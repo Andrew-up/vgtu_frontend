@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>478</width>
+    <height>652</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_5">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Карта пациента</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="card_image_patient">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(96, 191, 255);</string>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="card_fullname_patient">
+           <property name="text">
+            <string>Петров Петр Петрович</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Minimum</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="card_gender_patient">
+           <property name="text">
+            <string>Пол: мужской</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="card_date_birth_patient">
+           <property name="text">
+            <string>Дата рождени: 14.01.1990</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="card_age_patient">
+           <property name="text">
+            <string>Возраст: 32</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="card_address_patient">
+         <property name="text">
+          <string>Место регистрации: г. Воронеж, ул плехановская, дом 11, квартира 202</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_phone_patient">
+         <property name="text">
+          <string>Телефон: +7 951 875 68 53</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_oms_patient">
+         <property name="text">
+          <string>Полис ОМС: серия 5053 № 457895123</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_snils_patient">
+         <property name="text">
+          <string>СНИЛС: 142-202-53</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_document_patient">
+         <property name="text">
+          <string>Документ: паспорт серия 2045 № 638574</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_diagnosis_patient">
+         <property name="text">
+          <string>Диагноз: ожог 3 степени</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_healing_date_start_patient">
+         <property name="text">
+          <string>Дата начала лечения: 10.09.2022</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="card_healing_date_end_patient">
+         <property name="text">
+          <string>Дата окончания лечения: 25.09.2022</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="delete_patient_button">
+         <property name="text">
+          <string>Удалить пациента</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
