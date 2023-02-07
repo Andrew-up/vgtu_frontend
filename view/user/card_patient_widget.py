@@ -66,7 +66,7 @@ class CardPatient(QWidget):
         patient = self.patient
         if patient.full_name is not None:
             self.ui.card_fullname_patient.setText(patient.full_name)
-        if patient.date_of_birth is not None:
+        if patient.date_of_birth is not None and patient.date_of_birth != 'None':
             self.ui.card_date_birth_patient.setText('Дата рождения: ' + str(patient.date_of_birth))
             patient_datetime = datetime.strptime(str(patient.date_of_birth), '%Y-%m-%d').date()
             self.ui.card_age_patient.setText('Возраст: ' + str(self.get_age(patient_datetime)))

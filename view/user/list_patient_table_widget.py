@@ -20,7 +20,7 @@ class ListPatientItem(QWidget):
         self.ui.patient_table_item_snils.clicked.connect(self.open_patient)
         self.main_menu_slots = None
         self.main_menu_slots: SlotsMainMenu
-        print('123123')
+        # print('123123')
 
     def set_main_menu_slots(self, value: SlotsMainMenu):
         self.main_menu_slots = value
