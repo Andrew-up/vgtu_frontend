@@ -37,7 +37,8 @@ class LoadingModelAndPredict(QThread):
     def set_image_path(self, path_image):
         self.image_path = path_image
 
-    def opencvFormatToQImage(self, image):
+    def opencvFormatToQImage(self, image: QImage):
+        print(image)
         convertToQtFormats = QImage(image.data, image.shape[1], image.shape[0],
                                     QImage.Format.Format_BGR888)
         qimage = convertToQtFormats.scaled(512, 512, Qt.KeepAspectRatio)
@@ -74,19 +75,18 @@ class LoadingModelAndPredict(QThread):
         # Получение картинки с камеры
         if self.scan_from_cam and self.image_path is None:
             timer = time.time()
-            cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)  # 1 - номер камеры
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    print("failed to grab frame")
-                    break
-                # Ждем 2 секунды что бы камера прогрелась
-                if time.time() - timer >= 2:
-                    timer = time.time()
-                    cap.release()
-                    cv2.destroyAllWindows()
-                    # Возращаем кадр из видеопотока
-                    return frame
+            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # 0 - номер камеры
+
+            # "Прогреваем" камеру, чтобы снимок не был тёмным
+            for i in range(30):
+                cap.read()
+            ret, frame = cap.read()
+            if not ret:
+                print("failed to grab frame")
+            cap.release()
+            cv2.destroyAllWindows()
+            # Возращаем кадр из видеопотока
+            return frame
         else:
             # Получаем картинку если картинка из каталога
             image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)

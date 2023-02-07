@@ -35,6 +35,36 @@ class WoundHealingPatient(QWidget):
         self.ui.button_select_ptoho_from_catalog.clicked.connect(self.open_file_from_catalog)
         self.test_color()
 
+    def returnCameraIndexes(self):
+        # checks the first 10 indexes.
+        index = 0
+        arr = []
+        i = 3
+        while i > 0:
+            cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+            for jjjj in range(30):
+                cap.read()
+            if cap.read()[0]:
+                arr.append('Камера: ' + str(index))
+                print(index)
+            print(cap.read()[0])
+            cap.release()
+            cv2.destroyAllWindows()
+            index += 1
+            print(i)
+            i -= 1
+        # if cap.read()[0]:
+        #     arr.append(index)
+        #     cap.release()
+        # if cap.read()[0]:
+        #     arr.append(index)
+        #     cap.release()
+
+
+        # print(index)
+
+        return arr
+
     def test_color(self):
         pass
 
@@ -63,6 +93,8 @@ class WoundHealingPatient(QWidget):
             self.ui.wound_healing_start_scan.setEnabled(False)
 
     def on_radio_scan_to_cam(self):
+        print(self.returnCameraIndexes())
+
         if self.ui.radio_scan_to_cam.isChecked():
             self.load_model_and_predict.image_path = None
             self.ui.button_select_ptoho_from_catalog.setVisible(False)
