@@ -18,6 +18,8 @@ class LoadingModelAndPredict(QThread):
     predict_image_result = Signal(QImage)
     image_original = Signal(QImage)
     result_scan = Signal(ResultScan)
+    # Запомнить номер камеры
+    number_cam = -1
 
     def __init__(self, path_model, parent=None):
         super(LoadingModelAndPredict, self).__init__(parent)
@@ -38,7 +40,7 @@ class LoadingModelAndPredict(QThread):
         self.image_path = path_image
 
     def opencvFormatToQImage(self, image: QImage):
-        print(image)
+        # print(image)
         convertToQtFormats = QImage(image.data, image.shape[1], image.shape[0],
                                     QImage.Format.Format_BGR888)
         qimage = convertToQtFormats.scaled(512, 512, Qt.KeepAspectRatio)
@@ -75,7 +77,7 @@ class LoadingModelAndPredict(QThread):
         # Получение картинки с камеры
         if self.scan_from_cam and self.image_path is None:
             timer = time.time()
-            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # 0 - номер камеры
+            cap = cv2.VideoCapture(self.number_cam, cv2.CAP_DSHOW)  # 0 - номер камеры
 
             # "Прогреваем" камеру, чтобы снимок не был тёмным
             for i in range(30):
@@ -102,7 +104,7 @@ class LoadingModelAndPredict(QThread):
         image_original_copy = image.copy()
         area_full = 0
         if polygon is not None:
-            print(dir(polygon))
+            # print(dir(polygon))
             polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
             image_temp = np.zeros_like(image, np.uint8)
             image_original_copy = image.copy()
