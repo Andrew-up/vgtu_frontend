@@ -22,8 +22,8 @@ def getPatient(patient_dto_back: PatientDTO):
     p = Patient()
     p.id_patient = patient_dto_back.id_patient
     p.firstname = patient_dto_back.firstname
-    p.surname = patient_dto_back.last_name
-    p.middlename = patient_dto_back.middle_name
+    p.last_name = patient_dto_back.last_name
+    p.middle_name = patient_dto_back.middle_name
     p.snils = patient_dto_back.snils
     p.document = patient_dto_back.document
     p.phone = patient_dto_back.phone
@@ -53,18 +53,19 @@ def getPatientList(patient_dto_back: list[PatientDTO]):
         patient_list.append(patient)
     return patient_list
 
-def getPatientDTO(patient_model_back: PatientDTO) -> PatientDTO:
+def getPatientDTO(patient: Patient) -> PatientDTO:
     dto = PatientDTO()
-    dto.id_patient = patient_model_back.id_patient
-    dto.firstname = patient_model_back.firstname
-    dto.last_name = patient_model_back.last_name
-    dto.middle_name = patient_model_back.middle_name
-    dto.snils = patient_model_back.snils
-    dto.document = patient_model_back.document
-    dto.date_of_birth = patient_model_back.date_of_birth
-    dto.gender = patient_model_back.gender
-    dto.phone = patient_model_back.phone
-    dto.polis_oms = patient_model_back.polis_oms
+    dto.id_patient = patient.id_patient
+    dto.firstname = patient.firstname
+    dto.last_name = patient.last_name
+    dto.middle_name = patient.middle_name
+    dto.snils = patient.snils
+    dto.document = patient.document
+    dto.date_of_birth = str(patient.date_of_birth)
+    dto.gender = patient.gender
+    dto.phone = patient.phone
+    dto.polis_oms = patient.polis_oms
+    dto.address = patient.address
     return dto
 
 

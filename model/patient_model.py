@@ -8,7 +8,7 @@ class Patient:
         self._gender = None
         self._address = None
         self._phone = None
-        self._polis_oms = None
+        self._polis_oms = ''
         self._snils = None
         self._document = None
         self._dianosis = None
@@ -108,7 +108,4 @@ class Patient:
 
     @property
     def full_name(self):
-        if self.last_name and self.firstname is not None:
-            return '{} {} {}'.format(self.last_name, self.firstname, self.middle_name)
-        else:
-            return None
+        return '{} {} {}'.format(self.last_name, self.firstname, self.middle_name)

@@ -4,10 +4,10 @@ from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QFileDialog
 import sys
 from view.py.wound_healing_widget import Ui_Form
-from service.unetModelService import LoadingModelAndPredict
 from matplotlib import pyplot as plt
 from definitions import DATASET_PATH, MODEL_H5_PATH
 from model.result_scan import ResultScan
+from service.unetModelService import LoadingModelAndPredict
 
 class WoundHealingPatient(QWidget):
 
@@ -23,17 +23,17 @@ class WoundHealingPatient(QWidget):
         self.ui.button_select_ptoho_from_catalog.setVisible(False)
 
         #------- Отдельный поток и связка сигналов
+
         self.load_model_and_predict = LoadingModelAndPredict(MODEL_H5_PATH)
         self.load_model_and_predict.setObjectName('LOAD_MODEL_THREAD')
         self.load_model_and_predict.loading_model_end.connect(self.on_load_model_end_signal)
         self.load_model_and_predict.image_original.connect(self.setImage)
         self.load_model_and_predict.predict_image_result.connect(self.setImage)
         self.load_model_and_predict.result_scan.connect(self.result_scan_init)
-        # -------
 
+        # -------
         self.ui.button_select_ptoho_from_catalog.clicked.connect(self.open_file_from_catalog)
         self.test_color()
-
 
     def test_color(self):
         pass
@@ -73,6 +73,7 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_widget.setVisible(False)
         self.ui.wound_healing_loading_label.setVisible(False)
         self.ui.wound_healing_start_scan.setEnabled(False)
+        self.ui.widget.setVisible(False)
 
     def open_file_from_catalog(self):
         fileName = QFileDialog.getOpenFileName(self, ("Open Image"), DATASET_PATH,

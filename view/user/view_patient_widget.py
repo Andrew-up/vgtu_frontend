@@ -1,16 +1,13 @@
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QDialog
 import sys
 
+from PySide6.QtWidgets import QApplication, QDialog
+
+from model.patient_model import Patient
 from service.slotsService import SlotsMainMenu
 from view.py.view_patient_widget import Ui_Form
-from PySide6.QtCore import Qt, QSize
 from view.user.card_patient_widget import CardPatient
 from view.user.history_patient_widget import HistoryPatient
 from view.user.wound_treatment_widget import WoundHealingPatient
-from model.patient_model import Patient
-
 
 class ViewPatient(QDialog):
 
@@ -32,16 +29,14 @@ class ViewPatient(QDialog):
         self.ui.stacked_widget_view_patient.addWidget(self.history_widget)
         self.ui.stacked_widget_view_patient.addWidget(self.wound_treatment_widget)
 
-        self.ui.view_patient_go_card_patient.setFocus()
-        self.ui.view_patient_go_card_patient.click()
-
 
 
     def set_main_menu_slots(self, value: SlotsMainMenu):
-        print('set_main_menu_slots ViewPatient:' + str(value))
         self.main_menu_slots = value
+        self.ui.view_patient_go_card_patient.setFocus()
+        self.ui.view_patient_go_card_patient.click()
 
-    def get_main_menu_slots(self) -> SlotsMainMenu:
+    def get_main_menu_slots(self):
         return self.main_menu_slots
 
     def clear_stacked_widget(self):
@@ -58,7 +53,6 @@ class ViewPatient(QDialog):
             self.get_main_menu_slots().open_start_view.emit()
 
     def on_click_card_patient(self):
-        print(self.ui.view_patient_go_card_patient)
         self.card_patient.set_main_menu_slots(self.get_main_menu_slots())
         self.ui.stacked_widget_view_patient.setCurrentWidget(self.card_patient)
         print('открыть карту пациента в родительском виджете')

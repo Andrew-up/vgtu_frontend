@@ -7,6 +7,7 @@ from service.slotsService import SlotsMainMenu
 from view.py.mainwindow import Ui_MainWindow
 from view.user.list_patient_widget import ListPatient
 
+
 class MainWindow(QMainWindow):
     this_class_slot = SlotsMainMenu()
 

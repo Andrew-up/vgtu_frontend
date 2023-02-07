@@ -1,14 +1,13 @@
-from PySide6.QtCore import Slot, QSize, Signal
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QStackedWidget
 import sys
+
+from PySide6.QtWidgets import QWidget, QApplication
+
+from model.patient_model import Patient
+from service.PatientService import PatientServiceFront
+from service.slotsService import SlotsMainMenu
 from view.py.list_patient_widget import Ui_Form
 from view.user.list_patient_table_widget import ListPatientItem
-from service.generate_random_repson import generate_person
-from service.PatientService import PatientServiceFront
-from model.patient_model import Patient
 from view.user.patient_registration_widget import PatientRegistration
-from service.slotsService import SlotsMainMenu
 
 
 class ListPatient(QWidget):
@@ -40,15 +39,11 @@ class ListPatient(QWidget):
     def get_all_patient(self):
         service = PatientServiceFront(1)
         self.patient_list = service.getAll()
-
         if self.patient_list is not None:
             for patient in self.patient_list:
-                print(patient.full_name)
                 new = ListPatientItem(patient=patient)
                 new.set_main_menu_slots(self.get_main_menu_slots())
                 self.ui.verticalLayout_4.addWidget(new)
-
-
 
     def add_new_patient(self, patient: Patient = 0):
         dlg = PatientRegistration()

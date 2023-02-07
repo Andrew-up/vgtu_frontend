@@ -26,8 +26,9 @@ class CardPatient(QWidget):
         self.init_card_patient()
 
     def set_main_menu_slots(self, value: SlotsMainMenu):
-        print('123123123123213123')
+        print('CARD PATIENT SLOTS: ')
         self.main_menu_slots = value
+        print(self.get_main_menu_slots())
 
     def get_main_menu_slots(self) -> SlotsMainMenu:
         return self.main_menu_slots
@@ -49,6 +50,7 @@ class CardPatient(QWidget):
         if res == QMessageBox.StandardButton.Yes:
             print('Удаляем')
             p = PatientServiceFront(ID_DOCTOR)
+            print(self.patient.id_patient)
             p.deletePatientById(self.patient.id_patient)
             if self.get_main_menu_slots() is not None:
                 print('11111111111111')
@@ -62,7 +64,6 @@ class CardPatient(QWidget):
 
     def init_card_patient(self):
         patient = self.patient
-        print(patient.full_name)
         if patient.full_name is not None:
             self.ui.card_fullname_patient.setText(patient.full_name)
         if patient.date_of_birth is not None:

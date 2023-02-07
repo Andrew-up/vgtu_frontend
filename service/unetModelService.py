@@ -1,23 +1,16 @@
 import os
+import random
+import time
 
 import cv2
 import numpy as np
 from PIL import Image
-from PIL import ImageDraw
-from keras.models import load_model, Model
-from utils.unet_model.model_losses import dice_coef, bce_dice_loss
-from definitions import DATASET_PATH, MODEL_H5_PATH, DATASET_LABELS
-import random
-from keras.utils import img_to_array
-import tensorflow as tf
-from PySide6.QtCore import QThread, Signal, Slot
-from PySide6.QtGui import QImage
+from PySide6.QtCore import QThread, Signal
 from PySide6.QtCore import Qt
-import time
-from matplotlib import gridspec, pyplot as plt
+from PySide6.QtGui import QImage
+from matplotlib import pyplot as plt
+from definitions import DATASET_PATH, MODEL_H5_PATH, DATASET_LABELS
 from model.result_scan import ResultScan
-
-from keras.preprocessing import image
 
 
 class LoadingModelAndPredict(QThread):
@@ -28,14 +21,18 @@ class LoadingModelAndPredict(QThread):
 
     def __init__(self, path_model, parent=None):
         super(LoadingModelAndPredict, self).__init__(parent)
+        start = time.time()
         self.model = None
         self.path_model = path_model
-        self.model: Model
+        # self.model: Model
         self.segmentation_polygon = None
         self.area = None
         self.image_batch = None
         self.scan_from_cam = False
         self.image_path = None
+        print('1')
+        end_time = time.time() - start
+        print(end_time)
 
     def set_image_path(self, path_image):
         self.image_path = path_image
@@ -49,10 +46,9 @@ class LoadingModelAndPredict(QThread):
     def run(self):
         print('Началась загрузка модели в отдельном потоке')
         secundomer = time.time()
-        self.load_model()
+        self.load_model_func()
         res = round(time.time() - secundomer, 2)
         self.loading_model_end.emit(str(res))  # посылаем сигнал с временем загрузки модели
-
         image = self.get_image()
         self.image_original.emit(self.opencvFormatToQImage(image))
         image_preprocessing = self.image_preprocessing(image)
@@ -60,8 +56,11 @@ class LoadingModelAndPredict(QThread):
         predict = self.predict(batch_image, image)
         image_qt = self.opencvFormatToQImage(predict)
         self.predict_image_result.emit(image_qt)
+        print('Поток закончил свою работу')
 
-    def load_model(self) -> Model:
+    def load_model_func(self):
+        from keras.models import load_model
+        from utils.unet_model.model_losses import dice_coef, bce_dice_loss
         if self.model is None:
             print('------ Загружаю модель ------')
             self.model = load_model(self.path_model,
@@ -72,7 +71,6 @@ class LoadingModelAndPredict(QThread):
             return self.model
 
     def get_image(self):
-
         # Получение картинки с камеры
         if self.scan_from_cam and self.image_path is None:
             timer = time.time()
@@ -92,6 +90,7 @@ class LoadingModelAndPredict(QThread):
         else:
             # Получаем картинку если картинка из каталога
             image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
+
             return image
 
     def drawingMaskForImagePredict(self, image: Image, predict: Image, color):
@@ -99,10 +98,12 @@ class LoadingModelAndPredict(QThread):
         dilation = cv2.dilate(p, (3, 3), iterations=1)
         edged = cv2.Canny(dilation, 1, 200)
         polygon, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # print(polygon)
         image_original_copy = image.copy()
         area_full = 0
         if polygon is not None:
-            polygon.sort(key=cv2.contourArea, reverse=True)
+            print(dir(polygon))
+            polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
             image_temp = np.zeros_like(image, np.uint8)
             image_original_copy = image.copy()
             print(image_temp.shape)
@@ -124,6 +125,7 @@ class LoadingModelAndPredict(QThread):
         if self.model is not None:
             res = self.model.predict(batch)
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
+
             list_predict = list()
             list_predict.append(np.sum(res[0, :, :, 0]))
             list_predict.append(np.sum(res[0, :, :, 1]))
@@ -148,9 +150,9 @@ class LoadingModelAndPredict(QThread):
             # color2 = (0, 255, 0)
             # color3 = (0, 0, 255)
 
-
             # Расширение
-            img1, polygon1, area_full1 = self.drawingMaskForImagePredict(image=img_original_resize, predict=predict1, color=color[::-1])
+            img1, polygon1, area_full1 = self.drawingMaskForImagePredict(image=img_original_resize, predict=predict1,
+                                                                         color=color[::-1])
 
             # img2, polygon2, area_full2 = self.drawingMaskForImagePredict(image=img1, predict=predict2, color=color2[::-1])
             # img3, polygon3, area_full3 = self.drawingMaskForImagePredict(image=img2, predict=predict3, color=color3[::-1])
@@ -214,18 +216,16 @@ class LoadingModelAndPredict(QThread):
             print('2')
             return stacked_img
 
-
-
     def create_batch(self, image11):
         # image = image11[:, :, 0, :]
         # print(image11.shape)
+        from keras.utils import img_to_array
+        from tensorflow import expand_dims
         img_array = img_to_array(image11)
-        img_array_batch = tf.expand_dims(img_array, 0)  # Create a batch
+        img_array_batch = expand_dims(img_array, 0)  # Create a batch
         return img_array_batch
 
 
 if __name__ == '__main__':
     l = LoadingModelAndPredict(MODEL_H5_PATH)
-    l.scan_from_cam = True
-    l.start()
     # pred = l.predict()

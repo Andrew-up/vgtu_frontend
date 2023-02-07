@@ -16,14 +16,14 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QLabel,
-    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
-    QVBoxLayout, QWidget)
+    QLayout, QPushButton, QRadioButton, QSizePolicy,
+    QSpacerItem, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(862, 710)
+        Form.resize(697, 648)
         self.verticalLayout_4 = QVBoxLayout(Form)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_6 = QVBoxLayout()
@@ -123,7 +123,12 @@ class Ui_Form(object):
 
         self.wound_healing_widget = QWidget(Form)
         self.wound_healing_widget.setObjectName(u"wound_healing_widget")
-        self.wound_healing_widget.setMinimumSize(QSize(0, 100))
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.wound_healing_widget.sizePolicy().hasHeightForWidth())
+        self.wound_healing_widget.setSizePolicy(sizePolicy)
+        self.wound_healing_widget.setMinimumSize(QSize(0, 300))
         self.verticalLayout_5 = QVBoxLayout(self.wound_healing_widget)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.verticalLayout = QVBoxLayout()
@@ -135,8 +140,20 @@ class Ui_Form(object):
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalSpacer_6 = QSpacerItem(10, 20, QSizePolicy.Maximum, QSizePolicy.Minimum)
+
+        self.horizontalLayout.addItem(self.horizontalSpacer_6)
+
         self.wound_healing_image = QLabel(self.wound_healing_widget)
         self.wound_healing_image.setObjectName(u"wound_healing_image")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.wound_healing_image.sizePolicy().hasHeightForWidth())
+        self.wound_healing_image.setSizePolicy(sizePolicy1)
+        self.wound_healing_image.setMinimumSize(QSize(200, 200))
+        self.wound_healing_image.setMaximumSize(QSize(250, 250))
+        self.wound_healing_image.setSizeIncrement(QSize(0, 0))
         self.wound_healing_image.setStyleSheet(u"background-color: rgb(102, 255, 217);")
 
         self.horizontalLayout.addWidget(self.wound_healing_image)
@@ -147,6 +164,7 @@ class Ui_Form(object):
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.verticalLayout_2.setContentsMargins(-1, -1, -1, 0)
         self.wound_healing_type_wound = QLabel(self.wound_healing_widget)
         self.wound_healing_type_wound.setObjectName(u"wound_healing_type_wound")
@@ -189,10 +207,21 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addLayout(self.wound_healing_layout_result)
 
+        self.widget = QWidget(self.wound_healing_widget)
+        self.widget.setObjectName(u"widget")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
+        self.widget.setSizePolicy(sizePolicy2)
+        self.widget.setMinimumSize(QSize(100, 100))
+        self.verticalLayout_8 = QVBoxLayout(self.widget)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.verticalLayout_8.setSizeConstraint(QLayout.SetMinimumSize)
         self.wound_healing_layout_strategy = QVBoxLayout()
         self.wound_healing_layout_strategy.setObjectName(u"wound_healing_layout_strategy")
         self.wound_healing_layout_strategy.setContentsMargins(-1, 0, -1, -1)
-        self.wound_healing_strategy_healing = QLabel(self.wound_healing_widget)
+        self.wound_healing_strategy_healing = QLabel(self.widget)
         self.wound_healing_strategy_healing.setObjectName(u"wound_healing_strategy_healing")
 
         self.wound_healing_layout_strategy.addWidget(self.wound_healing_strategy_healing)
@@ -200,13 +229,20 @@ class Ui_Form(object):
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(-1, 0, -1, -1)
-        self.wound_healing_strategy_button_go = QPushButton(self.wound_healing_widget)
+        self.wound_healing_strategy_button_go = QPushButton(self.widget)
         self.wound_healing_strategy_button_go.setObjectName(u"wound_healing_strategy_button_go")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.wound_healing_strategy_button_go.sizePolicy().hasHeightForWidth())
+        self.wound_healing_strategy_button_go.setSizePolicy(sizePolicy3)
 
         self.horizontalLayout_5.addWidget(self.wound_healing_strategy_button_go)
 
-        self.wound_healing_strategy_button_select_list = QPushButton(self.wound_healing_widget)
+        self.wound_healing_strategy_button_select_list = QPushButton(self.widget)
         self.wound_healing_strategy_button_select_list.setObjectName(u"wound_healing_strategy_button_select_list")
+        sizePolicy3.setHeightForWidth(self.wound_healing_strategy_button_select_list.sizePolicy().hasHeightForWidth())
+        self.wound_healing_strategy_button_select_list.setSizePolicy(sizePolicy3)
 
         self.horizontalLayout_5.addWidget(self.wound_healing_strategy_button_select_list)
 
@@ -214,7 +250,7 @@ class Ui_Form(object):
         self.wound_healing_layout_strategy.addLayout(self.horizontalLayout_5)
 
 
-        self.verticalLayout_2.addLayout(self.wound_healing_layout_strategy)
+        self.verticalLayout_8.addLayout(self.wound_healing_layout_strategy)
 
         self.wound_healing_layout_process = QVBoxLayout()
         self.wound_healing_layout_process.setObjectName(u"wound_healing_layout_process")
@@ -222,13 +258,16 @@ class Ui_Form(object):
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.horizontalLayout_6.setContentsMargins(-1, 5, -1, 5)
-        self.label_12 = QLabel(self.wound_healing_widget)
+        self.label_12 = QLabel(self.widget)
         self.label_12.setObjectName(u"label_12")
 
         self.horizontalLayout_6.addWidget(self.label_12)
 
-        self.wound_healing_STOP_robot = QPushButton(self.wound_healing_widget)
+        self.wound_healing_STOP_robot = QPushButton(self.widget)
         self.wound_healing_STOP_robot.setObjectName(u"wound_healing_STOP_robot")
+        sizePolicy3.setHeightForWidth(self.wound_healing_STOP_robot.sizePolicy().hasHeightForWidth())
+        self.wound_healing_STOP_robot.setSizePolicy(sizePolicy3)
+        self.wound_healing_STOP_robot.setMinimumSize(QSize(0, 0))
 
         self.horizontalLayout_6.addWidget(self.wound_healing_STOP_robot)
 
@@ -238,7 +277,7 @@ class Ui_Form(object):
         self.verticalLayout_9 = QVBoxLayout()
         self.verticalLayout_9.setObjectName(u"verticalLayout_9")
         self.verticalLayout_9.setContentsMargins(-1, 0, -1, -1)
-        self.wound_healing_status_end_process = QLabel(self.wound_healing_widget)
+        self.wound_healing_status_end_process = QLabel(self.widget)
         self.wound_healing_status_end_process.setObjectName(u"wound_healing_status_end_process")
 
         self.verticalLayout_9.addWidget(self.wound_healing_status_end_process)
@@ -247,11 +286,10 @@ class Ui_Form(object):
         self.wound_healing_layout_process.addLayout(self.verticalLayout_9)
 
 
-        self.verticalLayout_2.addLayout(self.wound_healing_layout_process)
+        self.verticalLayout_8.addLayout(self.wound_healing_layout_process)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_2)
+        self.verticalLayout_2.addWidget(self.widget)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout_2)

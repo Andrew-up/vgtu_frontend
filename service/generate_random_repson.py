@@ -75,7 +75,7 @@ def generate_person():
     patient.phone = f'+7({random.randint(900, 999)})-{random.randint(100, 999)}' \
                     f'-{random.randint(10,99)}-{random.randint(10, 99)}'
     for i in range(4):
-        patient.polis_oms += str(random.randint(1000, 9999))
+        patient.polis_oms = str(patient.polis_oms) + str(random.randint(1000, 9999))
         if i == 3:
             break
         patient.polis_oms += ' '

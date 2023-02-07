@@ -3,9 +3,10 @@ from PySide6.QtWidgets import QWidget, QApplication, QStackedWidget
 
 from service.slotsService import SlotsMainMenu
 from view.py.patient_table_item import Ui_Form
-from view.user.view_patient_widget import ViewPatient
+
 from PySide6.QtCore import QSize
 from model.patient_model import Patient
+from view.user.view_patient_widget import ViewPatient
 
 class ListPatientItem(QWidget):
 
@@ -19,6 +20,7 @@ class ListPatientItem(QWidget):
         self.ui.patient_table_item_snils.clicked.connect(self.open_patient)
         self.main_menu_slots = None
         self.main_menu_slots: SlotsMainMenu
+        print('123123')
 
     def set_main_menu_slots(self, value: SlotsMainMenu):
         self.main_menu_slots = value
@@ -31,11 +33,12 @@ class ListPatientItem(QWidget):
         self.ui.patient_table_item_snils.setText(self.patient.snils)
 
     def open_patient(self):
+        print('sssssssssssssssss')
+
         vp = ViewPatient(patient=self.patient)
         if self.get_main_menu_slots() is not None:
             vp.set_main_menu_slots(self.get_main_menu_slots())
             self.get_main_menu_slots().set_widget_main_menu.emit(vp)
-            print('hhhhhhhhh: '+str(vp.get_main_menu_slots()))
         else:
             vp.exec()
 

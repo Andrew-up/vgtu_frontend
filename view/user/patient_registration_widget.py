@@ -5,7 +5,7 @@ import sys
 from view.py.patient_registration import Ui_Form
 from service.generate_random_repson import generate_person
 from model.patient_model import Patient
-
+from service.PatientService import PatientServiceFront
 
 
 class PatientRegistration(QDialog):
@@ -40,13 +40,13 @@ class PatientRegistration(QDialog):
         self.ui.polis_oms_patient.setText(self.patient.polis_oms)
         self.ui.document_patient.setText(self.patient.document)
         self.ui.snils_patient.setText(self.patient.snils)
-    #
-    # def on_registration_button(self):
-    #     p = PatientService(1)
-    #     res: Patient = p.add(self.patient)
-    #     if res.id_patient > 0:
-    #         self.registration_ok(res)
 
+    def on_registration_button(self):
+        p = PatientServiceFront(1)
+        res: Patient = p.add(self.patient)
+        print(res.id_patient)
+        # if res.id_patient > 0:
+        #     self.registration_ok(res)
 
 
     def get_random_person(self):
