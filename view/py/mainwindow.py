@@ -97,6 +97,17 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_4.addLayout(self.verticalLayout)
 
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(-1, 5, -1, -1)
+        self.pushButton = QPushButton(self.centralwidget)
+        self.pushButton.setObjectName(u"pushButton")
+
+        self.verticalLayout_2.addWidget(self.pushButton)
+
+
+        self.verticalLayout_4.addLayout(self.verticalLayout_2)
+
         self.stacked_widget_main = QStackedWidget(self.centralwidget)
         self.stacked_widget_main.setObjectName(u"stacked_widget_main")
 
@@ -123,5 +134,6 @@ class Ui_MainWindow(object):
         self.icon_profile_main.setText(QCoreApplication.translate("MainWindow", u"\u0418\u043a\u043e\u043d\u043a\u0430", None))
         self.authorized_user.setText(QCoreApplication.translate("MainWindow", u"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d \u0418\u0432\u0430\u043d\u043e\u0432\u0438\u0447", None))
         self.login_exit.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0445\u043e\u0434", None))
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f", None))
     # retranslateUi
 

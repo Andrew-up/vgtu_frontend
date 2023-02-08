@@ -1,12 +1,17 @@
+import os
 import sys
+import time
+import zipfile
 
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QMessageBox
 
 from service.slotsService import SlotsMainMenu
 from view.py.mainwindow import Ui_MainWindow
 from view.user.list_patient_widget import ListPatient
-
+from controller.UpdateAppController import UpdateApp
+import subprocess
+from definitions import EXE, ZIP_FILE_NEW, ROOT_DIR, DEBUG_MODE, EXE_NEW
 
 class MainWindow(QMainWindow):
     this_class_slot = SlotsMainMenu()
@@ -18,12 +23,58 @@ class MainWindow(QMainWindow):
         self.this_class_slot.open_start_view.connect(self.open_start_view)
         self.this_class_slot.set_widget_main_menu.connect(self.set_widget_root_stacket_widget)
         self.view_patient()
+        self.ui.pushButton.clicked.connect(self.update_app)
+
+
+        # Обновление приложения в отдельном потоке
+        self.updated = UpdateApp()
+        self.updated.signal_download_ok.connect(self.restart_app)
+
 
     def view_patient(self):
         list_patient = ListPatient(self)
         list_patient.set_main_menu_slots(self.this_class_slot)
         list_patient.get_all_patient()
         self.this_class_slot.set_widget_main_menu.emit(list_patient)
+
+    @Slot()
+    def update_app(self):
+        self.updated.start()
+
+    @Slot()
+    def restart_app(self):
+        print('Перезагрузаю приложение')
+        msg = QMessageBox()
+        msg.setInformativeText("Обновление скачано, перезапустить приложение?")
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Установка обновлений")
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+        res = msg.exec()
+        if res == QMessageBox.StandardButton.Yes:
+            app.quit()
+            time.sleep(0.2)
+            main_file = ROOT_DIR + f'/main.exe'
+            with zipfile.ZipFile(ZIP_FILE_NEW, 'r') as zip_file:
+                if DEBUG_MODE:
+                    print('DEBUG MODE ON')
+                    os.remove(ROOT_DIR + '/dist/main/main.exe')
+                    zip_file.extractall(f'{ROOT_DIR}/dist/main/')
+                    print(ROOT_DIR + f'/dist/main/main.exe')
+                else:
+                    print('DEBUG MODE OFF')
+                    time.sleep(2)
+                    os.remove(main_file)
+                    time.sleep(2)
+                    zip_file.extractall(f'{ROOT_DIR}')
+                    time.sleep(2)
+            time.sleep(2)
+            main_file = ROOT_DIR + f'/main.exe'
+            print(main_file)
+            time.sleep(2)
+            subprocess.Popen([main_file])
+            time.sleep(2)
+        if res == QMessageBox.StandardButton.Cancel:
+            print('Отмена удаления')
 
     @Slot()
     def open_start_view(self):

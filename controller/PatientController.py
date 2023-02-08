@@ -9,7 +9,6 @@ from model.patient_model import Patient
 IpV4 = '188.235.18.191'
 port = 8095
 API = f'http://{IpV4}:{port}/api/'
-
 SECRET_KEY = {"key": 'hFGHFEFyr67ggghhPJhdfh123dd'}
 
 def get_patient_by_id(id: int) -> Patient:
