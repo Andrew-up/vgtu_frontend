@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 import zipfile
+from threading import Thread
 
 from PySide6.QtCore import QThread, Signal, Slot
 from PySide6.QtWidgets import QWidget, QApplication, QMessageBox
@@ -58,6 +59,7 @@ class app_class(object):
     version = None
     new_version = None
 
+
 class UpdateAppWidget(QWidget):
 
     def __init__(self, parent=None):
@@ -77,8 +79,6 @@ class UpdateAppWidget(QWidget):
         self.read_xml()
         self.ui.pushButton_2.setEnabled(False)
 
-
-
     @Slot(int)
     def set_value_progress(self, progress: int):
         print(progress)
@@ -95,11 +95,12 @@ class UpdateAppWidget(QWidget):
         msg.setIcon(QMessageBox.Icon.Critical)
         msg.exec()
 
-
     def check_version(self):
         print(self.app_setting.version)
         print(self.app_setting.server_port)
-        addr_server = f'http://{self.app_setting.server_addr}:{self.app_setting.server_port}/app/version'
+
+        addr_server = f'http://{self.app_setting.server_addr}:{self.app_setting.server_port}/app/version/'
+        print(addr_server)
         r = requests.get(addr_server)
         if r.status_code != 200:
             msg = QMessageBox()
@@ -127,7 +128,6 @@ class UpdateAppWidget(QWidget):
             msg.setStandardButtons(QMessageBox.StandardButton.Ok)
             msg.exec()
 
-
     def update_version_xml(self):
         et = ET.parse('project.xml')
         app_n = et.find('app')
@@ -135,21 +135,22 @@ class UpdateAppWidget(QWidget):
         version_n.text = self.app_setting.new_version
         et.write('project.xml')
 
-
     def read_xml(self):
-        root_node = ET.parse('project.xml').getroot()
-        app = root_node.find('app')
-        version = app.find('version')
-        update_api = app.find('update_api')
-        print(update_api.text)
-        server = root_node.find('server')
-        server_addr = server.find('addr')
-        server_port = server.find('port')
-        self.app_setting.server_addr = server_addr.text
-        self.app_setting.server_port = server_port.text
-        self.app_setting.version = version.text
-        self.update_class.API = f'http://{server_addr.text}:{server_port.text}/{update_api.text}'
-
+        if os.path.exists('project.xml'):
+            root_node = ET.parse('project.xml').getroot()
+            app = root_node.find('app')
+            version = app.find('version')
+            update_api = app.find('update_api')
+            print(update_api.text)
+            server = root_node.find('server')
+            server_addr = server.find('addr')
+            server_port = server.find('port')
+            self.app_setting.server_addr = server_addr.text
+            self.app_setting.server_port = server_port.text
+            self.app_setting.version = version.text
+            self.update_class.API = f'http://{server_addr.text}:{server_port.text}/{update_api.text}'
+        else:
+            print('не найден project.xml')
 
     def install_update(self):
         ROOT_DIR = ''  # This is your Project Root
@@ -188,7 +189,26 @@ class UpdateAppWidget(QWidget):
             msg.exec()
 
 
+class Worker(Thread):
+    def __init__(self, parent=None):
+        super(Worker, self).__init__(parent)
+        self.API = None
+
+    def run(self):
+        subprocess.run('Update_app_widget.exe')
+        count = 1
+        print('--------------')
+        while count < 10:
+            print(count)
+            time.sleep(1)
+            count += 1
+
 if __name__ == '__main__':
+
+    # upd = Worker()
+    # upd.daemon = True
+    # upd.start()
+    # sys.exit(app.exec())
     app = QApplication()
     window = UpdateAppWidget()
     window.show()

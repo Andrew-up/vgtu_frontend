@@ -1,6 +1,8 @@
 import subprocess
 import sys
-
+import threading
+from threading import Thread
+from time import time, sleep
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QMessageBox
 
@@ -8,6 +10,9 @@ from definitions import UPDATE_EXE
 from service.slotsService import SlotsMainMenu
 from view.py.mainwindow import Ui_MainWindow
 from view.user.list_patient_widget import ListPatient
+
+from Update_app_widget import Worker
+
 
 
 class MainWindow(QMainWindow):
@@ -32,19 +37,11 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_app(self):
-
-        try:
-            app.quit()
-            subprocess.run("Update_app_widget.exe")
-
-            # subprocess.check_call(UPDATE_EXE)
-        except Exception as f:
-            msg = QMessageBox()
-            msg.setWindowTitle('Ошибка!')
-            msg.setIcon(QMessageBox.Icon.Critical)
-            msg.setText(str(f) + ': \n' )
-            msg.exec()
-        print('close')
+        upd = Worker()
+        upd.daemon = True
+        upd.start()
+        sleep(3)
+        sys.exit(app.exec())
 
     @Slot()
     def open_start_view(self):
@@ -75,7 +72,10 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    try:
+        app = QApplication(sys.argv)
+        window = MainWindow()
+        window.show()
+        sys.exit(app.exec())
+    except BaseException as e:
+        print(e)

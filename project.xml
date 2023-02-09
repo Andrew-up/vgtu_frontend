@@ -2,10 +2,10 @@
 <root>
     <app>
         <version>1.0.0</version>
-        <update_api>app/update</update_api>
+        <update_api>app/update/</update_api>
     </app>
     <server>
-        <addr>localhost</addr>
-        <port>5000</port>
+        <addr>188.235.18.191</addr>
+        <port>8095</port>
     </server>
 </root>
