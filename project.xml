@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <app>
+        <version>1.0.0</version>
+        <update_api>app/update</update_api>
+    </app>
+    <server>
+        <addr>localhost</addr>
+        <port>5000</port>
+    </server>
+</root>

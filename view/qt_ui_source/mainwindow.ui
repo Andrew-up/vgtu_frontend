@@ -55,10 +55,10 @@
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: rgb(26, 251, 255);</string>
+           <string notr="true">background-color: rgb(50, 255, 39);</string>
           </property>
           <property name="text">
-           <string>Логотип</string>
+           <string>Логотип НОВАЯ ВЕРСИЯ</string>
           </property>
          </widget>
         </item>

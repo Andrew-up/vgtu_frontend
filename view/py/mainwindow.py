@@ -45,7 +45,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.logo_company_main.sizePolicy().hasHeightForWidth())
         self.logo_company_main.setSizePolicy(sizePolicy)
         self.logo_company_main.setMinimumSize(QSize(0, 10))
-        self.logo_company_main.setStyleSheet(u"background-color: rgb(26, 251, 255);")
+        self.logo_company_main.setStyleSheet(u"background-color: rgb(50, 255, 39);")
 
         self.horizontalLayout.addWidget(self.logo_company_main)
 
@@ -129,7 +129,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.logo_company_main.setText(QCoreApplication.translate("MainWindow", u"\u041b\u043e\u0433\u043e\u0442\u0438\u043f", None))
+        self.logo_company_main.setText(QCoreApplication.translate("MainWindow", u"\u041b\u043e\u0433\u043e\u0442\u0438\u043f \u041d\u041e\u0412\u0410\u042f \u0412\u0415\u0420\u0421\u0418\u042f", None))
         self.notification_button_main.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u044f", None))
         self.icon_profile_main.setText(QCoreApplication.translate("MainWindow", u"\u0418\u043a\u043e\u043d\u043a\u0430", None))
         self.authorized_user.setText(QCoreApplication.translate("MainWindow", u"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d \u0418\u0432\u0430\u043d\u043e\u0432\u0438\u0447", None))

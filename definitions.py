@@ -8,7 +8,7 @@ EXE = os.path.join(ROOT_DIR, "main.exe")
 EXE_NEW = os.path.join(ROOT_DIR, "main_OLD.exe")
 ZIP_FILE_NEW = os.path.join(ROOT_DIR, "update.zip")
 
-DATASET_LABELS = ['Асептическое', 'Бактериальное', 'Гнойное']
+UPDATE_EXE = os.path.join(ROOT_DIR, "Update_app_widget.exe")
 
-DEBUG_MODE = False
+DATASET_LABELS = ['Асептическое', 'Бактериальное', 'Гнойное']
 
