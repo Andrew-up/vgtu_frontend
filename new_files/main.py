@@ -26,7 +26,6 @@ class MainWindow(QMainWindow):
         self.this_class_slot.set_widget_main_menu.connect(self.set_widget_root_stacket_widget)
         self.view_patient()
         self.ui.pushButton.clicked.connect(self.update_app)
-        self.ui.logo_company_main.setText('12563r1263f123')
 
 
         # Обновление приложения в отдельном потоке
