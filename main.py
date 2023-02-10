@@ -1,17 +1,12 @@
-import subprocess
 import sys
-import threading
-from threading import Thread
-from time import time, sleep
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget
 
-from definitions import UPDATE_EXE
 from service.slotsService import SlotsMainMenu
 from view.py.mainwindow import Ui_MainWindow
 from view.user.list_patient_widget import ListPatient
 
-from Update_app_widget import Worker
+from view.user.Update_app_widget import UpdateAppWidget
 
 
 
@@ -37,11 +32,13 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_app(self):
-        upd = Worker()
-        upd.daemon = True
-        upd.start()
-        sleep(3)
-        sys.exit(app.exec())
+        dlg = UpdateAppWidget()
+        dlg.exec()
+        # upd = Worker()
+        # upd.daemon = True
+        # upd.start()
+        # sleep(3)
+        # sys.exit(app.exec())
 
     @Slot()
     def open_start_view(self):

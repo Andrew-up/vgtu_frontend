@@ -1,11 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <root>
     <app>
         <version>1.0.0</version>
-        <update_api>app/update/</update_api>
+        <exe_file_main>main.exe</exe_file_main>
+        <temp_update>temp_update</temp_update>
+
     </app>
     <server>
         <addr>188.235.18.191</addr>
         <port>8095</port>
+        <update_api>api/app/update/download/</update_api>
+        <check_version_api>api/app/version/</check_version_api>
     </server>
 </root>
