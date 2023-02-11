@@ -30,15 +30,19 @@ class MainWindow(QMainWindow):
         list_patient.get_all_patient()
         self.this_class_slot.set_widget_main_menu.emit(list_patient)
 
+
+    def close_app(self):
+        app.quit()
+        sys.exit(app.exec())
     @Slot()
     def update_app(self):
-        dlg = UpdateAppWidget()
+        dlg = UpdateAppWidget(self)
+        dlg.close_app.connect(self.close_app)
         dlg.exec()
         # upd = Worker()
         # upd.daemon = True
         # upd.start()
         # sleep(3)
-        # sys.exit(app.exec())
 
     @Slot()
     def open_start_view(self):
