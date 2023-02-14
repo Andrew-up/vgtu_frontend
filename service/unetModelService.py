@@ -20,6 +20,7 @@ class LoadingModelAndPredict(QThread):
     result_scan = Signal(ResultScan)
     # Запомнить номер камеры
     number_cam = -1
+    play_video = True
 
     def __init__(self, path_model, parent=None):
         super(LoadingModelAndPredict, self).__init__(parent)
@@ -45,15 +46,31 @@ class LoadingModelAndPredict(QThread):
                                     QImage.Format.Format_BGR888)
         qimage = convertToQtFormats.scaled(512, 512, Qt.KeepAspectRatio)
         return qimage
+    def video_stream(self):
+        print('streamVideo')
+        print(self.play_video)
+        cap = cv2.VideoCapture(self.number_cam, cv2.CAP_DSHOW)
+        while True:
+            if self.play_video:
+                print('222222')
+                ret, frame = cap.read()
+                self.image_original.emit(self.opencvFormatToQImage(frame))
+            else:
+                cap.release()
+                cv2.destroyAllWindows()
+                print('поток закончен')
+                break
 
     def run(self):
+        self.video_stream()
+        print('==========___==========')
+        image = self.get_image()
+        self.image_original.emit(self.opencvFormatToQImage(image))
         print('Началась загрузка модели в отдельном потоке')
         secundomer = time.time()
         self.load_model_func()
         res = round(time.time() - secundomer, 2)
         self.loading_model_end.emit(str(res))  # посылаем сигнал с временем загрузки модели
-        image = self.get_image()
-        self.image_original.emit(self.opencvFormatToQImage(image))
         image_preprocessing = self.image_preprocessing(image)
         batch_image = self.create_batch(image_preprocessing)
         predict = self.predict(batch_image, image)
@@ -78,13 +95,13 @@ class LoadingModelAndPredict(QThread):
         if self.scan_from_cam and self.image_path is None:
             timer = time.time()
             cap = cv2.VideoCapture(self.number_cam, cv2.CAP_DSHOW)  # 0 - номер камеры
-
             # "Прогреваем" камеру, чтобы снимок не был тёмным
             for i in range(30):
                 cap.read()
             ret, frame = cap.read()
             if not ret:
                 print("failed to grab frame")
+            self.image_original.emit(frame)
             cap.release()
             cv2.destroyAllWindows()
             # Возращаем кадр из видеопотока
@@ -92,7 +109,6 @@ class LoadingModelAndPredict(QThread):
         else:
             # Получаем картинку если картинка из каталога
             image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
-
             return image
 
     def drawingMaskForImagePredict(self, image: Image, predict: Image, color):

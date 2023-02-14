@@ -1,14 +1,15 @@
-import cv2
-from PySide6.QtCore import Slot, QSize, Qt, Signal
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QFileDialog, QPushButton, QDialog, QLabel, \
-    QVBoxLayout, QButtonGroup, QRadioButton
 import sys
-from view.py.wound_healing_widget import Ui_Form
-from matplotlib import pyplot as plt
+
+import cv2
+from PySide6.QtCore import Slot
+from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtWidgets import QWidget, QApplication, QFileDialog, QPushButton, QDialog, QVBoxLayout, QButtonGroup, \
+    QRadioButton
+
 from definitions import DATASET_PATH, MODEL_H5_PATH
 from model.result_scan import ResultScan
 from service.unetModelService import LoadingModelAndPredict
+from view.py.wound_healing_widget import Ui_Form
 
 
 class WoundHealingPatient(QWidget):
@@ -25,19 +26,27 @@ class WoundHealingPatient(QWidget):
         self.ui.button_select_ptoho_from_catalog.setVisible(False)
 
         # ------- Отдельный поток и связка сигналов
-
         self.load_model_and_predict = LoadingModelAndPredict(MODEL_H5_PATH)
         self.load_model_and_predict.setObjectName('LOAD_MODEL_THREAD')
         self.load_model_and_predict.loading_model_end.connect(self.on_load_model_end_signal)
         self.load_model_and_predict.image_original.connect(self.setImage)
         self.load_model_and_predict.predict_image_result.connect(self.setImage)
         self.load_model_and_predict.result_scan.connect(self.result_scan_init)
+        # -------
 
+        # Связка кнопок Результат корректен ?
+        self.ui.wound_healing_button_result_yes.clicked.connect(self.on_result_is_ok)
+        self.ui.wound_healing_button_result_no.clicked.connect(self.on_result_is_not_ok)
         # -------
 
         self.ui.button_select_ptoho_from_catalog.clicked.connect(self.open_file_from_catalog)
         self.test_color()
 
+    def on_result_is_ok(self):
+        print('результат ок, надо сохранить')
+
+    def on_result_is_not_ok(self):
+        print('результат не правильный, надо редактировать')
 
     def returnCameraIndexes(self):
         # checks the first 10 indexes.
@@ -90,6 +99,7 @@ class WoundHealingPatient(QWidget):
             if i.isChecked():
                 self.ui.file_name_select_folder.setText('Выбрана камера: ' + str(array_index_cam[a]))
                 self.load_model_and_predict.number_cam = array_index_cam[a]
+                self.load_model_and_predict.number_cam = a
                 return 0
             a += 1
 
@@ -115,6 +125,11 @@ class WoundHealingPatient(QWidget):
             layout.addWidget(button_cancel)
             msg.setLayout(layout)
             msg.exec()
+            self.load_model_and_predict.start()
+        else:
+            print('else')
+            self.load_model_and_predict.play_video = True
+            self.load_model_and_predict.start()
 
         if self.ui.radio_scan_to_cam.isChecked():
             self.load_model_and_predict.image_path = None
@@ -123,7 +138,7 @@ class WoundHealingPatient(QWidget):
             self.ui.wound_healing_start_scan.setEnabled(True)
 
     def hide_widget(self):
-        self.ui.wound_healing_widget.setVisible(False)
+        # self.ui.wound_healing_widget.setVisible(False)
         self.ui.wound_healing_loading_label.setVisible(False)
         self.ui.wound_healing_start_scan.setEnabled(False)
         self.ui.widget.setVisible(False)
@@ -150,7 +165,7 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_widget.setVisible(True)
 
     def start_scan(self):
-        self.load_model_and_predict.start()
+        self.load_model_and_predict.play_video = False
         self.ui.wound_healing_loading_label.setVisible(True)
         # self.ui.wound_healing_loading_label.setVisible(True)
         # self.l.get_random_image()

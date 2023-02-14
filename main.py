@@ -21,15 +21,14 @@ class MainWindow(QMainWindow):
         self.this_class_slot.set_widget_main_menu.connect(self.set_widget_root_stacket_widget)
         self.view_patient()
         self.ui.pushButton.clicked.connect(self.update_app)
-        self.ui.logo_company_main.setStyleSheet('background-color: green')
-        self.ui.logo_company_main.setText('ВЕРСИЯ 1')
+        self.ui.logo_company_main.setStyleSheet('background-color: red')
+        self.ui.logo_company_main.setText('ВЕРСИЯ 2')
 
     def view_patient(self):
         list_patient = ListPatient(self)
         list_patient.set_main_menu_slots(self.this_class_slot)
         list_patient.get_all_patient()
         self.this_class_slot.set_widget_main_menu.emit(list_patient)
-
 
     def close_app(self):
         app.quit()
