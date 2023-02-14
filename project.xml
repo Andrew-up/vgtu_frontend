@@ -3,7 +3,7 @@
         <version>1.0.0</version>
         <exe_file_main>main.exe</exe_file_main>
         <temp_update>temp_update</temp_update>
-
+        <file_name_archive>update.zip</file_name_archive>
     </app>
     <server>
         <addr>188.235.18.191</addr>

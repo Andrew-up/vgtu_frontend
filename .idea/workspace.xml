@@ -2,7 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8bd0d110-13dc-433e-9215-496fb2324788" name="Changes" comment="обновление приложение через отдельный файл">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vgtu_frontend.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install_update.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Update_app_widget.py" beforeDir="false" afterPath="$PROJECT_DIR$/view/user/Update_app_widget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/build.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/UpdateAppController.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/definitions.py" beforeDir="false" afterPath="$PROJECT_DIR$/definitions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/project.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,8 +170,7 @@
       <workItem from="1675670681509" duration="27543000" />
       <workItem from="1675774267221" duration="49264000" />
       <workItem from="1676015664089" duration="22020000" />
-      <workItem from="1676038785650" duration="2132000" />
-      <workItem from="1676273212885" duration="715000" />
+      <workItem from="1676038785650" duration="2105000" />
     </task>
     <task id="LOCAL-00001" summary="обновление приложение через отдельный файл">
       <created>1675955208604</created>
