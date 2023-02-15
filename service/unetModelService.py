@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QImage
+from PySide6.QtGui import QImage, QPixmap
 from matplotlib import pyplot as plt
 from definitions import DATASET_PATH, MODEL_H5_PATH, DATASET_LABELS
 from model.result_scan import ResultScan
@@ -15,7 +15,7 @@ from model.result_scan import ResultScan
 
 class LoadingModelAndPredict(QThread):
     loading_model_end = Signal(str)
-    predict_image_result = Signal(QImage)
+    predict_image_result = Signal(QPixmap)
     image_original = Signal(QImage)
     result_scan = Signal(ResultScan)
     # Запомнить номер камеры
@@ -75,7 +75,7 @@ class LoadingModelAndPredict(QThread):
         batch_image = self.create_batch(image_preprocessing)
         predict = self.predict(batch_image, image)
         image_qt = self.opencvFormatToQImage(predict)
-        self.predict_image_result.emit(image_qt)
+        self.predict_image_result.emit(QPixmap.fromImage(image_qt))
         print('Поток закончил свою работу')
 
     def load_model_func(self):

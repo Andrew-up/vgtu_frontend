@@ -10,6 +10,7 @@ from definitions import DATASET_PATH, MODEL_H5_PATH
 from model.result_scan import ResultScan
 from service.unetModelService import LoadingModelAndPredict
 from view.py.wound_healing_widget import Ui_Form
+from view.user.drawing_counter import DrawingCounter
 
 
 class WoundHealingPatient(QWidget):
@@ -29,8 +30,8 @@ class WoundHealingPatient(QWidget):
         self.load_model_and_predict = LoadingModelAndPredict(MODEL_H5_PATH)
         self.load_model_and_predict.setObjectName('LOAD_MODEL_THREAD')
         self.load_model_and_predict.loading_model_end.connect(self.on_load_model_end_signal)
-        self.load_model_and_predict.image_original.connect(self.setImage)
-        self.load_model_and_predict.predict_image_result.connect(self.setImage)
+        self.load_model_and_predict.image_original.connect(self.setImage_Original)
+        self.load_model_and_predict.predict_image_result.connect(self.setImage_Predict)
         self.load_model_and_predict.result_scan.connect(self.result_scan_init)
         # -------
 
@@ -41,12 +42,17 @@ class WoundHealingPatient(QWidget):
 
         self.ui.button_select_ptoho_from_catalog.clicked.connect(self.open_file_from_catalog)
         self.test_color()
+        self.image_original = None
 
     def on_result_is_ok(self):
         print('результат ок, надо сохранить')
 
     def on_result_is_not_ok(self):
+        dlg = DrawingCounter(self.image_original)
+        dlg.image_result_edit_doctor.connect(self.setImage_Predict)
         print('результат не правильный, надо редактировать')
+        dlg.exec()
+
 
     def returnCameraIndexes(self):
         # checks the first 10 indexes.
@@ -159,13 +165,23 @@ class WoundHealingPatient(QWidget):
         print('модель загружена')
 
     @Slot(QImage)
-    def setImage(self, image):
+    def setImage_Original(self, image):
+        self.image_original = QPixmap.fromImage(image)
         self.ui.wound_healing_image.setPixmap(QPixmap.fromImage(image))
         self.ui.wound_healing_image.setScaledContents(True)
         self.ui.wound_healing_widget.setVisible(True)
 
+    @Slot(QPixmap)
+    def setImage_Predict(self, image):
+        print(image)
+        self.ui.wound_healing_image.setPixmap(image)
+        self.ui.wound_healing_image.setScaledContents(True)
+        self.ui.wound_healing_widget.setVisible(True)
+
     def start_scan(self):
+        print('sss')
         self.load_model_and_predict.play_video = False
+        self.load_model_and_predict.start()
         self.ui.wound_healing_loading_label.setVisible(True)
         # self.ui.wound_healing_loading_label.setVisible(True)
         # self.l.get_random_image()
