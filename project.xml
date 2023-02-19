@@ -6,8 +6,10 @@
         <file_name_archive>update.zip</file_name_archive>
     </app>
     <server>
-        <addr>188.235.18.191</addr>
-        <port>8095</port>
+<!--        <addr>188.235.18.191</addr>-->
+        <addr>localhost</addr>
+<!--        <port>8095</port>-->
+        <port>5000</port>
         <update_api>api/app/update/download/</update_api>
         <check_version_api>api/app/version/</check_version_api>
     </server>

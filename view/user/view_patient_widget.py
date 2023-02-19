@@ -20,7 +20,7 @@ class ViewPatient(QDialog):
         self.ui.view_patient_go_history_healing.clicked.connect(self.on_click_history_patient)
         self.ui.view_patient_go_wound_treatment.clicked.connect(self.on_click_wound_treatment_patient)
         self.card_patient = CardPatient(patient)
-        self.history_widget = HistoryPatient()
+        self.history_widget = HistoryPatient(patient)
         self.wound_treatment_widget = WoundHealingPatient()
         self.patient = patient
         self.main_menu_slots = None

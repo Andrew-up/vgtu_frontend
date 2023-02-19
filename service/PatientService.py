@@ -1,11 +1,11 @@
 from dto.patientDTO import PatientDTO, getPatient, getPatientDTO, getPatientList
 from model.patient_model import Patient
-from controller.PatientController import get_all_patients, add_patient, delete_patient
+from controller.PatientController import get_patient_by_id, get_all_patients, add_patient, delete_patient, get_history_patient
 
 
 class PatientServiceFront(object):
 
-    def __init__(self, doctor_id):
+    def __init__(self, doctor_id=1):
         self.doctor = doctor_id
 
     def getAll(self):
@@ -20,4 +20,10 @@ class PatientServiceFront(object):
         res = add_patient(patient)
         return res
 
+    def getHistoryPatient(self, id_patient):
+        history = get_history_patient(id_patient=id_patient)
+        return history
 
+    def getPatientById(self, id_patient) -> Patient:
+        patient = get_patient_by_id(id_patient)
+        return patient

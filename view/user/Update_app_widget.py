@@ -206,13 +206,6 @@ class UpdateAppWidget(QDialog):
             msg.setStandardButtons(QMessageBox.StandardButton.Ok)
             msg.exec()
 
-    def update_version_xml(self):
-        et = ET.parse(self.app_setting.get_xml_dir())
-        app_n = et.find('app')
-        version_n = app_n.find('version')
-        version_n.text = self.app_setting.new_version
-        et.write(self.app_setting.get_xml_dir())
-
     def read_xml(self):
         print(self.app_setting.get_xml_dir())
         if os.path.exists(self.app_setting.get_xml_dir()):

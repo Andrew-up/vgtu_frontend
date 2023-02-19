@@ -6,57 +6,95 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>237</height>
+    <width>202</width>
+    <height>273</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <property name="styleSheet">
+   <string notr="true">QWidget#Form{
+	color: rgb(255, 255, 255);
+}
+
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QLabel" name="patient_history_item_image">
-       <property name="minimumSize">
-        <size>
-         <width>70</width>
-         <height>70</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Фото </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="patient_history_item_date">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Дата: 22.09.2022</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="patient_history_item_comment">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Комментарий врача: все 
+    <widget class="QWidget" name="widget" native="true">
+     <property name="styleSheet">
+      <string notr="true">QWidget#widget{
+background-color:  rgb(199, 199, 199) ;
+padding: 10px;
+border: solid 2px #1B7530;
+border-radius: 10px;
+}
+</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="patient_history_item_image">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>70</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>Фото </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="patient_history_item_date">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>Дата: 22.09.2022</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="patient_history_item_comment">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(170, 153, 255);</string>
+          </property>
+          <property name="text">
+           <string>Комментарий врача: все 
  норм</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Подробнее</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>

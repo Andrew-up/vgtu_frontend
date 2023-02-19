@@ -109,3 +109,11 @@ class Patient:
     @property
     def full_name(self):
         return '{} {} {}'.format(self.last_name, self.firstname, self.middle_name)
+
+    @property
+    def dianosis(self):
+        return self._dianosis
+
+    @dianosis.setter
+    def dianosis(self, value):
+        self._dianosis = value

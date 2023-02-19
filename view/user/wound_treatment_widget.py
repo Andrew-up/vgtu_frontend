@@ -94,6 +94,7 @@ class WoundHealingPatient(QWidget):
             # self.ui.wound_healing_area_wound.setText(f'Площадь: {str(i.area_wound)}')
 
     def on_radio_scan_from_catalog(self):
+        self.load_model_and_predict.play_video = False
         if self.ui.radio_scan_to_photo_catalog.isChecked():
             self.ui.button_select_ptoho_from_catalog.setVisible(True)
             self.load_model_and_predict.scan_from_cam = False
