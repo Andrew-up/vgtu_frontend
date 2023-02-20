@@ -7,10 +7,15 @@ from PySide6.QtWidgets import QWidget, QApplication, QFileDialog, QPushButton, Q
     QRadioButton
 
 from definitions import DATASET_PATH, MODEL_H5_PATH
+
 from model.result_scan import ResultScan
+from model.history_patient import HistoryPatient
+from model.history_neural_network import HistoryNeuralNetwork
 from service.unetModelService import LoadingModelAndPredict
+from service.PatientService import PatientServiceFront
 from view.py.wound_healing_widget import Ui_Form
 from view.user.drawing_counter import DrawingCounter
+
 
 
 class WoundHealingPatient(QWidget):
@@ -33,18 +38,35 @@ class WoundHealingPatient(QWidget):
         self.load_model_and_predict.image_original.connect(self.setImage_Original)
         self.load_model_and_predict.predict_image_result.connect(self.setImage_Predict)
         self.load_model_and_predict.result_scan.connect(self.result_scan_init)
+        self.load_model_and_predict.set_categorical_predict(self.get_predict_categorical())
+        print(self.load_model_and_predict.categorical_predict)
         # -------
 
         # Связка кнопок Результат корректен ?
         self.ui.wound_healing_button_result_yes.clicked.connect(self.on_result_is_ok)
         self.ui.wound_healing_button_result_no.clicked.connect(self.on_result_is_not_ok)
         # -------
-
         self.ui.button_select_ptoho_from_catalog.clicked.connect(self.open_file_from_catalog)
         self.test_color()
         self.image_original = None
 
+
+    def get_predict_categorical(self):
+        return PatientServiceFront(1).get_all_categorical()
+
+
     def on_result_is_ok(self):
+        history = HistoryPatient()
+        history_nn = HistoryNeuralNetwork()
+        history_nn.result_predict_id = 1
+        history_nn.photo_original = '12312312'
+        history_nn.photo_predict = 'ssssss'
+        history.comment = 'comment-test'
+        history.date = 'date-test'
+        history.history_neutral_network = history_nn.__dict__
+        history.patient_id = 1
+        s = PatientServiceFront(1)
+        s.addHistoryPatient(history)
         print('результат ок, надо сохранить')
 
     def on_result_is_not_ok(self):

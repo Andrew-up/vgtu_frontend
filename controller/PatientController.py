@@ -5,6 +5,7 @@ import requests
 from dto.patientDTO import PatientDTO, getPatient, getPatientDTO
 from model.patient_model import Patient
 from model.history_patient import HistoryPatient
+from model.result_predict import ResultPredict
 from utils.read_xml_file import ReadXmlProject
 
 SECRET_KEY = {"key": 'hFGHFEFyr67ggghhPJhdfh123dd'}
@@ -30,8 +31,8 @@ def get_all_patients(id_doctor: int) -> list[Patient]:
             dto = PatientDTO(**dto_dict)
             patient: Patient = getPatient(dto)
             patients.append(patient)
-            # print(patient.full_name)
         return patients
+
 
 def get_history_patient(id_patient) -> list[HistoryPatient]:
     r = requests.get(f'{api}history/{id_patient}/')
@@ -61,18 +62,34 @@ def delete_patient(id_patient):
     return r.text
 
 
+def add_history_patient(history: HistoryPatient):
+    str_api = f'{api}/history/add/{history.patient_id}/'
+    json = history.__dict__
+    r = requests.post(str_api, json=json, headers={"Content-Type": "application/json"})
+    print(r.text)
+
+
+def get_categorical_predict() -> list[ResultPredict]:
+    str_api = f'{api}/categorical/all/'
+    r = requests.get(str_api)
+    result_predict_list: list[ResultPredict] = []
+    for i in r.json():
+        result_predict_list.append(ResultPredict(**i))
+    return result_predict_list
+
+
 if __name__ == '__main__':
     # delete_patient(10)
     # get_patient_by_id(30)
     # l = get_all_patients(1)
     # print(l[0].id_patient)
-    p = Patient()
+    # p = Patient()
     # p.firstname = "123"
     # add_patient(p)
     # get_patient_by_id(1)
-    get_history_patient(5)
+    # get_history_patient(5)
     # p = Patient()
     # p.address = "123"
     # add_patient(p)
-
+    print(get_categorical_predict())
     pass

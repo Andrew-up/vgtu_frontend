@@ -1,6 +1,8 @@
 from dto.patientDTO import PatientDTO, getPatient, getPatientDTO, getPatientList
 from model.patient_model import Patient
-from controller.PatientController import get_patient_by_id, get_all_patients, add_patient, delete_patient, get_history_patient
+from model.history_patient import HistoryPatient
+from controller.PatientController import get_patient_by_id,\
+    get_all_patients, add_patient, delete_patient, get_history_patient, add_history_patient, get_categorical_predict
 
 
 class PatientServiceFront(object):
@@ -27,3 +29,12 @@ class PatientServiceFront(object):
     def getPatientById(self, id_patient) -> Patient:
         patient = get_patient_by_id(id_patient)
         return patient
+
+    def addHistoryPatient(self, history: HistoryPatient):
+        add = add_history_patient(history)
+        pass
+
+    def get_all_categorical(self):
+        return get_categorical_predict()
+
+

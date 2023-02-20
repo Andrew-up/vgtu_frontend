@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 from definitions import DATASET_PATH, MODEL_H5_PATH, DATASET_LABELS
 from model.result_scan import ResultScan
 
-
+from model.result_predict import ResultPredict
 class LoadingModelAndPredict(QThread):
     loading_model_end = Signal(str)
     predict_image_result = Signal(QPixmap)
@@ -33,9 +33,11 @@ class LoadingModelAndPredict(QThread):
         self.image_batch = None
         self.scan_from_cam = False
         self.image_path = None
-        print('1')
-        end_time = time.time() - start
-        print(end_time)
+        self.categorical_predict = None
+        self.categorical_predict: list[ResultPredict]
+
+    def set_categorical_predict(self, categorical):
+        self.categorical_predict = categorical
 
     def set_image_path(self, path_image):
         self.image_path = path_image

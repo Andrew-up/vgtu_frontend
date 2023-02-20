@@ -2,7 +2,7 @@ from model.history_neural_network import HistoryNeuralNetwork
 
 class HistoryPatient:
     def __init__(self, **entries):
-        self.id_healing_history = 0
+        self.id_healing_history = None
         self.patient_id = None
         self.history_neural_network_id = None
         self.history_neutral_network: HistoryNeuralNetwork.__dict__ = None
