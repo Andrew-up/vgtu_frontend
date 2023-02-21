@@ -6,3 +6,4 @@ class ResultScan(object):
         self.type_wound = ''
         self.image_wound = ''
         self.color = 0
+        self.result_predict_id = None

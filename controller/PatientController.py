@@ -35,7 +35,7 @@ def get_all_patients(id_doctor: int) -> list[Patient]:
 
 
 def get_history_patient(id_patient) -> list[HistoryPatient]:
-    r = requests.get(f'{api}history/{id_patient}/')
+    r = requests.get(f'{api}patient/history/{id_patient}/')
     h = r.json()
     list_history_patient: list[HistoryPatient] = []
     for i in h:

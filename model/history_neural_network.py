@@ -1,5 +1,6 @@
 from model.result_predict import ResultPredict
 
+
 class HistoryNeuralNetwork:
     def __init__(self, **entries):
         self.id_history_neural_network = 0

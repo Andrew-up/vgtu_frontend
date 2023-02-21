@@ -27,7 +27,7 @@ class HistoryPatient(QWidget):
         self.ui.history_patient_fullname_patient.setText(patient.full_name)
         self.ui.history_patient_diagnosis_patient.setText(patient.dianosis)
         for i in self.history_patient:
-            item = HistoryPatientWidgetItem()
+            item = HistoryPatientWidgetItem(i)
             item.ui.patient_history_item_comment.setText(f'Test: {i.comment}')
             self.items_layout.addWidget(item)
 
@@ -49,7 +49,7 @@ class HistoryPatient(QWidget):
 
 if __name__ == '__main__':
     p = PatientServiceFront()
-    patient = p.getPatientById(5)
+    patient = p.getPatientById(1)
     app = QApplication()
     window = HistoryPatient(patient)
     window.show()

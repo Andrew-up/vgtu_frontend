@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import time
@@ -18,6 +19,7 @@ class LoadingModelAndPredict(QThread):
     predict_image_result = Signal(QPixmap)
     image_original = Signal(QImage)
     result_scan = Signal(ResultScan)
+    video_stream_image = Signal(QImage)
     # Запомнить номер камеры
     number_cam = -1
     play_video = True
@@ -54,9 +56,8 @@ class LoadingModelAndPredict(QThread):
         cap = cv2.VideoCapture(self.number_cam, cv2.CAP_DSHOW)
         while True:
             if self.play_video:
-                print('222222')
                 ret, frame = cap.read()
-                self.image_original.emit(self.opencvFormatToQImage(frame))
+                self.video_stream_image.emit(self.opencvFormatToQImage(frame))
             else:
                 cap.release()
                 cv2.destroyAllWindows()
@@ -121,23 +122,39 @@ class LoadingModelAndPredict(QThread):
         # print(polygon)
         image_original_copy = image.copy()
         area_full = 0
+
+        polygon_result = []
         if polygon is not None:
             # print(dir(polygon))
             polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
             image_temp = np.zeros_like(image, np.uint8)
             image_original_copy = image.copy()
-            print(image_temp.shape)
             for contour in polygon:
+                peri = cv2.arcLength(contour, True)
+                polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
                 area_full += cv2.contourArea(contour)
                 cv2.fillPoly(image_temp, pts=[contour], color=color)
                 # contour = contour.flatten().tolist()
                 # if len(contour) > 4:
                 #     segmentation.append(contour)
-            cv2.drawContours(image_original_copy, polygon, -1, color, thickness=2)
+
+            cv2.drawContours(image_original_copy, polygon_result, -1, color, thickness=2)
             alpha = 0.5
             mask = image_temp.astype(bool)
             image_original_copy[mask] = cv2.addWeighted(image_original_copy, alpha, image_temp, 1 - alpha, 0)[mask]
-        return image_original_copy, polygon, area_full
+        return image_original_copy, polygon_result, area_full
+
+
+    def unpackArray(self, array):
+        print('=============')
+        res = []
+        for i in array:
+            for j in i:
+                a, b = j
+                res.append(a)
+                res.append(b)
+        return res
+
 
     def predict(self, batch, original_image):
         print(f" ==========  {self.objectName()} ========== ")
@@ -147,23 +164,24 @@ class LoadingModelAndPredict(QThread):
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
 
             list_predict = list()
-            list_predict.append(np.sum(res[0, :, :, 0]))
-            list_predict.append(np.sum(res[0, :, :, 1]))
-            list_predict.append(np.sum(res[0, :, :, 2]))
+            for i in range(len(self.categorical_predict)):
+                list_predict.append(np.sum(res[0, :, :, i]))
             max_value = max(list_predict)
             max_index = list_predict.index(max_value)
 
+            print(max_index)
+            print(self.categorical_predict[max_index].name_category_ru)
             predict1 = res[0, :, :, max_index]
             predict1 = (predict1 > 0.4).astype(np.uint8)
             predict1 = np.array(predict1) * 255
 
-            predict2 = res[0, :, :, 1]
-            predict2 = (predict2 > 0.4).astype(np.uint8)
-            predict2 = np.array(predict2) * 255
+            # predict2 = res[0, :, :, 1]
+            # predict2 = (predict2 > 0.4).astype(np.uint8)
+            # predict2 = np.array(predict2) * 255
 
-            predict3 = res[0, :, :, 2]
-            predict3 = (predict3 > 0.4).astype(np.uint8)
-            predict3 = np.array(predict3) * 255
+            # predict3 = res[0, :, :, 2]
+            # predict3 = (predict3 > 0.4).astype(np.uint8)
+            # predict3 = np.array(predict3) * 255
 
             color1 = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
             color = color1[max_index]
@@ -173,6 +191,14 @@ class LoadingModelAndPredict(QThread):
             # Расширение
             img1, polygon1, area_full1 = self.drawingMaskForImagePredict(image=img_original_resize, predict=predict1,
                                                                          color=color[::-1])
+
+
+
+
+            result_mask = []
+            for i in polygon1:
+                result_mask.append(self.unpackArray(i))
+            base64_polygon = base64.b64encode(str(result_mask).encode())
 
             # img2, polygon2, area_full2 = self.drawingMaskForImagePredict(image=img1, predict=predict2, color=color2[::-1])
             # img3, polygon3, area_full3 = self.drawingMaskForImagePredict(image=img2, predict=predict3, color=color3[::-1])
@@ -184,7 +210,11 @@ class LoadingModelAndPredict(QThread):
                 scan.color = color
                 scan.type_wound = DATASET_LABELS[max_index]
                 scan.area_wound = area_full1
+                scan.result_predict_id = self.categorical_predict[max_index].id_category
+                scan.polygon_wound = str(base64_polygon)
                 scan_list.append(scan)
+
+
 
             # if area_full2 != 0:
             #     scan = ResultScan()
