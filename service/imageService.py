@@ -1,8 +1,10 @@
 import base64
+import json
+from ast import literal_eval
 
 from PySide6 import QtGui, QtCore
 from PySide6.QtCore import QByteArray, QBuffer
-from PySide6.QtGui import QImage
+from PySide6.QtGui import QImage, QPixmap
 
 from PIL import ImageQt
 
@@ -22,36 +24,25 @@ import base64
 import io
 from PIL import Image
 
+# def is_valid_base_64(base64):
+
 
 def is_valid_base64_image(image_string):
-    # checking valid base64 image string
+
     try:
-        image = base64.b64decode(eval(image_string))
+        string = image_string[1:-1]
+        image = base64.b64decode(string)
         img = Image.open(io.BytesIO(image))
+        return True
     except Exception:
         print('file is not valid base64 image')
         return False
-
-    # checking image format I want to support
-    if img.format.lower() in ["jpg", "jpeg", "png"]:
-
-        # if you need to check image dimension
-        width, height = img.size
-        if width < 800 and height < 800:
-            return True
-        else:
-            print('image size exceeded, width and height must be less than 800 pixels')
-            return False
-        # end of checking dimentions
-
-    else:
-        print('Image is not valid, only \'base64\' image (jpg, jpeg, png) is valid')
 
 
 
 def base64_to_image(base64_image):
     # print(base64_image)
-    basad = QByteArray.fromBase64(eval(base64_image))
+    basad = QByteArray.fromBase64(base64_image)
     img = QImage.fromData(basad, 'PNG')
 
     # pil_img_image = ImageQt.fromqimage(img)
@@ -59,6 +50,13 @@ def base64_to_image(base64_image):
 
     # print(type(img))
     return img
+
+
+def byteArrayToPixmap(byteArray):
+    basad = QByteArray.fromBase64(literal_eval(byteArray))
+    img = QImage.fromData(basad, 'PNG')
+    image = QPixmap.fromImage(img)
+    return image
 
 
 class ImageConverter(object):
@@ -75,7 +73,7 @@ class ImageConverter(object):
 def stringIsBase64(s):
     # print(type(s))
     try:
-        base64.b64decode(eval(s)).decode('utf-8')
+        base64.b64decode(literal_eval(s)).decode('utf-8')
         return True
     except Exception:
         return False

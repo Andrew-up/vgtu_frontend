@@ -200,8 +200,6 @@ class WoundHealingPatient(QWidget):
         print('модель загружена')
     @Slot(QImage)
     def setImage_Original(self, image):
-        # print(image)
-        # print('setImage_Original')
         self.history_n_n.photo_original = image_to_base64(image)
         self.image_original = QPixmap.fromImage(image)
         self.ui.wound_healing_image.setPixmap(QPixmap.fromImage(image))

@@ -37,15 +37,6 @@ class HistoryPatient(QWidget):
         self.ui.scrollArea.horizontalScrollBar().setValue(self.ui.scrollArea.horizontalScrollBar().value() - self.item_size)
 
 
-    def add_item(self):
-        for i in range(10):
-            item = HistoryPatientWidgetItem()
-            item.ui.patient_history_item_comment.setText(f'Test: {i}')
-            w = item.size().width()
-            self.item_size = w
-            self.items_layout.addWidget(item)
-
-
 
 if __name__ == '__main__':
     p = PatientServiceFront()
