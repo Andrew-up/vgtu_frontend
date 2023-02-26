@@ -1,15 +1,24 @@
+import cv2
+import numpy as np
 from PySide6 import QtGui
 from PySide6.QtCore import Slot, QSize, Signal
 from PySide6.QtGui import QPixmap, QImage, QBrush, QColor, QPainterPath
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QLabel, QDialog
+from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QLabel, QDialog, QListWidget, QVBoxLayout, QPushButton
 import sys
+
+from service.PatientService import PatientServiceFront
 from view.py.draw_counter_widget import Ui_Form
 from PySide6.QtCore import Qt
-
+from model.history_neural_network import HistoryNeuralNetwork
+from service.imageService import ImageConverter, image_to_base64
+from model.result_predict import ResultPredict
+from view.user.catrgorical_item_widget import CategoricalItem
+import collections
 
 class DrawingCounter(QDialog):
 
     image_result_edit_doctor = Signal(QPixmap)
+    history_n_n = Signal(HistoryNeuralNetwork)
 
     def __init__(self, image_original = None, parent=None):
         super(DrawingCounter, self).__init__(parent)
@@ -18,6 +27,7 @@ class DrawingCounter(QDialog):
         canvas = QtGui.QPixmap(512, 512)
         canvas.fill(Qt.white)
         self.polygon = []
+        self.polygon_all = []
         self.last_x, self.last_y = None, None
         self.first_x, self.first_y = None, None
         self.canvas = self.ui.image_drawing_canvas
@@ -31,10 +41,46 @@ class DrawingCounter(QDialog):
         self.path = QPainterPath()
         self.polygon_QPoint = []
         self.ui.save_button.clicked.connect(self.on_click_save_image_button)
+        self.history = HistoryNeuralNetwork()
+        self.categorical = self.get_predict_categorical()
+        self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
+        # self.area_full = 0
+
+
+
+    def select_disease(self):
+        dlg = QDialog()
+        layout = QVBoxLayout()
+        for i in self.categorical:
+            item = CategoricalItem(layout, category=i)
+            item.clickButtonItem.connect(self.ooooooooooooooooo)
+            layout.addWidget(item)
+        save_button = QPushButton()
+        save_button.setText("Сохранить")
+        save_button.clicked.connect(dlg.close)
+        layout.addWidget(save_button)
+        dlg.setLayout(layout)
+        dlg.exec()
+
+    @Slot(ResultPredict)
+    def ooooooooooooooooo(self, category: ResultPredict):
+        self.history.result_predict_id = category.id_category
+        self.history.result_predict = category
+        self.ui.type_disease_label.setText(category.name_category_ru)
+        # print(category.name_category_ru)
+    def get_predict_categorical(self)-> list[ResultPredict]:
+        return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
         print('save')
+        print(self.history)
+        if self.history is not None:
+            self.history.polygon_mask = self.polygon_all
+            qiamge = self.ui.image_drawing_canvas.pixmap().toImage()
+            self.history.photo_predict_edit_doctor = image_to_base64(qiamge)
+            self.history_n_n.emit(self.history)
         self.image_result_edit_doctor.emit(self.ui.image_drawing_canvas.pixmap())
+        self.close()
 
 
     def on_close_contour(self):
@@ -46,7 +92,7 @@ class DrawingCounter(QDialog):
         painter.setPen(pen)
         painter.drawLine(self.last_x, self.last_y, self.first_x, self.first_y)
         self.path.addPolygon(self.polygon_QPoint)
-        print(self.path)
+        # print(self.path)
         painter.fillPath(self.path, QBrush(QColor(0, 255, 0, 100)))
         painter.end()
         self.canvas.setPixmap(canvas)
@@ -54,6 +100,23 @@ class DrawingCounter(QDialog):
         self.last_y = None
         self.polygon_QPoint.clear()
         self.path.clear()
+        self.polygon_all.append(self.polygon.copy())
+        xy = np.array(self.polygon)
+        sssssssss = int(len(xy)/2)
+        xy = xy.reshape((sssssssss, 2))
+        xy = xy.astype(int)
+        # self.area_full += cv2.contourArea(xy)
+        # print(self.area_full)
+        self.polygon.clear()
+        self.history.area_wound += cv2.contourArea(xy)
+
+        # print(self.polygon_all)
+        self.ui.area_countor_label.setText('Площадь контура: ' + str(self.history.area_wound))
+
+
+
+    def PolyArea(self, x, y):
+        return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
     def mousePressEvent(self, event):
         canvas = self.canvas.pixmap()
@@ -72,13 +135,14 @@ class DrawingCounter(QDialog):
         painter.drawLine(self.last_x, self.last_y, localPos.x(), localPos.y())
         self.polygon.append(localPos.x())
         self.polygon.append(localPos.y())
-        print(self.polygon)
-        print(localPos)
+        # print(self.polygon)
+        # print(localPos)
         self.polygon_QPoint.append(localPos)
         painter.end()
         self.canvas.setPixmap(canvas)
         self.last_x = localPos.x()
         self.last_y = localPos.y()
+
 
 
 if __name__ == '__main__':

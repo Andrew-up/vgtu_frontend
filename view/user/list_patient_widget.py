@@ -48,7 +48,7 @@ class ListPatient(QWidget):
     def add_new_patient(self, patient: Patient = 0):
         dlg = PatientRegistration()
         dlg.exec()
-        pass
+        self.on_update_list()
 
 
 if __name__ == '__main__':

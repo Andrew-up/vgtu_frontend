@@ -18,6 +18,10 @@ class MoreHistoryPatientItem(QDialog):
         self.history_patient: HistoryPatient = history
         if history is not None:
             self.initImage()
+        self.ui.button_close.clicked.connect(self.close_this)
+
+    def close_this(self):
+        self.close()
 
 
     def initImage(self):
@@ -47,7 +51,9 @@ class MoreHistoryPatientItem(QDialog):
 
         self.ui.label_date.setText(self.history_patient.date)
         self.ui.label_comment.setText(self.history_patient.comment)
-        self.ui.label_dianosis.setText(self.history_patient.history_neutral_network.result_predict.name_category_ru)
+        print(self.history_patient.history_neutral_network.result_predict)
+        if self.history_patient.history_neutral_network.result_predict is not None:
+            self.ui.label_dianosis.setText(self.history_patient.history_neutral_network.result_predict.name_category_ru)
 
         # print(img_orig)
         # print(img_pred)

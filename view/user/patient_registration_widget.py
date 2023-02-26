@@ -20,6 +20,8 @@ class PatientRegistration(QDialog):
         self.ui.clear_all_button.clicked.connect(self.clear_all)
 
 
+
+
     def registration_ok(self, id_new_user: Patient):
         dlg = QMessageBox(self)
         dlg.setWindowTitle('Регистрация успешна! ')
@@ -45,6 +47,7 @@ class PatientRegistration(QDialog):
         p = PatientServiceFront(1)
         res: Patient = p.add(self.patient)
         print(res.id_patient)
+        self.close()
         # if res.id_patient > 0:
         #     self.registration_ok(res)
 

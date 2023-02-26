@@ -130,6 +130,7 @@ class LoadingModelAndPredict(QThread):
             image_temp = np.zeros_like(image, np.uint8)
             image_original_copy = image.copy()
             for contour in polygon:
+                # print(contour)
                 peri = cv2.arcLength(contour, True)
                 polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
                 area_full += cv2.contourArea(contour)
@@ -169,8 +170,8 @@ class LoadingModelAndPredict(QThread):
             max_value = max(list_predict)
             max_index = list_predict.index(max_value)
 
-            print(max_index)
-            print(self.categorical_predict[max_index].name_category_ru)
+            # print(max_index)
+            # print(self.categorical_predict[max_index].name_category_ru)
             predict1 = res[0, :, :, max_index]
             predict1 = (predict1 > 0.4).astype(np.uint8)
             predict1 = np.array(predict1) * 255
@@ -208,7 +209,7 @@ class LoadingModelAndPredict(QThread):
             if area_full1 != 0:
                 scan = ResultScan()
                 scan.color = color
-                scan.type_wound = DATASET_LABELS[max_index]
+                scan.type_wound = self.categorical_predict[max_index].name_category_ru
                 scan.area_wound = area_full1
                 scan.result_predict_id = self.categorical_predict[max_index].id_category
                 scan.polygon_wound = str(base64_polygon)

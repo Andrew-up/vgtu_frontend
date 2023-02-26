@@ -23,7 +23,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(786, 644)
+        Form.resize(820, 687)
         self.verticalLayout_4 = QVBoxLayout(Form)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_6 = QVBoxLayout()
@@ -117,10 +117,6 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
 
-        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Maximum)
-
-        self.verticalLayout_4.addItem(self.verticalSpacer_3)
-
         self.wound_healing_widget = QWidget(Form)
         self.wound_healing_widget.setObjectName(u"wound_healing_widget")
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -146,15 +142,9 @@ class Ui_Form(object):
 
         self.wound_healing_image = QLabel(self.wound_healing_widget)
         self.wound_healing_image.setObjectName(u"wound_healing_image")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.wound_healing_image.sizePolicy().hasHeightForWidth())
-        self.wound_healing_image.setSizePolicy(sizePolicy1)
-        self.wound_healing_image.setMinimumSize(QSize(200, 200))
+        self.wound_healing_image.setMinimumSize(QSize(250, 250))
         self.wound_healing_image.setMaximumSize(QSize(250, 250))
-        self.wound_healing_image.setSizeIncrement(QSize(0, 0))
-        self.wound_healing_image.setStyleSheet(u"background-color: rgb(102, 255, 217);")
+        self.wound_healing_image.setStyleSheet(u"background-color: rgb(19, 255, 220);")
 
         self.horizontalLayout.addWidget(self.wound_healing_image)
 
@@ -166,54 +156,93 @@ class Ui_Form(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.verticalLayout_2.setContentsMargins(-1, -1, -1, 0)
-        self.wound_healing_type_wound = QLabel(self.wound_healing_widget)
-        self.wound_healing_type_wound.setObjectName(u"wound_healing_type_wound")
-
-        self.verticalLayout_2.addWidget(self.wound_healing_type_wound)
-
-        self.wound_healing_area_wound = QLabel(self.wound_healing_widget)
+        self.widget_2 = QWidget(self.wound_healing_widget)
+        self.widget_2.setObjectName(u"widget_2")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.widget_2.sizePolicy().hasHeightForWidth())
+        self.widget_2.setSizePolicy(sizePolicy1)
+        self.widget_2.setMinimumSize(QSize(0, 100))
+        self.widget_2.setStyleSheet(u"")
+        self.verticalLayout_10 = QVBoxLayout(self.widget_2)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.wound_healing_area_wound = QLabel(self.widget_2)
         self.wound_healing_area_wound.setObjectName(u"wound_healing_area_wound")
 
-        self.verticalLayout_2.addWidget(self.wound_healing_area_wound)
+        self.verticalLayout_10.addWidget(self.wound_healing_area_wound)
 
-        self.label_9 = QLabel(self.wound_healing_widget)
-        self.label_9.setObjectName(u"label_9")
+        self.wound_healing_type_wound = QLabel(self.widget_2)
+        self.wound_healing_type_wound.setObjectName(u"wound_healing_type_wound")
 
-        self.verticalLayout_2.addWidget(self.label_9)
+        self.verticalLayout_10.addWidget(self.wound_healing_type_wound)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_10.addItem(self.verticalSpacer)
 
         self.wound_healing_layout_result = QVBoxLayout()
         self.wound_healing_layout_result.setObjectName(u"wound_healing_layout_result")
+        self.wound_healing_layout_result.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.wound_healing_layout_result.setContentsMargins(-1, 0, -1, -1)
-        self.wound_healing_result_is_ok = QLabel(self.wound_healing_widget)
+        self.wound_healing_result_is_ok = QLabel(self.widget_2)
         self.wound_healing_result_is_ok.setObjectName(u"wound_healing_result_is_ok")
 
         self.wound_healing_layout_result.addWidget(self.wound_healing_result_is_ok)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.wound_healing_button_result_yes = QPushButton(self.wound_healing_widget)
+        self.horizontalLayout_2.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_9)
+
+        self.wound_healing_button_result_yes = QPushButton(self.widget_2)
         self.wound_healing_button_result_yes.setObjectName(u"wound_healing_button_result_yes")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.wound_healing_button_result_yes.sizePolicy().hasHeightForWidth())
+        self.wound_healing_button_result_yes.setSizePolicy(sizePolicy2)
+        self.wound_healing_button_result_yes.setMinimumSize(QSize(0, 25))
 
         self.horizontalLayout_2.addWidget(self.wound_healing_button_result_yes)
 
-        self.wound_healing_button_result_no = QPushButton(self.wound_healing_widget)
+        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_7)
+
+        self.wound_healing_button_result_no = QPushButton(self.widget_2)
         self.wound_healing_button_result_no.setObjectName(u"wound_healing_button_result_no")
+        sizePolicy2.setHeightForWidth(self.wound_healing_button_result_no.sizePolicy().hasHeightForWidth())
+        self.wound_healing_button_result_no.setSizePolicy(sizePolicy2)
+        self.wound_healing_button_result_no.setMinimumSize(QSize(0, 25))
+        self.wound_healing_button_result_no.setAutoDefault(False)
 
         self.horizontalLayout_2.addWidget(self.wound_healing_button_result_no)
+
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_8)
 
 
         self.wound_healing_layout_result.addLayout(self.horizontalLayout_2)
 
 
-        self.verticalLayout_2.addLayout(self.wound_healing_layout_result)
+        self.verticalLayout_10.addLayout(self.wound_healing_layout_result)
+
+        self.label_9 = QLabel(self.widget_2)
+        self.label_9.setObjectName(u"label_9")
+
+        self.verticalLayout_10.addWidget(self.label_9)
+
+
+        self.verticalLayout_2.addWidget(self.widget_2)
 
         self.widget = QWidget(self.wound_healing_widget)
         self.widget.setObjectName(u"widget")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
-        self.widget.setSizePolicy(sizePolicy2)
+        sizePolicy1.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
+        self.widget.setSizePolicy(sizePolicy1)
         self.widget.setMinimumSize(QSize(100, 100))
         self.verticalLayout_8 = QVBoxLayout(self.widget)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
@@ -322,13 +351,13 @@ class Ui_Form(object):
         self.wound_healing_start_scan.setText(QCoreApplication.translate("Form", u"\u041d\u0430\u0447\u0430\u0442\u044c \u0441\u043a\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435", None))
         self.wound_healing_loading_label.setText(QCoreApplication.translate("Form", u"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430...", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"\u041e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u0440\u0430\u043d\u044b", None))
-        self.wound_healing_image.setText(QCoreApplication.translate("Form", u"\u0418\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435 ", None))
-        self.wound_healing_type_wound.setText(QCoreApplication.translate("Form", u"\u0422\u0438\u043f \u0440\u0430\u043d\u044b: \u0433\u043d\u043e\u0439\u043d\u0430\u044f", None))
+        self.wound_healing_image.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.wound_healing_area_wound.setText(QCoreApplication.translate("Form", u"\u041f\u043b\u043e\u0449\u0430\u0434\u044c: 5 \u043a\u0432 \u0441\u043c", None))
-        self.label_9.setText(QCoreApplication.translate("Form", u"\u041a\u043e\u043d\u0442\u0443\u0440 \u0440\u0430\u043d\u044b \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d", None))
+        self.wound_healing_type_wound.setText(QCoreApplication.translate("Form", u"\u0422\u0438\u043f \u0440\u0430\u043d\u044b: \u0433\u043d\u043e\u0439\u043d\u0430\u044f", None))
         self.wound_healing_result_is_ok.setText(QCoreApplication.translate("Form", u"\u0420\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u0435\u043d? ", None))
         self.wound_healing_button_result_yes.setText(QCoreApplication.translate("Form", u"\u0414\u0430", None))
         self.wound_healing_button_result_no.setText(QCoreApplication.translate("Form", u"\u041d\u0435\u0442", None))
+        self.label_9.setText(QCoreApplication.translate("Form", u"\u041a\u043e\u043d\u0442\u0443\u0440 \u0440\u0430\u043d\u044b \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d", None))
         self.wound_healing_strategy_healing.setText(QCoreApplication.translate("Form", u"\u0421\u0442\u0440\u0430\u0442\u0435\u0433\u0438\u044f \u043b\u0435\u0447\u0435\u043d\u0438\u044f: \u043d\u0430\u043d\u0435\u0441\u0442\u0438 2 \u043c\u043b \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430", None))
         self.wound_healing_strategy_button_go.setText(QCoreApplication.translate("Form", u"\u041e\u0431\u0440\u0430\u0431\u043e\u0442\u0430\u0442\u044c", None))
         self.wound_healing_strategy_button_select_list.setText(QCoreApplication.translate("Form", u"\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0432\u0440\u0443\u0447\u043d\u0443\u044e", None))

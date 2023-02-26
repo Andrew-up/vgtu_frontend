@@ -53,6 +53,9 @@
      </property>
      <item>
       <widget class="QPushButton" name="select_color_pen_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Выбрать цвет пера</string>
        </property>
@@ -60,6 +63,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="select_width_pen_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Выбрать толщину пера</string>
        </property>
@@ -67,6 +73,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="clear_countor_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Очистить контур</string>
        </property>
@@ -85,6 +94,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="cancel_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Отменить</string>
        </property>

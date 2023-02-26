@@ -48,16 +48,19 @@ class Ui_Form(object):
         self.horizontalLayout_3.setContentsMargins(-1, 0, -1, -1)
         self.select_color_pen_button = QPushButton(Form)
         self.select_color_pen_button.setObjectName(u"select_color_pen_button")
+        self.select_color_pen_button.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.select_color_pen_button)
 
         self.select_width_pen_button = QPushButton(Form)
         self.select_width_pen_button.setObjectName(u"select_width_pen_button")
+        self.select_width_pen_button.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.select_width_pen_button)
 
         self.clear_countor_button = QPushButton(Form)
         self.clear_countor_button.setObjectName(u"clear_countor_button")
+        self.clear_countor_button.setEnabled(False)
 
         self.horizontalLayout_3.addWidget(self.clear_countor_button)
 
@@ -73,6 +76,7 @@ class Ui_Form(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.cancel_button = QPushButton(Form)
         self.cancel_button.setObjectName(u"cancel_button")
+        self.cancel_button.setEnabled(False)
 
         self.horizontalLayout.addWidget(self.cancel_button)
 

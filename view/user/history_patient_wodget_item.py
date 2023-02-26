@@ -33,7 +33,16 @@ class HistoryPatientWidgetItem(QWidget):
             self.ui.patient_history_item_comment.setText(self.history_patient.comment)
             self.ui.patient_history_item_date.setText(self.history_patient.date)
             photo = self.history_patient.history_neutral_network.photo_predict
+            photo_pred = self.history_patient.history_neutral_network.photo_predict_edit_doctor
             img = is_valid_base64_image(photo)
+            img_pred = is_valid_base64_image(photo_pred)
+            if img_pred:
+                basad = QByteArray.fromBase64(literal_eval(photo_pred))
+                img = QImage.fromData(basad, 'PNG')
+                image = QPixmap.fromImage(img)
+                self.ui.patient_history_item_image.setPixmap(image)
+                self.ui.patient_history_item_image.setScaledContents(True)
+                return 0
             if img:
                 basad = QByteArray.fromBase64(literal_eval(photo))
                 img = QImage.fromData(basad, 'PNG')

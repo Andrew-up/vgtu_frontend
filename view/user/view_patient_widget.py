@@ -3,6 +3,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QDialog
 
 from model.patient_model import Patient
+from service.PatientService import PatientServiceFront
 from service.slotsService import SlotsMainMenu
 from view.py.view_patient_widget import Ui_Form
 from view.user.card_patient_widget import CardPatient
@@ -21,7 +22,7 @@ class ViewPatient(QDialog):
         self.ui.view_patient_go_wound_treatment.clicked.connect(self.on_click_wound_treatment_patient)
         self.card_patient = CardPatient(patient)
         self.history_widget = HistoryPatient(patient)
-        self.wound_treatment_widget = WoundHealingPatient()
+        self.wound_treatment_widget = WoundHealingPatient(patient=patient)
         self.patient = patient
         self.main_menu_slots = None
         self.main_menu_slots: SlotsMainMenu
@@ -60,6 +61,7 @@ class ViewPatient(QDialog):
     def on_click_history_patient(self):
         print(self.ui.stacked_widget_view_patient.count())
         self.ui.stacked_widget_view_patient.setCurrentWidget(self.history_widget)
+        self.history_widget.update_list_patient()
         print('открыть историю лечения пациента')
 
     def on_click_wound_treatment_patient(self):
@@ -69,7 +71,8 @@ class ViewPatient(QDialog):
 
 if __name__ == '__main__':
     app = QApplication()
-    p = Patient()
-    window = ViewPatient(p)
+    p = PatientServiceFront()
+    patient = p.getPatientById(4)
+    window = ViewPatient(patient)
     window.show()
     sys.exit(app.exec())

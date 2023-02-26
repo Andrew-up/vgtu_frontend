@@ -1,3 +1,4 @@
+import base64
 import datetime
 import sys
 
@@ -17,11 +18,12 @@ from service.PatientService import PatientServiceFront
 from view.py.wound_healing_widget import Ui_Form
 from view.user.drawing_counter import DrawingCounter
 from service.imageService import ImageConverter, image_to_base64
+from model.patient_model import Patient
 
 
 class WoundHealingPatient(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, patient: Patient = None, parent=None):
         super(WoundHealingPatient, self).__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
@@ -49,10 +51,12 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_button_result_no.clicked.connect(self.on_result_is_not_ok)
         # -------
         self.ui.button_select_ptoho_from_catalog.clicked.connect(self.open_file_from_catalog)
-        self.test_color()
         self.image_original = None
-
         self.history_n_n: HistoryNeuralNetwork = HistoryNeuralNetwork()
+        if patient is not None:
+            self.patient_id = patient.id_patient
+            self.ui.wound_healing_fullname_client.setText(patient.full_name)
+            self.ui.wound_healing_diagnosis_client.setText(patient.dianosis)
 
 
     def get_predict_categorical(self):
@@ -63,7 +67,7 @@ class WoundHealingPatient(QWidget):
         history = HistoryPatient()
         history.date = str(datetime.datetime.now())
         history.comment = 'тест'
-        history.patient_id = 1
+        history.patient_id = self.patient_id
         # history_nn = HistoryNeuralNetwork()
         # history_nn.result_predict_id = 1
         # history_nn.photo_original = '12312312'
@@ -71,17 +75,32 @@ class WoundHealingPatient(QWidget):
         # history.comment = 'comment-test'
         # history.date = 'date-test'
         history.history_neutral_network = self.history_n_n.__dict__
+
         # history.patient_id = 1
         s = PatientServiceFront(1)
         s.addHistoryPatient(history)
-        print(self.image_original)
+        # print(self.image_original)
         print('результат ок, надо сохранить')
 
     def on_result_is_not_ok(self):
         dlg = DrawingCounter(self.image_original)
-        dlg.image_result_edit_doctor.connect(self.setImage_Predict)
+        dlg.image_result_edit_doctor.connect(self.setImage_Predict_edit)
+        dlg.history_n_n.connect(self.init_history_nn_edit)
         print('результат не правильный, надо редактировать')
         dlg.exec()
+
+    @Slot(HistoryNeuralNetwork)
+    def init_history_nn_edit(self, h: HistoryNeuralNetwork):
+        self.ui.wound_healing_area_wound.setText(f"Площадь: {h.area_wound}")
+        self.ui.wound_healing_type_wound.setText(f"Тип раны: {h.result_predict.name_category_ru}")
+        # self.history_n_n.polygon_mask = h.polygon_mask
+        base64_polygon = base64.b64encode(str(h.polygon_mask).encode())
+        self.history_n_n.polygon_mask = str(base64_polygon)
+        self.history_n_n.result_predict_id = h.result_predict_id
+        print(h.result_predict_id)
+        # print(base64_polygon)
+        # print(h.polygon_mask)
+        # print(h.area_wound)
 
 
     def returnCameraIndexes(self):
@@ -104,9 +123,6 @@ class WoundHealingPatient(QWidget):
             i -= 1
         return arr
 
-    def test_color(self):
-        pass
-
     @Slot(ResultScan)
     def result_scan_init(self, res: list[ResultScan]):
         self.ui.wound_healing_type_wound.setText('Тип раны: <br>')
@@ -114,9 +130,9 @@ class WoundHealingPatient(QWidget):
         self.ui.label_9.setText(f'<font style="color:rgb(255, 0, 0);"> КОНТУР РАНЫ НЕ ОПРЕДЕЛЕН </font>')
         for i in res:
             self.ui.label_9.setText(f'<font style="color:rgb(0, 255, 0);"> КОНТУР РАНЫ ОПРЕДЕЛЕН </font>')
-            print(i.type_wound)
-            print('========================================')
-            print(i.polygon_wound)
+            # print(i.type_wound)
+            # print('========================================')
+            # print(i.polygon_wound)
             self.history_n_n.polygon_mask = i.polygon_wound
             self.history_n_n.result_predict_id = i.result_predict_id
             # print(i.color)
@@ -183,6 +199,7 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_loading_label.setVisible(False)
         self.ui.wound_healing_start_scan.setEnabled(False)
         self.ui.widget.setVisible(False)
+        self.ui.widget_2.setVisible(False)
 
     def open_file_from_catalog(self):
         fileName = QFileDialog.getOpenFileName(self, ("Open Image"), DATASET_PATH,
@@ -198,13 +215,7 @@ class WoundHealingPatient(QWidget):
                                                     f'Идет распознавание болезни \n'
                                                     f'подождите....')
         print('модель загружена')
-    @Slot(QImage)
-    def setImage_Original(self, image):
-        self.history_n_n.photo_original = image_to_base64(image)
-        self.image_original = QPixmap.fromImage(image)
-        self.ui.wound_healing_image.setPixmap(QPixmap.fromImage(image))
-        self.ui.wound_healing_image.setScaledContents(True)
-        self.ui.wound_healing_widget.setVisible(True)
+
 
     @Slot(QImage)
     def playVideoStream(self, image):
@@ -213,11 +224,27 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_image.setScaledContents(True)
         self.ui.wound_healing_widget.setVisible(True)
 
+    @Slot(QImage)
+    def setImage_Original(self, image):
+        self.history_n_n.photo_original = image_to_base64(image)
+        self.image_original = QPixmap.fromImage(image)
+        self.ui.wound_healing_image.setPixmap(QPixmap.fromImage(image))
+        self.ui.wound_healing_image.setScaledContents(True)
+        self.ui.wound_healing_widget.setVisible(True)
+
     @Slot(QPixmap)
-    def setImage_Predict(self, image:QPixmap):
-        print(image)
+    def setImage_Predict(self, image: QPixmap):
+        # print(image)
         print('setImage_Predict')
         self.history_n_n.photo_predict = image_to_base64(image.toImage())
+        self.ui.wound_healing_image.setPixmap(image)
+        self.ui.wound_healing_image.setScaledContents(True)
+        self.ui.wound_healing_widget.setVisible(True)
+        self.ui.widget_2.setVisible(True)
+
+    @Slot(QPixmap)
+    def setImage_Predict_edit(self, image: QPixmap):
+        self.history_n_n.photo_predict_edit_doctor = image_to_base64(image.toImage())
         self.ui.wound_healing_image.setPixmap(image)
         self.ui.wound_healing_image.setScaledContents(True)
         self.ui.wound_healing_widget.setVisible(True)

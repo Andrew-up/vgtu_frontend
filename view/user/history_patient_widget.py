@@ -12,16 +12,22 @@ class HistoryPatient(QWidget):
         super(HistoryPatient, self).__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        self.patient_id = 0
         self.items_layout = self.ui.history_patient_layout_list_healing
         self.item_size = 200
         self.ui.history_patient_button_next.clicked.connect(self.scroll_next)
         self.ui.history_patient_button_prev.clicked.connect(self.scroll_prev)
         self.history_patient: list[HistoryPatient] = []
+        self.patient_this = None
         if patient is not None:
-            self.init(patient)
+            self.patient_this: Patient = patient
+            # self.init(patient)
 
-    def init(self, patient:Patient):
+    def update_list_patient(self):
+        self.init(self.patient_this)
+
+    def init(self, patient: Patient):
+        for i in reversed(range(self.items_layout.count())):
+            self.items_layout.itemAt(i).widget().setParent(None)
         s = PatientServiceFront(1)
         self.history_patient = s.getHistoryPatient(patient.id_patient)
         self.ui.history_patient_fullname_patient.setText(patient.full_name)
@@ -40,7 +46,7 @@ class HistoryPatient(QWidget):
 
 if __name__ == '__main__':
     p = PatientServiceFront()
-    patient = p.getPatientById(1)
+    patient = p.getPatientById(4)
     app = QApplication()
     window = HistoryPatient(patient)
     window.show()

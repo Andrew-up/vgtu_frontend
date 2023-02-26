@@ -11,6 +11,7 @@ class HistoryNeuralNetwork:
         self.result_predict_id = None
         self.result_predict: ResultPredict.__dict__ = None
         self.healing_history_id = None
+        self.area_wound = 0
         self.__dict__.update(entries)
         if self.result_predict is not None:
             self.result_predict = ResultPredict(**self.result_predict)
