@@ -22,7 +22,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(202, 273)
+        Form.resize(218, 308)
         Form.setStyleSheet(u"QWidget#Form{\n"
 "	color: rgb(255, 255, 255);\n"
 "}\n"
@@ -45,7 +45,8 @@ class Ui_Form(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.patient_history_item_image = QLabel(self.widget)
         self.patient_history_item_image.setObjectName(u"patient_history_item_image")
-        self.patient_history_item_image.setMinimumSize(QSize(70, 70))
+        self.patient_history_item_image.setMinimumSize(QSize(180, 180))
+        self.patient_history_item_image.setMaximumSize(QSize(180, 180))
         self.patient_history_item_image.setStyleSheet(u"background-color: rgb(255, 255, 255);")
 
         self.verticalLayout.addWidget(self.patient_history_item_image)

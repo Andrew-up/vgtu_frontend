@@ -1,6 +1,6 @@
 <root>
     <app>
-        <version>1.0.0</version>
+        <version>1.0.6</version>
         <exe_file_main>main.exe</exe_file_main>
         <temp_update>temp_update</temp_update>
         <file_name_archive>update.zip</file_name_archive>

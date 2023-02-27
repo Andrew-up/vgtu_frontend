@@ -2,6 +2,7 @@ import base64
 import os
 import random
 import time
+from ast import literal_eval
 
 import cv2
 import numpy as np
@@ -163,9 +164,9 @@ class LoadingModelAndPredict(QThread):
         if self.model is not None:
             res = self.model.predict(batch)
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
-
+            # print(len(res[0, 0, 0, :]))
             list_predict = list()
-            for i in range(len(self.categorical_predict)):
+            for i in range(len(res[0, 0, 0, :])):
                 list_predict.append(np.sum(res[0, :, :, i]))
             max_value = max(list_predict)
             max_index = list_predict.index(max_value)
@@ -183,8 +184,13 @@ class LoadingModelAndPredict(QThread):
             # predict3 = res[0, :, :, 2]
             # predict3 = (predict3 > 0.4).astype(np.uint8)
             # predict3 = np.array(predict3) * 255
+            color1 = []
+            for i in self.categorical_predict:
+                # print(i.color)
+                color1.append(literal_eval(i.color))
 
-            color1 = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+            # color1 = []
+
             color = color1[max_index]
             # color2 = (0, 255, 0)
             # color3 = (0, 0, 255)

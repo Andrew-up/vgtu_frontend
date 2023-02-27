@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>202</width>
-    <height>273</height>
+    <width>218</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,8 +39,14 @@ border-radius: 10px;
          <widget class="QLabel" name="patient_history_item_image">
           <property name="minimumSize">
            <size>
-            <width>70</width>
-            <height>70</height>
+            <width>180</width>
+            <height>180</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>180</height>
            </size>
           </property>
           <property name="styleSheet">

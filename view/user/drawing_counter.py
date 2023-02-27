@@ -1,3 +1,5 @@
+from ast import literal_eval
+
 import cv2
 import numpy as np
 from PySide6 import QtGui
@@ -44,8 +46,9 @@ class DrawingCounter(QDialog):
         self.history = HistoryNeuralNetwork()
         self.categorical = self.get_predict_categorical()
         self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
-        # self.area_full = 0
-
+        self.color_brush_r = 0
+        self.color_brush_g = 0
+        self.color_brush_b = 0
 
 
     def select_disease(self):
@@ -67,8 +70,9 @@ class DrawingCounter(QDialog):
         self.history.result_predict_id = category.id_category
         self.history.result_predict = category
         self.ui.type_disease_label.setText(category.name_category_ru)
-        # print(category.name_category_ru)
-    def get_predict_categorical(self)-> list[ResultPredict]:
+        self.color_brush_r, self.color_brush_g, self.color_brush_b, = literal_eval(category.color)
+
+    def get_predict_categorical(self) -> list[ResultPredict]:
         return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
@@ -87,13 +91,13 @@ class DrawingCounter(QDialog):
         canvas = self.canvas.pixmap()
         pen = QtGui.QPen()
         pen.setWidth(5)
-        pen.setColor(QtGui.QColor('green'))
+        pen.setColor(QtGui.QColor(self.color_brush_r, self.color_brush_g, self.color_brush_b))
         painter = QtGui.QPainter(canvas)
         painter.setPen(pen)
         painter.drawLine(self.last_x, self.last_y, self.first_x, self.first_y)
         self.path.addPolygon(self.polygon_QPoint)
         # print(self.path)
-        painter.fillPath(self.path, QBrush(QColor(0, 255, 0, 100)))
+        painter.fillPath(self.path, QBrush(QColor(self.color_brush_r, self.color_brush_g, self.color_brush_b, 100)))
         painter.end()
         self.canvas.setPixmap(canvas)
         self.last_x = None
@@ -129,7 +133,7 @@ class DrawingCounter(QDialog):
         painter = QtGui.QPainter(canvas)
         pen = QtGui.QPen()
         pen.setWidth(5)
-        pen.setColor(QtGui.QColor('green'))
+        pen.setColor(QtGui.QColor(self.color_brush_r, self.color_brush_g, self.color_brush_b))
         painter.setPen(pen)
         painter.drawPoint(localPos.x(), localPos.y())
         painter.drawLine(self.last_x, self.last_y, localPos.x(), localPos.y())

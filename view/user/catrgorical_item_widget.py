@@ -15,7 +15,9 @@ class CategoricalItem(QWidget):
         super(CategoricalItem, self).__init__()
         q_radio = QRadioButton()
         self.cat_pred = None
+        self.color = None
         if category is not None:
+            self.color = category.color
             self.cat_pred = category
             q_radio.setText(category.name_category_ru)
         q_radio.clicked.connect(self.clickghdhgfs)
@@ -25,6 +27,8 @@ class CategoricalItem(QWidget):
     def clickghdhgfs(self):
         if self.cat_pred is not None:
             self.clickButtonItem.emit(self.cat_pred)
+
+
 
 
 

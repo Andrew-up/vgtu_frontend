@@ -1,6 +1,7 @@
 import base64
 import datetime
 import sys
+import time
 
 import cv2
 from PySide6.QtCore import Slot
@@ -104,14 +105,16 @@ class WoundHealingPatient(QWidget):
 
 
     def returnCameraIndexes(self):
-        # checks the first 10 indexes.
+        # checks the first 3 indexes.
         index = 0
         arr = []
         i = 3
         while i > 0:
             cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
-            # for jjjj in range(1):
-            #     cap.read()
+            for jjjj in range(10):
+                cap.read()
+            success, img = cap.read()
+            print(success)
             if cap.read()[0]:
                 arr.append(index)
                 print(index)
@@ -145,9 +148,10 @@ class WoundHealingPatient(QWidget):
 
     def on_radio_scan_from_catalog(self):
         self.load_model_and_predict.play_video = False
+        self.load_model_and_predict.scan_from_cam = False
         if self.ui.radio_scan_to_photo_catalog.isChecked():
             self.ui.button_select_ptoho_from_catalog.setVisible(True)
-            self.load_model_and_predict.scan_from_cam = False
+            # self.load_model_and_predict.scan_from_cam = False
             self.ui.wound_healing_start_scan.setEnabled(False)
 
     def check_cam_in_group(self, radio_group: QButtonGroup(), array_index_cam):
@@ -202,12 +206,15 @@ class WoundHealingPatient(QWidget):
         self.ui.widget_2.setVisible(False)
 
     def open_file_from_catalog(self):
-        fileName = QFileDialog.getOpenFileName(self, ("Open Image"), DATASET_PATH,
-                                               ("Image Files (*.png *.jpg, *.jpeg, *.tiff, *.*)"))
+        timing = time.time()
+        fileName = QFileDialog.getOpenFileName(self, "Open Image", DATASET_PATH,
+                                               "Image Files (*.png *.jpg, *.jpeg, *.tiff, *.*)")
         self.ui.file_name_select_folder.setText(fileName[0])
         if fileName[0] != '':
             self.load_model_and_predict.image_path = fileName[0]
             self.ui.wound_healing_start_scan.setEnabled(True)
+        print(time.time() - timing)
+
 
     @Slot(str)
     def on_load_model_end_signal(self, time_load_model):
@@ -241,6 +248,7 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_image.setScaledContents(True)
         self.ui.wound_healing_widget.setVisible(True)
         self.ui.widget_2.setVisible(True)
+        self.ui.wound_healing_loading_label.setText('Ok')
 
     @Slot(QPixmap)
     def setImage_Predict_edit(self, image: QPixmap):
@@ -251,6 +259,7 @@ class WoundHealingPatient(QWidget):
 
     def start_scan(self):
         print('sss')
+        self.history_n_n = HistoryNeuralNetwork()
         self.load_model_and_predict.play_video = False
         self.ui.wound_healing_loading_label.setVisible(True)
         self.load_model_and_predict.start()

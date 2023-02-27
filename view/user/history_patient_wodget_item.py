@@ -42,13 +42,16 @@ class HistoryPatientWidgetItem(QWidget):
                 image = QPixmap.fromImage(img)
                 self.ui.patient_history_item_image.setPixmap(image)
                 self.ui.patient_history_item_image.setScaledContents(True)
+                print('img_pred')
                 return 0
+
             if img:
                 basad = QByteArray.fromBase64(literal_eval(photo))
                 img = QImage.fromData(basad, 'PNG')
                 image = QPixmap.fromImage(img)
                 self.ui.patient_history_item_image.setPixmap(image)
                 self.ui.patient_history_item_image.setScaledContents(True)
+                print('img')
 
 
 

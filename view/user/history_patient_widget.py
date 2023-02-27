@@ -46,8 +46,9 @@ class HistoryPatient(QWidget):
 
 if __name__ == '__main__':
     p = PatientServiceFront()
-    patient = p.getPatientById(4)
+    patient = p.getPatientById(1)
     app = QApplication()
     window = HistoryPatient(patient)
+    window.update_list_patient()
     window.show()
     sys.exit(app.exec())
