@@ -31,8 +31,9 @@ class PatientServiceFront(object):
         return patient
 
     def addHistoryPatient(self, history: HistoryPatient):
-        add = add_history_patient(history)
-        pass
+        status_code, text = add_history_patient(history)
+        return status_code, text
+
 
     def get_all_categorical(self):
         return get_categorical_predict()

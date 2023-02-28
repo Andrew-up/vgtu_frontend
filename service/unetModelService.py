@@ -11,10 +11,12 @@ from PySide6.QtCore import QThread, Signal
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
 from matplotlib import pyplot as plt
-from definitions import DATASET_PATH, MODEL_H5_PATH, DATASET_LABELS
+
+from definitions import DATASET_PATH, MODEL_H5_PATH
+from model.result_predict import ResultPredict
 from model.result_scan import ResultScan
 
-from model.result_predict import ResultPredict
+
 class LoadingModelAndPredict(QThread):
     loading_model_end = Signal(str)
     predict_image_result = Signal(QPixmap)
@@ -51,6 +53,7 @@ class LoadingModelAndPredict(QThread):
                                     QImage.Format.Format_BGR888)
         qimage = convertToQtFormats.scaled(512, 512, Qt.KeepAspectRatio)
         return qimage
+
     def video_stream(self):
         print('streamVideo')
         print(self.play_video)
@@ -146,7 +149,6 @@ class LoadingModelAndPredict(QThread):
             image_original_copy[mask] = cv2.addWeighted(image_original_copy, alpha, image_temp, 1 - alpha, 0)[mask]
         return image_original_copy, polygon_result, area_full
 
-
     def unpackArray(self, array):
         print('=============')
         res = []
@@ -156,7 +158,6 @@ class LoadingModelAndPredict(QThread):
                 res.append(a)
                 res.append(b)
         return res
-
 
     def predict(self, batch, original_image):
         print(f" ==========  {self.objectName()} ========== ")
@@ -199,9 +200,6 @@ class LoadingModelAndPredict(QThread):
             img1, polygon1, area_full1 = self.drawingMaskForImagePredict(image=img_original_resize, predict=predict1,
                                                                          color=color[::-1])
 
-
-
-
             result_mask = []
             for i in polygon1:
                 result_mask.append(self.unpackArray(i))
@@ -220,8 +218,6 @@ class LoadingModelAndPredict(QThread):
                 scan.result_predict_id = self.categorical_predict[max_index].id_category
                 scan.polygon_wound = str(base64_polygon)
                 scan_list.append(scan)
-
-
 
             # if area_full2 != 0:
             #     scan = ResultScan()

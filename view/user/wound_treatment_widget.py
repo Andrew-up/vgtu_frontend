@@ -20,6 +20,7 @@ from view.py.wound_healing_widget import Ui_Form
 from view.user.drawing_counter import DrawingCounter
 from service.imageService import ImageConverter, image_to_base64
 from model.patient_model import Patient
+from utils.message_box import message_error_show, message_info_show
 
 
 class WoundHealingPatient(QWidget):
@@ -63,7 +64,6 @@ class WoundHealingPatient(QWidget):
     def get_predict_categorical(self):
         return PatientServiceFront(1).get_all_categorical()
 
-
     def on_result_is_ok(self):
         history = HistoryPatient()
         history.date = str(datetime.datetime.now())
@@ -79,9 +79,16 @@ class WoundHealingPatient(QWidget):
 
         # history.patient_id = 1
         s = PatientServiceFront(1)
-        s.addHistoryPatient(history)
+        status_code, text = s.addHistoryPatient(history)
+        if status_code != 200:
+            message_error_show(self, text)
+        else:
+            message_info_show(self, text)
+
         # print(self.image_original)
         print('результат ок, надо сохранить')
+        self.block_result_scan_widget()
+        self.ui.widget.setVisible(True)
 
     def on_result_is_not_ok(self):
         dlg = DrawingCounter(self.image_original)
@@ -89,6 +96,16 @@ class WoundHealingPatient(QWidget):
         dlg.history_n_n.connect(self.init_history_nn_edit)
         print('результат не правильный, надо редактировать')
         dlg.exec()
+
+    def block_result_scan_widget(self):
+        print('block')
+        self.ui.wound_healing_button_result_yes.setEnabled(False)
+        self.ui.wound_healing_button_result_no.setEnabled(False)
+
+    def unblock_result_scan_widget(self):
+        print('unblock')
+        self.ui.wound_healing_button_result_yes.setEnabled(True)
+        self.ui.wound_healing_button_result_no.setEnabled(True)
 
     @Slot(HistoryNeuralNetwork)
     def init_history_nn_edit(self, h: HistoryNeuralNetwork):
@@ -102,7 +119,6 @@ class WoundHealingPatient(QWidget):
         # print(base64_polygon)
         # print(h.polygon_mask)
         # print(h.area_wound)
-
 
     def returnCameraIndexes(self):
         # checks the first 3 indexes.
@@ -186,11 +202,11 @@ class WoundHealingPatient(QWidget):
             layout.addWidget(button_cancel)
             msg.setLayout(layout)
             msg.exec()
-            self.load_model_and_predict.start()
-        else:
-            print('else')
-            self.load_model_and_predict.play_video = True
-            self.load_model_and_predict.start()
+            # self.load_model_and_predict.start()
+        # else:
+        #     print('else')
+        #     self.load_model_and_predict.play_video = True
+        #     self.load_model_and_predict.start()
 
         if self.ui.radio_scan_to_cam.isChecked():
             self.load_model_and_predict.image_path = None
@@ -204,6 +220,9 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_start_scan.setEnabled(False)
         self.ui.widget.setVisible(False)
         self.ui.widget_2.setVisible(False)
+        self.ui.label_12.setVisible(False)
+        self.ui.wound_healing_STOP_robot.setVisible(False)
+        self.ui.wound_healing_status_end_process.setVisible(False)
 
     def open_file_from_catalog(self):
         timing = time.time()
@@ -215,14 +234,12 @@ class WoundHealingPatient(QWidget):
             self.ui.wound_healing_start_scan.setEnabled(True)
         print(time.time() - timing)
 
-
     @Slot(str)
     def on_load_model_end_signal(self, time_load_model):
         self.ui.wound_healing_loading_label.setText(f'Модель была загружена за {time_load_model} секунды \n '
                                                     f'Идет распознавание болезни \n'
                                                     f'подождите....')
         print('модель загружена')
-
 
     @Slot(QImage)
     def playVideoStream(self, image):
@@ -250,6 +267,7 @@ class WoundHealingPatient(QWidget):
         self.ui.widget_2.setVisible(True)
         self.ui.wound_healing_loading_label.setText('Ok')
 
+
     @Slot(QPixmap)
     def setImage_Predict_edit(self, image: QPixmap):
         self.history_n_n.photo_predict_edit_doctor = image_to_base64(image.toImage())
@@ -259,6 +277,8 @@ class WoundHealingPatient(QWidget):
 
     def start_scan(self):
         print('sss')
+        self.hide_widget()
+        self.unblock_result_scan_widget()
         self.history_n_n = HistoryNeuralNetwork()
         self.load_model_and_predict.play_video = False
         self.ui.wound_healing_loading_label.setVisible(True)

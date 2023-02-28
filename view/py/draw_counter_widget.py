@@ -22,24 +22,12 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(532, 684)
+        Form.resize(542, 531)
         self.verticalLayout_2 = QVBoxLayout(Form)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.image_drawing_canvas = QLabel(Form)
-        self.image_drawing_canvas.setObjectName(u"image_drawing_canvas")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.image_drawing_canvas.sizePolicy().hasHeightForWidth())
-        self.image_drawing_canvas.setSizePolicy(sizePolicy)
-        self.image_drawing_canvas.setMinimumSize(QSize(512, 512))
-        self.image_drawing_canvas.setMaximumSize(QSize(512, 512))
-        self.image_drawing_canvas.setStyleSheet(u"background-color: rgb(228, 228, 239);")
-
-        self.verticalLayout.addWidget(self.image_drawing_canvas)
-
+        self.verticalLayout.setContentsMargins(-1, 50, -1, -1)
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
 
@@ -121,7 +109,6 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.image_drawing_canvas.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.select_color_pen_button.setText(QCoreApplication.translate("Form", u"\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0446\u0432\u0435\u0442 \u043f\u0435\u0440\u0430", None))
         self.select_width_pen_button.setText(QCoreApplication.translate("Form", u"\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0442\u043e\u043b\u0449\u0438\u043d\u0443 \u043f\u0435\u0440\u0430", None))
         self.clear_countor_button.setText(QCoreApplication.translate("Form", u"\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u043a\u043e\u043d\u0442\u0443\u0440", None))

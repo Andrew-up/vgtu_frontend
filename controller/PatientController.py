@@ -66,7 +66,8 @@ def add_history_patient(history: HistoryPatient):
     str_api = f'{api}/history/add/{history.patient_id}/'
     json = history.__dict__
     r = requests.post(str_api, json=json, headers={"Content-Type": "application/json"})
-    print(r.text)
+    return r.status_code, r.text
+
 
 
 def get_categorical_predict() -> list[ResultPredict]:
