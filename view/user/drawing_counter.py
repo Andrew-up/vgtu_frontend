@@ -23,7 +23,7 @@ class historyCanvas(object):
         self.id_history: int = 0
         self.points = None
         self.pen = None
-        self.lines = None
+        self.path: QPainterPath = QPainterPath()
 
 
 
@@ -43,6 +43,8 @@ class Canvas(QtWidgets.QLabel):
 
     def clear_canvas(self):
         self.setPixmap(self.pixmap_clean)
+        self.points_local = []
+        self.history_list = []
         print('clear_canvas')
 
 
@@ -63,109 +65,82 @@ class Canvas(QtWidgets.QLabel):
     #                 painter.drawLine(self.history_list[i].point, self.history_list[i + 1].point)
     #         painter.end()
     #         self.setPixmap(canvas)
+
     def cancel_stage(self):
+        #Отменить не замкнутый контур
         self.setPixmap(self.pixmap_clean)
         canvas = self.pixmap()
         painter = QtGui.QPainter(canvas)
-        local = False
         if self.points_local:
             del self.points_local[-1]
             pen = self.pen_local
             painter.setPen(pen)
             painter.drawPoints(self.points_local)
-            local = True
-            max_point = len(self.points_local)
-            for i in range(len(self.points_local)):
-                if i < max_point:
-                    print(f'i: {i}')
-                    print(f'max_point: {max_point}')
-                    # print(self.points_local[i+1])
-                    painter.drawLine(self.points_local[i], self.points_local[i-1])
+            for i in range(len(self.points_local)-1):
+                painter.drawLine(self.points_local[i], self.points_local[i+1])
 
+        #Нарисовать все контуры
+        def draw_all():
+            for i in self.history_list:
+                pen = i.pen
+                painter.setPen(pen)
+                painter.drawPoints(i.points)
 
-        for i in self.history_list:
-            pen = i.pen
-            painter.setPen(pen)
-            painter.drawPoints(i.points)
-
-        if not local:
-            if self.history_list:
-                last = self.history_list[-1]
-                print(last.points)
-                if last.points:
-                    del last.points[-1]
-                    print(last)
-                    pen = last.pen
-                    painter.setPen(pen)
-                    for i in range(len(last.points)):
-                        painter.drawPoint(last.points[i])
-
-                if not last.points:
-                    print('11111111')
-                    del self.history_list[-1]
+                if self.history_list:
+                    for j in range(len(i.points)-1):
+                        painter.drawLine(i.points[j], i.points[j+1])
+                    painter.fillPath(i.path, QBrush(QColor(0, 0, 200, 100)))
 
 
 
+        #Найти последнюю историю и удалить последний элемент
+        if self.history_list:
+            print('3-q')
+            # last_history = self.history_list[-1]
+            # print(last_history.id_history)
+            if not self.points_local:
+                if self.history_list[-1].points:
+                    del self.history_list[-1].points[-1]
+                    self.history_list[-1].path.clear()
 
+                    self.points_local = self.history_list[-1].points
 
+                else:
+                    if len(self.history_list) > 0:
+                        del self.history_list[-1]
+                        # print(len(self.history_list))
+            draw_all()
 
         painter.end()
         self.setPixmap(canvas)
-
-
-
-        # pass
-
-
 
     def close_countor(self):
 
         h = historyCanvas()
-        start = self.points_local[0]
-        end = self.points_local[-1]
-        if len(self.history_list):
-            h.id_history = self.history_list[-1].id_history + 1
-        else:
-            h.id_history = 0
-
-        h.points = self.points_local
         h.pen = self.pen_local
-        self.history_list.append(h)
-
         canvas = self.pixmap()
         painter = QtGui.QPainter(canvas)
         painter.setPen(h.pen)
-        painter.drawLine(start, end)
+
+        if self.points_local:
+            start = self.points_local[0]
+            end = self.points_local[-1]
+            if len(self.history_list):
+                h.id_history = self.history_list[-1].id_history + 1
+            else:
+                h.id_history = 0
+            h.points = self.points_local
+            h.points.append(start)
+            self.history_list.append(h)
+            painter.drawLine(start, end)
+            self.history_list[-1].path.clear()
+            self.history_list[-1].path.addPolygon(self.points_local)
+            painter.fillPath(self.history_list[-1].path, QBrush(QColor(0, 0, 200, 100)))
+            self.points_local = []
+
         painter.end()
         self.setPixmap(canvas)
-        self.points_local = []
-        print(self.history_list[-1].id_history)
 
-
-
-
-
-    # def close_countor(self):
-    #     self.history_list.points.append(self.points_local)
-    #     self.history_list.pen = self.pen_local
-    #     print(self.history_list.points)
-    #     start = self.points_local[0]
-    #     end = self.points_local[-1]
-    #     print(start)
-    #     print(end)
-    #     canvas = self.pixmap()
-    #     painter = QtGui.QPainter(canvas)
-    #     painter.setPen(self.history_list.pen)
-    #     painter.drawLine(start, end)
-    #     painter.end()
-    #     self.setPixmap(canvas)
-    #
-    #     self.points_local = []
-    #     # h = historyCanvas()
-    #     # h.point = end
-    #     # h.id_history = self.id_history_count = self.id_history_count + 1
-    #     # h.pen = self.history_list[0].pen
-    #     # self.history_list.append(h)
 
 
     def mousePressEvent(self, event):
@@ -224,8 +199,8 @@ class DrawingCounter(QDialog):
         # else:
         #     self.ui.image_drawing_canvas.setPixmap(canvas)
         # self.ui.countor_close_button.clicked.connect(self.on_close_contour)
-        # self.path = QPainterPath()
-        # self.polygon_QPoint = []
+        self.path = QPainterPath()
+        self.polygon_QPoint = []
         # self.ui.save_button.clicked.connect(self.on_click_save_image_button)
         # self.history = HistoryNeuralNetwork()
         # self.categorical = self.get_predict_categorical()
