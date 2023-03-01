@@ -34,17 +34,17 @@ class Ui_Form(object):
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(-1, 0, -1, -1)
-        self.select_color_pen_button = QPushButton(Form)
-        self.select_color_pen_button.setObjectName(u"select_color_pen_button")
-        self.select_color_pen_button.setEnabled(False)
+        self.zoom_plus = QPushButton(Form)
+        self.zoom_plus.setObjectName(u"zoom_plus")
+        self.zoom_plus.setEnabled(True)
 
-        self.horizontalLayout_3.addWidget(self.select_color_pen_button)
+        self.horizontalLayout_3.addWidget(self.zoom_plus)
 
-        self.select_width_pen_button = QPushButton(Form)
-        self.select_width_pen_button.setObjectName(u"select_width_pen_button")
-        self.select_width_pen_button.setEnabled(False)
+        self.zoom_minus = QPushButton(Form)
+        self.zoom_minus.setObjectName(u"zoom_minus")
+        self.zoom_minus.setEnabled(True)
 
-        self.horizontalLayout_3.addWidget(self.select_width_pen_button)
+        self.horizontalLayout_3.addWidget(self.zoom_minus)
 
         self.clear_countor_button = QPushButton(Form)
         self.clear_countor_button.setObjectName(u"clear_countor_button")
@@ -109,8 +109,8 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.select_color_pen_button.setText(QCoreApplication.translate("Form", u"\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0446\u0432\u0435\u0442 \u043f\u0435\u0440\u0430", None))
-        self.select_width_pen_button.setText(QCoreApplication.translate("Form", u"\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0442\u043e\u043b\u0449\u0438\u043d\u0443 \u043f\u0435\u0440\u0430", None))
+        self.zoom_plus.setText(QCoreApplication.translate("Form", u"+", None))
+        self.zoom_minus.setText(QCoreApplication.translate("Form", u"-", None))
         self.clear_countor_button.setText(QCoreApplication.translate("Form", u"\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u043a\u043e\u043d\u0442\u0443\u0440", None))
         self.countor_close_button.setText(QCoreApplication.translate("Form", u"\u0417\u0430\u043c\u043a\u043d\u0443\u0442\u044c \u043a\u043e\u043d\u0442\u0443\u0440", None))
         self.cancel_button.setText(QCoreApplication.translate("Form", u"\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c", None))

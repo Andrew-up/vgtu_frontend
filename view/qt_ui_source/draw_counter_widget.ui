@@ -27,22 +27,22 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="select_color_pen_button">
+      <widget class="QPushButton" name="zoom_plus">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
-        <string>Выбрать цвет пера</string>
+        <string>+</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="select_width_pen_button">
+      <widget class="QPushButton" name="zoom_minus">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
-        <string>Выбрать толщину пера</string>
+        <string>-</string>
        </property>
       </widget>
      </item>

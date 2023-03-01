@@ -4,11 +4,12 @@ from ast import literal_eval
 import cv2
 import numpy as np
 from PySide6 import QtGui, QtWidgets, QtCore
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, QRectF, QSize, QLineF
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QPixmap, QBrush, QColor, QPainterPath
 from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, \
-    QPushButton, QGraphicsScene, QGraphicsItem, QGraphicsView
+    QPushButton, QGraphicsScene, QGraphicsItem, QGraphicsView, QGraphicsEllipseItem, QGraphicsLineItem, \
+    QGraphicsPolygonItem, QGraphicsPathItem
 
 from model.history_neural_network import HistoryNeuralNetwork
 from model.result_predict import ResultPredict
@@ -18,82 +19,141 @@ from view.py.draw_counter_widget import Ui_Form
 from view.user.catrgorical_item_widget import CategoricalItem
 from itertools import cycle
 
+
 class historyCanvas(object):
     def __init__(self):
         self.id_history: int = 0
-        self.points = None
+        self.points: list[QPointF] = QPointF()
         self.pen = None
-        self.path: QPainterPath = QPainterPath()
+        self.brush = None
+        self.path: QGraphicsPolygonItem = QGraphicsPolygonItem()
 
 
+class Canvas(QtWidgets.QGraphicsView):
+    area_signal = Signal(float)
 
-class Canvas(QtWidgets.QLabel):
-
-    def __init__(self):
+    def __init__(self, image_original: QPixmap = None):
         super().__init__()
-        pixmapsss = QtGui.QPixmap(600, 300)
-        pixmapsss.fill(Qt.white)
-        self.pixmap_clean = pixmapsss.copy()
-        self.setPixmap(pixmapsss)
+
+        if image_original is None:
+            pixmap = QtGui.QPixmap(512, 512)
+            pixmap.fill(Qt.gray)
+        else:
+            pixmap = image_original
+
+        self.scene_canvas = QtWidgets.QGraphicsScene()
+        self.scene_canvas.setSceneRect(pixmap.rect())
+        self.scene_canvas.addPixmap(pixmap)
+        print(self.scene_canvas.event)
+
+        self.original_image_copy = pixmap.copy()
+        self.setScene(self.scene_canvas)
         self.id_history_count = 0
         self.history_list: list[historyCanvas] = []
-        self.points_local = []
+        self.points_local: list[QPointF] = []
         self.pen_local = None
+        self.brush = None
+        print(self.scene_canvas.sceneRect().getRect())
+        # self.setMaximumSize(512, 512)
+        self.delta_scale = 1
 
+    def getPolygon(self):
+        polygon = []
+        if self.history_list:
+            for i in self.history_list:
+                sssss = []
+                if i.path:
+                    if i.path.polygon():
+                        print(type(i.path.polygon()))
+                        for kkk in i.path.polygon():
+                            sssss.append(kkk.x())
+                            sssss.append(kkk.y())
+                if sssss:
+                    polygon.append(sssss)
+        return polygon
+
+    def getAreaFromPolygon(self):
+        p = self.getPolygon()
+        summ_area = 0
+        for i in p:
+            xy = np.array(i)
+            print(xy)
+            sssssssss = int(len(xy) / 2)
+            print(sssssssss)
+            xy = xy.reshape((sssssssss, 2))
+            xy = xy.astype(int)
+            summ_area += cv2.contourArea(xy)
+        return summ_area
+
+    def clearScene(self):
+        self.scene_canvas.clear()
+        self.scene_canvas.addPixmap(self.original_image_copy)
 
     def clear_canvas(self):
-        self.setPixmap(self.pixmap_clean)
+        self.clearScene()
+        # self.setPixmap(self.pixmap_clean)
         self.points_local = []
         self.history_list = []
         print('clear_canvas')
-
-
-    # def cancel_stage(self):
-    #     if len(self.history_list) > 0:
-    #         self.setPixmap(self.pixmap_clean)
-    #         canvas = self.pixmap()
-    #         painter = QtGui.QPainter(canvas)
-    #         del self.history_list[-1]
-    #         max_point = len(self.history_list)
-    #         id_point = 0
-    #         for i in range(len(self.history_list)):
-    #             pen = self.history_list[i].pen
-    #             painter.setPen(pen)
-    #             painter.drawPoint(self.history_list[i].point)
-    #             id_point += 1
-    #             if max_point > id_point:
-    #                 painter.drawLine(self.history_list[i].point, self.history_list[i + 1].point)
-    #         painter.end()
-    #         self.setPixmap(canvas)
+        self.area_signal.emit(self.getAreaFromPolygon())
 
     def cancel_stage(self):
-        #Отменить не замкнутый контур
-        self.setPixmap(self.pixmap_clean)
-        canvas = self.pixmap()
-        painter = QtGui.QPainter(canvas)
+        # Отменить не замкнутый контур
+
+        pen = self.get_pen()
+        brush = self.get_brush()
+        rad = 1
+        scale = pen.width() * 2
+
+        canvas = self.scene_canvas
+        self.clearScene()
         if self.points_local:
             del self.points_local[-1]
-            pen = self.pen_local
-            painter.setPen(pen)
-            painter.drawPoints(self.points_local)
-            for i in range(len(self.points_local)-1):
-                painter.drawLine(self.points_local[i], self.points_local[i+1])
+            for i in range(len(self.points_local) - 1):
+                print(self.points_local[i])
+                point = QGraphicsEllipseItem(self.points_local[i].x() - rad - scale,
+                                             self.points_local[i].y() - rad - scale, rad * scale * 2, rad * scale * 2)
+                point.setPen(pen)
+                point.setBrush(brush)
+                line = QGraphicsLineItem(QLineF(self.points_local[i], self.points_local[i + 1]))
+                line.setPen(pen)
+                canvas.addItem(point)
+                canvas.addItem(line)
+            if self.points_local:
+                point = QGraphicsEllipseItem(self.points_local[-1].x() - rad - scale,
+                                             self.points_local[-1].y() - rad - scale,
+                                             rad * scale * 2, rad * scale * 2)
+                point.setPen(pen)
+                point.setBrush(brush)
+                canvas.addItem(point)
 
-        #Нарисовать все контуры
+        # Нарисовать все контуры
         def draw_all():
             for i in self.history_list:
                 pen = i.pen
-                painter.setPen(pen)
-                painter.drawPoints(i.points)
-
+                print(pen)
+                # painter.setPen(pen)
+                # painter.drawPoints(i.points)
+                #
                 if self.history_list:
-                    for j in range(len(i.points)-1):
-                        painter.drawLine(i.points[j], i.points[j+1])
-                    painter.fillPath(i.path, QBrush(QColor(0, 0, 200, 100)))
+                    for point_one in i.points:
+                        point = QGraphicsEllipseItem(point_one.x() - rad - scale,
+                                                     point_one.y() - rad - scale, rad * scale * 2,
+                                                     rad * scale * 2)
+                        point.setPen(i.pen)
+                        point.setBrush(i.brush)
+                        canvas.addItem(point)
+                    if i.points:
+                        for j in range(len(i.points) - 1):
+                            line = QGraphicsLineItem(QLineF(i.points[j], i.points[j + 1]))
+                            line.setPen(pen)
+                            canvas.addItem(line)
+                    if i.path is not None:
+                        path = QGraphicsPolygonItem(i.path.polygon())
+                        path.setBrush(i.brush)
+                        canvas.addItem(path)
 
-
-
-        #Найти последнюю историю и удалить последний элемент
+        # Найти последнюю историю и удалить последний элемент
         if self.history_list:
             print('3-q')
             # last_history = self.history_list[-1]
@@ -101,7 +161,7 @@ class Canvas(QtWidgets.QLabel):
             if not self.points_local:
                 if self.history_list[-1].points:
                     del self.history_list[-1].points[-1]
-                    self.history_list[-1].path.clear()
+                    self.history_list[-1].path = None
 
                     self.points_local = self.history_list[-1].points
 
@@ -110,17 +170,18 @@ class Canvas(QtWidgets.QLabel):
                         del self.history_list[-1]
                         # print(len(self.history_list))
             draw_all()
-
-        painter.end()
-        self.setPixmap(canvas)
+        #
+        # painter.end()
+        # self.setPixmap(canvas)
+        self.area_signal.emit(self.getAreaFromPolygon())
 
     def close_countor(self):
 
         h = historyCanvas()
-        h.pen = self.pen_local
-        canvas = self.pixmap()
-        painter = QtGui.QPainter(canvas)
-        painter.setPen(h.pen)
+        h.pen = self.get_pen()
+        h.brush = self.get_brush()
+        canvas = self.scene_canvas
+        brush = self.get_brush()
 
         if self.points_local:
             start = self.points_local[0]
@@ -132,43 +193,74 @@ class Canvas(QtWidgets.QLabel):
             h.points = self.points_local
             h.points.append(start)
             self.history_list.append(h)
-            painter.drawLine(start, end)
-            self.history_list[-1].path.clear()
-            self.history_list[-1].path.addPolygon(self.points_local)
-            painter.fillPath(self.history_list[-1].path, QBrush(QColor(0, 0, 200, 100)))
+
+            line = QGraphicsLineItem(QLineF(start, end))
+            line.setPen(self.get_pen())
+
+            print(self.points_local)
+            self.history_list[-1].path.setPolygon(self.points_local)
+            path = QGraphicsPolygonItem(self.history_list[-1].path.polygon())
+            path.setBrush(brush)
+
             self.points_local = []
 
-        painter.end()
-        self.setPixmap(canvas)
+            canvas.addItem(line)
+            canvas.addItem(path)
+            self.area_signal.emit(self.getAreaFromPolygon())
 
 
+
+    def set_pen(self, width, color):
+        pen = QtGui.QPen()
+        pen.setWidth(width)
+        pen.setColor(color)
+
+        self.pen_local = pen
+
+    def get_pen(self) -> QtGui.QPen:
+        return self.pen_local
+
+    def set_brush(self, color):
+        brush = QBrush(color)
+        self.brush = brush
+
+    def get_brush(self):
+        return self.brush
 
     def mousePressEvent(self, event):
+        brush = self.get_brush()
         super(Canvas, self).mousePressEvent(event)
-        canvas = self.pixmap()
-        # painter = QtGui.QPainter(canvas)
-        localPos = self.mapFrom(self, event.position())
-        painter = QtGui.QPainter(canvas)
-        pen = QtGui.QPen()
-        pen.setWidth(15)
-        pen.setColor(QtGui.QColor(255, 0, 0))
-        painter.setPen(pen)
-        painter.drawPoint(localPos.x(), localPos.y())
-        # print(len(self.history_list))
-        self.pen_local = pen
-        if len(self.points_local):
-            painter.drawLine(self.points_local[-1], localPos)
+        canvas = self.scene_canvas
+        localPos = self.mapToScene(event.position().toPoint())
+        pen = self.get_pen()
+        rad = 1
+        scale = pen.width() * 2
+        if self.scene_canvas.sceneRect().height() > localPos.x() > 0 and self.scene_canvas.sceneRect().width() > localPos.y() > 0:
+            point = QGraphicsEllipseItem(localPos.x() - rad - scale, localPos.y() - rad - scale, rad * scale * 2,
+                                         rad * scale * 2)
+            point.setBrush(brush)
+            point.setPen(pen)
+            # print(self.get_pen().color().getRgb())
+            if len(self.points_local):
+                line = QGraphicsLineItem(QLineF(self.points_local[-1], localPos))
+                line.setPen(pen)
+                canvas.addItem(line)
+            canvas.addItem(point)
+            self.points_local.append(localPos.toPoint())
+            # print(localPos.toPoint())
 
-        painter.end()
-        self.setPixmap(canvas)
-        self.points_local.append(localPos)
+    def zoom_plus(self):
+        # print(self.)
+        self.delta_scale += 0.2
+        self.scale(1.25, 1.25)
+        print('plus')
 
-        # h = historyCanvas()
-        # h.points.append(localPos)
-        # h.id_history = self.id_history_count = self.id_history_count + 1
-        # h.pen = pen
-        # self.history_list.points.append(localPos)
-        # print(self.history_list[-1].points)
+    def zoom_minus(self):
+        if self.delta_scale > 0.5:
+            self.scale(0.8, 0.8)
+            self.delta_scale -= 0.2
+        print('minus')
+        print(self.delta_scale)
 
 
 class DrawingCounter(QDialog):
@@ -179,13 +271,28 @@ class DrawingCounter(QDialog):
         super(DrawingCounter, self).__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        self.c = Canvas()
+
+        if image_original is not None:
+            self.c = Canvas(image_original=image_original)
+        else:
+            self.c = Canvas()
+
+
+        self.c.area_signal.connect(self.on_edit_area)
+
         self.ui.verticalLayout.addWidget(self.c)
+        self.c.set_pen(3, QtGui.QColor(255, 0, 0))
+        self.c.set_brush(QColor(0, 0, 127, 100))
+
         self.ui.cancel_button.clicked.connect(self.c.cancel_stage)
         self.ui.clear_countor_button.clicked.connect(self.c.clear_canvas)
         self.ui.countor_close_button.clicked.connect(self.c.close_countor)
+        self.ui.zoom_plus.clicked.connect(self.c.zoom_plus)
+        self.ui.zoom_minus.clicked.connect(self.c.zoom_minus)
         self.ui.cancel_button.setEnabled(True)
         self.ui.clear_countor_button.setEnabled(True)
+        self.ui.save_button.clicked.connect(self.c.getPolygon)
+        self.ui.save_button.clicked.connect(self.c.getAreaFromPolygon)
 
         # self.polygon = []
         # self.polygon_all = []
@@ -208,6 +315,10 @@ class DrawingCounter(QDialog):
         # self.color_brush_r = 0
         # self.color_brush_g = 0
         # self.color_brush_b = 0
+
+    @Slot(int)
+    def on_edit_area(self, area):
+        self.ui.area_countor_label.setText(f'Площадь: {str(area)}')
 
     def select_disease(self):
         dlg = QDialog()
@@ -273,9 +384,6 @@ class DrawingCounter(QDialog):
 
         # print(self.polygon_all)
         self.ui.area_countor_label.setText('Площадь контура: ' + str(self.history.area_wound))
-
-    def PolyArea(self, x, y):
-        return 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
 
     # def mousePressEvent(self, event):
 
