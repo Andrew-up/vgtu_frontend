@@ -1,3 +1,4 @@
+import enum
 import sys
 from ast import literal_eval
 
@@ -6,7 +7,7 @@ import numpy as np
 from PySide6 import QtGui, QtWidgets, QtCore
 from PySide6.QtCore import Qt, QPointF, QRectF, QSize, QLineF
 from PySide6.QtCore import Slot, Signal
-from PySide6.QtGui import QPixmap, QBrush, QColor, QPainterPath
+from PySide6.QtGui import QPixmap, QBrush, QColor, QPainterPath, QPen, QPainter, QImage
 from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, \
     QPushButton, QGraphicsScene, QGraphicsItem, QGraphicsView, QGraphicsEllipseItem, QGraphicsLineItem, \
     QGraphicsPolygonItem, QGraphicsPathItem
@@ -18,19 +19,38 @@ from service.imageService import image_to_base64
 from view.py.draw_counter_widget import Ui_Form
 from view.user.catrgorical_item_widget import CategoricalItem
 from itertools import cycle
+from utils.message_box import message_error_show
 
 
-class historyCanvas(object):
+class TypeHistory(enum.Enum):
+    null = 0
+    line = 1
+    point = 2
+    polygon = 3
+
+
+class HistoryCanvasTwo(object):
     def __init__(self):
         self.id_history: int = 0
-        self.points: list[QPointF] = QPointF()
-        self.pen = None
-        self.brush = None
-        self.path: QGraphicsPolygonItem = QGraphicsPolygonItem()
+        self.item_history: QGraphicsItem() = None
+        self.type: TypeHistory = TypeHistory.null
+
+
+class ListHistoryCanvasTwo(object):
+
+    def __init__(self, list_history_id, list_history_item, polygon):
+        self.id_list_history: int = list_history_id
+        self.list_history: list[HistoryCanvasTwo()] = list_history_item
+        self.polygon: QGraphicsPolygonItem() = polygon
 
 
 class Canvas(QtWidgets.QGraphicsView):
     area_signal = Signal(float)
+
+    cancel_button_signal = Signal(bool)
+    save_button_signal = Signal(bool)
+    contour_close_button_signal = Signal(bool)
+    clear_contour_button_signal = Signal(bool)
 
     def __init__(self, image_original: QPixmap = None):
         super().__init__()
@@ -44,28 +64,44 @@ class Canvas(QtWidgets.QGraphicsView):
         self.scene_canvas = QtWidgets.QGraphicsScene()
         self.scene_canvas.setSceneRect(pixmap.rect())
         self.scene_canvas.addPixmap(pixmap)
-        print(self.scene_canvas.event)
-
         self.original_image_copy = pixmap.copy()
         self.setScene(self.scene_canvas)
-        self.id_history_count = 0
-        self.history_list: list[historyCanvas] = []
-        self.points_local: list[QPointF] = []
-        self.pen_local = None
-        self.brush = None
-        print(self.scene_canvas.sceneRect().getRect())
-        # self.setMaximumSize(512, 512)
+        self.pen_local: QPen = QPen(QColor(0, 0, 0))
+        self.brush: QBrush = QBrush(QColor(0, 0, 0, 127))
         self.delta_scale = 1
+        self.item_history: list[HistoryCanvasTwo] = []
+        self.list_item_history: list[ListHistoryCanvasTwo] = []
+        self.default_pen = True
+
+    def get_image_from_scene(self):
+        image = QImage(int(self.scene_canvas.width()), int(self.scene_canvas.height()), QImage.Format_ARGB32_Premultiplied)
+        painter = QPainter(image)
+        self.scene_canvas.render(painter)
+        painter.end()
+        return image
+        # self.scene_canvas.render()
+
+    def get_len_item_history(self):
+        return len(self.item_history)
+
+    def get_len_list_item_history(self):
+        return len(self.list_item_history)
+
+    def get_count_points(self):
+        sum_point = 0
+        for i in self.item_history:
+            if i.type == TypeHistory.point:
+                sum_point += 1
+        return sum_point
 
     def getPolygon(self):
         polygon = []
-        if self.history_list:
-            for i in self.history_list:
+        if self.list_item_history:
+            for i in self.list_item_history:
                 sssss = []
-                if i.path:
-                    if i.path.polygon():
-                        print(type(i.path.polygon()))
-                        for kkk in i.path.polygon():
+                if i.polygon:
+                    if i.polygon.polygon():
+                        for kkk in i.polygon.polygon():
                             sssss.append(kkk.x())
                             sssss.append(kkk.y())
                 if sssss:
@@ -77,9 +113,9 @@ class Canvas(QtWidgets.QGraphicsView):
         summ_area = 0
         for i in p:
             xy = np.array(i)
-            print(xy)
+            # print(xy)
             sssssssss = int(len(xy) / 2)
-            print(sssssssss)
+            # print(sssssssss)
             xy = xy.reshape((sssssssss, 2))
             xy = xy.astype(int)
             summ_area += cv2.contourArea(xy)
@@ -91,131 +127,112 @@ class Canvas(QtWidgets.QGraphicsView):
 
     def clear_canvas(self):
         self.clearScene()
-        # self.setPixmap(self.pixmap_clean)
-        self.points_local = []
-        self.history_list = []
-        print('clear_canvas')
+        self.item_history = []
+        self.list_item_history = []
         self.area_signal.emit(self.getAreaFromPolygon())
+
+        self.save_button_signal.emit(False)
+        self.cancel_button_signal.emit(False)
+        self.clear_contour_button_signal.emit(False)
+        self.contour_close_button_signal.emit(False)
 
     def cancel_stage(self):
-        # Отменить не замкнутый контур
+        if not self.item_history and self.list_item_history:
+            if self.list_item_history[-1].list_history:
+                self.item_history = self.list_item_history[-1].list_history
+                del self.list_item_history[-1]
 
-        pen = self.get_pen()
-        brush = self.get_brush()
-        rad = 1
-        scale = pen.width() * 2
-
-        canvas = self.scene_canvas
-        self.clearScene()
-        if self.points_local:
-            del self.points_local[-1]
-            for i in range(len(self.points_local) - 1):
-                print(self.points_local[i])
-                point = QGraphicsEllipseItem(self.points_local[i].x() - rad - scale,
-                                             self.points_local[i].y() - rad - scale, rad * scale * 2, rad * scale * 2)
-                point.setPen(pen)
-                point.setBrush(brush)
-                line = QGraphicsLineItem(QLineF(self.points_local[i], self.points_local[i + 1]))
-                line.setPen(pen)
-                canvas.addItem(point)
-                canvas.addItem(line)
-            if self.points_local:
-                point = QGraphicsEllipseItem(self.points_local[-1].x() - rad - scale,
-                                             self.points_local[-1].y() - rad - scale,
-                                             rad * scale * 2, rad * scale * 2)
-                point.setPen(pen)
-                point.setBrush(brush)
-                canvas.addItem(point)
-
-        # Нарисовать все контуры
-        def draw_all():
-            for i in self.history_list:
-                pen = i.pen
-                print(pen)
-                # painter.setPen(pen)
-                # painter.drawPoints(i.points)
-                #
-                if self.history_list:
-                    for point_one in i.points:
-                        point = QGraphicsEllipseItem(point_one.x() - rad - scale,
-                                                     point_one.y() - rad - scale, rad * scale * 2,
-                                                     rad * scale * 2)
-                        point.setPen(i.pen)
-                        point.setBrush(i.brush)
-                        canvas.addItem(point)
-                    if i.points:
-                        for j in range(len(i.points) - 1):
-                            line = QGraphicsLineItem(QLineF(i.points[j], i.points[j + 1]))
-                            line.setPen(pen)
-                            canvas.addItem(line)
-                    if i.path is not None:
-                        path = QGraphicsPolygonItem(i.path.polygon())
-                        path.setBrush(i.brush)
-                        canvas.addItem(path)
-
-        # Найти последнюю историю и удалить последний элемент
-        if self.history_list:
-            print('3-q')
-            # last_history = self.history_list[-1]
-            # print(last_history.id_history)
-            if not self.points_local:
-                if self.history_list[-1].points:
-                    del self.history_list[-1].points[-1]
-                    self.history_list[-1].path = None
-
-                    self.points_local = self.history_list[-1].points
-
-                else:
-                    if len(self.history_list) > 0:
-                        del self.history_list[-1]
-                        # print(len(self.history_list))
-            draw_all()
-        #
-        # painter.end()
-        # self.setPixmap(canvas)
+        if self.item_history:
+            if self.item_history[-1].type == TypeHistory.polygon:
+                self.scene_canvas.removeItem(self.item_history[-1].item_history)
+                del self.item_history[-1]
+        if self.item_history:
+            if self.item_history[-1].type == TypeHistory.point:
+                self.scene_canvas.removeItem(self.item_history[-1].item_history)
+                del self.item_history[-1]
+        if self.item_history:
+            if self.item_history[-1].type == TypeHistory.line:
+                self.scene_canvas.removeItem(self.item_history[-1].item_history)
+                del self.item_history[-1]
         self.area_signal.emit(self.getAreaFromPolygon())
+
+        if not self.item_history and not self.list_item_history:
+            # print('zzzzzzzzzzzzzzzz')
+            self.save_button_signal.emit(False)
+            self.cancel_button_signal.emit(False)
+            self.clear_contour_button_signal.emit(False)
+            self.contour_close_button_signal.emit(False)
+        if self.get_count_points() <= 2:
+            self.contour_close_button_signal.emit(False)
+        if self.get_count_points() > 2:
+            self.contour_close_button_signal.emit(True)
+        self.save_button_signal.emit(False)
+        if self.list_item_history and not self.item_history:
+            self.save_button_signal.emit(True)
+
 
     def close_countor(self):
 
-        h = historyCanvas()
-        h.pen = self.get_pen()
-        h.brush = self.get_brush()
+        sum_points = 0
+        pen = self.get_pen()
+        rad = 1
+        scale = pen.width() * 2
         canvas = self.scene_canvas
-        brush = self.get_brush()
 
-        if self.points_local:
-            start = self.points_local[0]
-            end = self.points_local[-1]
-            if len(self.history_list):
-                h.id_history = self.history_list[-1].id_history + 1
-            else:
-                h.id_history = 0
-            h.points = self.points_local
-            h.points.append(start)
-            self.history_list.append(h)
+        for i in self.item_history:
+            if i.type == TypeHistory.point:
+                sum_points += 1
 
-            line = QGraphicsLineItem(QLineF(start, end))
-            line.setPen(self.get_pen())
+        if sum_points >= 3:
+            if self.item_history[-1].type == TypeHistory.point:
+                xy_start_point = QPointF(self.item_history[0].item_history.rect().x() + rad + scale,
+                                         self.item_history[0].item_history.rect().y() + rad + scale)
+                xy_end_point = QPointF(self.item_history[-1].item_history.rect().x() + rad + scale,
+                                       self.item_history[-1].item_history.rect().y() + rad + scale)
+                # print('points >= 3')
+                point = QGraphicsEllipseItem()
+                point.setBrush(self.get_brush())
+                point.setPen(pen)
+                point.setRect(self.item_history[0].item_history.rect().x(),
+                              self.item_history[0].item_history.rect().y(),
+                              rad * scale * 2, rad * scale * 2)
+                line = QGraphicsLineItem(QLineF(xy_start_point, xy_end_point))
+                line.setPen(pen)
+                canvas.addItem(line)
+                self.add_history(line, TypeHistory.line)
+                self.add_history(point, TypeHistory.point)
 
-            print(self.points_local)
-            self.history_list[-1].path.setPolygon(self.points_local)
-            path = QGraphicsPolygonItem(self.history_list[-1].path.polygon())
-            path.setBrush(brush)
+        if sum_points >= 3:
+            if self.item_history[-1].type == TypeHistory.point:
+                polygon_points: list[QPointF] = []
+                polygon: QGraphicsPolygonItem = QGraphicsPolygonItem()
+                for i in self.item_history:
+                    if i.type == TypeHistory.point:
+                        xy = QPointF(i.item_history.rect().x() + rad + scale, i.item_history.rect().y() + rad + scale)
+                        polygon_points.append(xy)
+                polygon.setPolygon(polygon_points)
+                polygon.setBrush(self.get_brush())
+                canvas.addItem(polygon)
+                self.add_history(polygon, TypeHistory.polygon)
+                if self.list_item_history:
+                    listzzzzzzzzz = ListHistoryCanvasTwo(self.list_item_history[-1].id_list_history + 1,
+                                                         self.item_history, polygon)
+                else:
+                    listzzzzzzzzz = ListHistoryCanvasTwo(0, self.item_history, polygon)
+                self.list_item_history.append(listzzzzzzzzz)
+                self.item_history = []
 
-            self.points_local = []
-
-            canvas.addItem(line)
-            canvas.addItem(path)
-            self.area_signal.emit(self.getAreaFromPolygon())
-
+        self.area_signal.emit(self.getAreaFromPolygon())
+        self.contour_close_button_signal.emit(False)
+        self.save_button_signal.emit(True)
 
 
     def set_pen(self, width, color):
         pen = QtGui.QPen()
         pen.setWidth(width)
         pen.setColor(color)
-
         self.pen_local = pen
+        self.default_pen = False
 
     def get_pen(self) -> QtGui.QPen:
         return self.pen_local
@@ -227,27 +244,63 @@ class Canvas(QtWidgets.QGraphicsView):
     def get_brush(self):
         return self.brush
 
+    def add_history(self, item, type):
+        history: HistoryCanvasTwo = HistoryCanvasTwo()
+        if self.item_history:
+            history.id_history = self.item_history[-1].id_history + 1
+        else:
+            history.id_history = 0
+        history.item_history = item
+        history.type = type
+        self.item_history.append(history)
+
     def mousePressEvent(self, event):
-        brush = self.get_brush()
-        super(Canvas, self).mousePressEvent(event)
-        canvas = self.scene_canvas
-        localPos = self.mapToScene(event.position().toPoint())
-        pen = self.get_pen()
-        rad = 1
-        scale = pen.width() * 2
-        if self.scene_canvas.sceneRect().height() > localPos.x() > 0 and self.scene_canvas.sceneRect().width() > localPos.y() > 0:
-            point = QGraphicsEllipseItem(localPos.x() - rad - scale, localPos.y() - rad - scale, rad * scale * 2,
-                                         rad * scale * 2)
-            point.setBrush(brush)
-            point.setPen(pen)
-            # print(self.get_pen().color().getRgb())
-            if len(self.points_local):
-                line = QGraphicsLineItem(QLineF(self.points_local[-1], localPos))
-                line.setPen(pen)
-                canvas.addItem(line)
-            canvas.addItem(point)
-            self.points_local.append(localPos.toPoint())
-            # print(localPos.toPoint())
+        self.save_button_signal.emit(False)
+        if event.button() == Qt.MouseButton.LeftButton:
+            if self.default_pen:
+                message_error_show(self, message='Укажите категорию болезни', title='Ошибка')
+                return 0
+            brush = self.get_brush()
+            super(Canvas, self).mousePressEvent(event)
+            if self.get_count_points() >= 2:
+                self.contour_close_button_signal.emit(True)
+            canvas = self.scene_canvas
+            localPos = self.mapToScene(event.position().toPoint())
+            pen = self.get_pen()
+            rad = 1
+            scale = pen.width() * 2
+            # print(localPos)
+            if self.scene_canvas.sceneRect().height() > localPos.x() > 0 and \
+                    self.scene_canvas.sceneRect().width() > localPos.y() > 0:
+                point_pos_x, point_pos_y = localPos.x() - scale - rad, localPos.y() - scale - rad
+                point = QGraphicsEllipseItem()
+                point.setBrush(brush)
+                point.setPen(pen)
+                point.setRect(point_pos_x, point_pos_y, rad * scale * 2, rad * scale * 2)
+                # print(len(self.item_history))
+                if self.item_history:
+                    # print(self.item_history[-1].type)
+                    if self.item_history[-1].type == TypeHistory.point:
+                        xy_start_point = QPointF(self.item_history[-1].item_history.rect().x() + rad + scale,
+                                                 self.item_history[-1].item_history.rect().y() + rad + scale)
+                        # print(self.item_history[-1].item_history.rect().getRect())
+                        # print(xy_start_point)
+                        line = QGraphicsLineItem(QLineF(xy_start_point, localPos))
+                        line.setPen(pen)
+                        canvas.addItem(point)
+                        canvas.addItem(line)
+                        self.add_history(line, TypeHistory.line)
+                        self.add_history(point, TypeHistory.point)
+                else:
+                    canvas.addItem(point)
+                    self.add_history(point, TypeHistory.point)
+                    # self.save_button_signal.emit(True)
+                    self.cancel_button_signal.emit(True)
+                    self.clear_contour_button_signal.emit(True)
+                    # print(point.rect().getRect())
+
+        if event.button() == Qt.MouseButton.RightButton:
+            self.cancel_stage()
 
     def zoom_plus(self):
         # print(self.)
@@ -260,7 +313,7 @@ class Canvas(QtWidgets.QGraphicsView):
             self.scale(0.8, 0.8)
             self.delta_scale -= 0.2
         print('minus')
-        print(self.delta_scale)
+        # print(self.delta_scale)
 
 
 class DrawingCounter(QDialog):
@@ -277,12 +330,11 @@ class DrawingCounter(QDialog):
         else:
             self.c = Canvas()
 
-
         self.c.area_signal.connect(self.on_edit_area)
 
         self.ui.verticalLayout.addWidget(self.c)
-        self.c.set_pen(3, QtGui.QColor(255, 0, 0))
-        self.c.set_brush(QColor(0, 0, 127, 100))
+        # self.c.set_pen(3, QtGui.QColor(0, 0, 0))
+        # self.c.set_brush(QColor(0, 0, 127, 100))
 
         self.ui.cancel_button.clicked.connect(self.c.cancel_stage)
         self.ui.clear_countor_button.clicked.connect(self.c.clear_canvas)
@@ -293,34 +345,62 @@ class DrawingCounter(QDialog):
         self.ui.clear_countor_button.setEnabled(True)
         self.ui.save_button.clicked.connect(self.c.getPolygon)
         self.ui.save_button.clicked.connect(self.c.getAreaFromPolygon)
-
-        # self.polygon = []
-        # self.polygon_all = []
-        # self.last_x, self.last_y = None, None
-        # self.first_x, self.first_y = None, None
-        # self.canvas = self.ui.image_drawing_canvas
-        # self.image_edit = image_original
-        # if image_original is not None:
-        #     self.ui.image_drawing_canvas.setPixmap(image_original)
-        #     # self.ui.image_drawing_canvas.setScaledContents(True)
-        # else:
-        #     self.ui.image_drawing_canvas.setPixmap(canvas)
-        # self.ui.countor_close_button.clicked.connect(self.on_close_contour)
         self.path = QPainterPath()
         self.polygon_QPoint = []
-        # self.ui.save_button.clicked.connect(self.on_click_save_image_button)
-        # self.history = HistoryNeuralNetwork()
-        # self.categorical = self.get_predict_categorical()
-        # self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
-        # self.color_brush_r = 0
-        # self.color_brush_g = 0
-        # self.color_brush_b = 0
+        self.ui.save_button.clicked.connect(self.on_click_save_image_button)
+        self.history = HistoryNeuralNetwork()
+        self.categorical = self.get_predict_categorical()
+        self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
+        self.color = QColor()
+
+        self.ui.cancel_button.setEnabled(False)
+        self.ui.save_button.setEnabled(False)
+        self.ui.countor_close_button.setEnabled(False)
+        self.ui.clear_countor_button.setEnabled(False)
+
+        self.c.clear_contour_button_signal.connect(self.clear_contour_button_isEnabled)
+        self.c.cancel_button_signal.connect(self.cancel_button_button_isEnabled)
+        self.c.save_button_signal.connect(self.save_button_isEnabled)
+        self.c.contour_close_button_signal.connect(self.contour_close_button_isEnabled)
+
+    @Slot(bool)
+    def save_button_isEnabled(self, b):
+        if b:
+            self.ui.save_button.setEnabled(True)
+        else:
+            self.ui.save_button.setEnabled(False)
+
+    @Slot(bool)
+    def contour_close_button_isEnabled(self, b):
+        if b:
+            self.ui.countor_close_button.setEnabled(True)
+        else:
+            self.ui.countor_close_button.setEnabled(False)
+
+    @Slot(bool)
+    def clear_contour_button_isEnabled(self, b):
+        if b:
+            self.ui.clear_countor_button.setEnabled(True)
+        else:
+            self.ui.clear_countor_button.setEnabled(False)
+
+    @Slot(bool)
+    def cancel_button_button_isEnabled(self, b):
+        if b:
+            self.ui.cancel_button.setEnabled(True)
+        else:
+            self.ui.cancel_button.setEnabled(False)
 
     @Slot(int)
     def on_edit_area(self, area):
         self.ui.area_countor_label.setText(f'Площадь: {str(area)}')
 
     def select_disease(self):
+        # print(self.c.get_len_item_history())
+        # print(self.c.get_len_list_item_history())
+        if self.c.get_len_item_history() + self.c.get_len_list_item_history() != 0:
+            message_error_show(self, message='Можно указать только 1 болезнь\n Очистите рисинок от других', title='Ошибка')
+            return 0
         dlg = QDialog()
         layout = QVBoxLayout()
         for i in self.categorical:
@@ -339,79 +419,26 @@ class DrawingCounter(QDialog):
         self.history.result_predict_id = category.id_category
         self.history.result_predict = category
         self.ui.type_disease_label.setText(category.name_category_ru)
-        self.color_brush_r, self.color_brush_g, self.color_brush_b, = literal_eval(category.color)
+        r, g, b = literal_eval(category.color)
+        self.color.setRgb(r, g, b)
+        self.c.set_pen(3, self.color)
+        self.c.set_brush(QColor(r, g, b, 127))
 
     def get_predict_categorical(self) -> list[ResultPredict]:
         return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
-        print('save')
-        print(self.history)
-        if self.history is not None:
-            self.history.polygon_mask = self.polygon_all
-            qiamge = self.ui.image_drawing_canvas.pixmap().toImage()
-            self.history.photo_predict_edit_doctor = image_to_base64(qiamge)
-            self.history_n_n.emit(self.history)
-        self.image_result_edit_doctor.emit(self.ui.image_drawing_canvas.pixmap())
-        self.close()
-
-    def on_close_contour(self):
-        canvas = self.canvas.pixmap()
-        pen = QtGui.QPen()
-        pen.setWidth(5)
-        pen.setColor(QtGui.QColor(self.color_brush_r, self.color_brush_g, self.color_brush_b))
-        painter = QtGui.QPainter(canvas)
-        painter.setPen(pen)
-        painter.drawLine(self.last_x, self.last_y, self.first_x, self.first_y)
-        self.path.addPolygon(self.polygon_QPoint)
-        # print(self.path)
-        painter.fillPath(self.path, QBrush(QColor(self.color_brush_r, self.color_brush_g, self.color_brush_b, 100)))
-        painter.end()
-        self.canvas.setPixmap(canvas)
-        self.last_x = None
-        self.last_y = None
-        self.polygon_QPoint.clear()
-        self.path.clear()
-        self.polygon_all.append(self.polygon.copy())
-        xy = np.array(self.polygon)
-        sssssssss = int(len(xy) / 2)
-        xy = xy.reshape((sssssssss, 2))
-        xy = xy.astype(int)
-        # self.area_full += cv2.contourArea(xy)
-        # print(self.area_full)
-        self.polygon.clear()
-        self.history.area_wound += cv2.contourArea(xy)
-
-        # print(self.polygon_all)
-        self.ui.area_countor_label.setText('Площадь контура: ' + str(self.history.area_wound))
-
-    # def mousePressEvent(self, event):
-
-    # canvas = self.canvas.pixmap()
-    # print(canvas.size())
-    # localPos = event.scenePosition()
-    # if self.last_x is None:
-    #     self.last_x = localPos.x()
-    #     self.last_y = localPos.y()
-    #     self.first_x, self.first_y = localPos.x(), localPos.y()
-
-    #     painter = QtGui.QPainter(canvas)
-    #     pen = QtGui.QPen()
-    #     pen.setWidth(5)
-    #     pen.setColor(QtGui.QColor(self.color_brush_r, self.color_brush_g, self.color_brush_b))
-    #
-    #     painter.setPen(pen)
-    #     painter.drawPoint(localPos.x(), localPos.y())
-    #     painter.drawLine(self.last_x, self.last_y, localPos.x(), localPos.y())
-    #     self.polygon.append(localPos.x())
-    #     self.polygon.append(localPos.y())
-    #     # print(self.polygon)
-    #     print(localPos)
-    #     self.polygon_QPoint.append(localPos)
-    #     painter.end()
-    #     self.canvas.setPixmap(canvas)
-    #     self.last_x = localPos.x()
-    #     self.last_y = localPos.y()
+        image = self.c.get_image_from_scene()
+        print(type(image))
+        # print('save')
+        # print(self.history.result_predict)
+        # if self.history is not None:
+        #     self.history.polygon_mask = self.c.getPolygon()
+        #     qiamge = self.c.original_image_copy
+        #     self.history.photo_predict_edit_doctor = image_to_base64(qiamge)
+        #     self.history_n_n.emit(self.history)
+        self.image_result_edit_doctor.emit(QPixmap.fromImage(image))
+        # self.close()
 
 
 if __name__ == '__main__':

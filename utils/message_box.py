@@ -3,10 +3,12 @@ from PySide6.QtWidgets import QMessageBox
 
 
 @Slot(str)
-def message_error_show(parent, message):
+def message_error_show(parent, message, title:str = None):
     msg = QMessageBox(parent=parent)
     msg.setText(f'{message}')
     msg.setIcon(QMessageBox.Icon.Critical)
+    if title:
+        msg.setWindowTitle(title)
     msg.exec()
 
 
