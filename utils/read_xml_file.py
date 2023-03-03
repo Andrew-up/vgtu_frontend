@@ -14,7 +14,9 @@ class ReadXmlProject(object):
         self._server_port = None
         self._server_api_update = None
         self._server_api_check_version = None
+        self._coefficient_k = None
         self._init_variable()
+
 
     def _init_variable(self):
         if os.path.exists(self.file_path):
@@ -22,7 +24,9 @@ class ReadXmlProject(object):
             app = root_node.find('app')
             self._app_update_folder = app.find('temp_update').text
             self._app_version = app.find('version').text
+            self._coefficient_k = app.find('coefficient_k').text
             server = root_node.find('server')
+
             self._server_addr = server.find('addr').text
             self._server_port = server.find('port').text
             self._server_api_update = server.find('update_api').text
@@ -61,7 +65,11 @@ class ReadXmlProject(object):
     def get_API(self):
         return f'http://{self.server_addr}:{self.server_port}/'
 
+    @property
+    def get_coefficient_k(self):
+        return float(self._coefficient_k)
+
 
 if __name__ == '__main__':
     r = ReadXmlProject()
-    print(r.get_API())
+    print(r.get_coefficient_k)

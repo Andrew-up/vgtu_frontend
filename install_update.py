@@ -66,7 +66,7 @@ class Worker(Thread):
                 self.add_text('--------------------------')
                 time.sleep(1)
                 files.remove(self._file_name_archive)
-                print(files)
+                # print(files)
                 # time.sleep(4)
                 for i in files:
                     self.add_text(i)

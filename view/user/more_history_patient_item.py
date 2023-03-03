@@ -42,7 +42,7 @@ class MoreHistoryPatientItem(QDialog):
             self.ui.image_predict_edit_doctor.setPixmap(pixmap_pred_edit)
             self.ui.image_predict_edit_doctor.setScaledContents(True)
 
-        print(polygon)
+        # print(polygon)F
         if polygon:
             s = self.history_patient.history_neutral_network.polygon_mask
             res = base64.b64decode(literal_eval(s)).decode('utf-8')
@@ -51,9 +51,11 @@ class MoreHistoryPatientItem(QDialog):
 
         self.ui.label_date.setText(self.history_patient.date)
         self.ui.label_comment.setText(self.history_patient.comment)
-        print(self.history_patient.history_neutral_network.result_predict)
+        # print(self.history_patient.history_neutral_network.area_wound)
+        # print(self.history_patient.history_neutral_network.result_predict)
         if self.history_patient.history_neutral_network.result_predict is not None:
             self.ui.label_dianosis.setText(self.history_patient.history_neutral_network.result_predict.name_category_ru)
+            self.ui.area_label.setText(str(self.history_patient.history_neutral_network.area_wound))
 
         # print(img_orig)
         # print(img_pred)

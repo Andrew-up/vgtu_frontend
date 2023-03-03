@@ -21,6 +21,7 @@ from view.user.drawing_counter import DrawingCounter
 from service.imageService import ImageConverter, image_to_base64
 from model.patient_model import Patient
 from utils.message_box import message_error_show, message_info_show
+from utils.read_xml_file import ReadXmlProject
 
 
 class WoundHealingPatient(QWidget):
@@ -59,7 +60,6 @@ class WoundHealingPatient(QWidget):
             self.patient_id = patient.id_patient
             self.ui.wound_healing_fullname_client.setText(patient.full_name)
             self.ui.wound_healing_diagnosis_client.setText(patient.dianosis)
-
 
     def get_predict_categorical(self):
         return PatientServiceFront(1).get_all_categorical()
@@ -115,6 +115,7 @@ class WoundHealingPatient(QWidget):
         base64_polygon = base64.b64encode(str(h.polygon_mask).encode())
         self.history_n_n.polygon_mask = str(base64_polygon)
         self.history_n_n.result_predict_id = h.result_predict_id
+        self.history_n_n.area_wound = h.area_wound
         print(h.result_predict_id)
         # print(base64_polygon)
         # print(h.polygon_mask)
@@ -147,6 +148,7 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_type_wound.setText('Тип раны: <br>')
         self.ui.wound_healing_area_wound.setText('Площадь: <br>')
         self.ui.label_9.setText(f'<font style="color:rgb(255, 0, 0);"> КОНТУР РАНЫ НЕ ОПРЕДЕЛЕН </font>')
+        coefficient_k = ReadXmlProject().get_coefficient_k
         for i in res:
             self.ui.label_9.setText(f'<font style="color:rgb(0, 255, 0);"> КОНТУР РАНЫ ОПРЕДЕЛЕН </font>')
             # print(i.type_wound)
@@ -158,8 +160,10 @@ class WoundHealingPatient(QWidget):
             self.ui.wound_healing_type_wound.setText(self.ui.wound_healing_type_wound.text() +
                                                      f'<font style="color:rgb{i.color};">{i.type_wound}</font>, ')
 
+            self.history_n_n.area_wound += int(i.area_wound * coefficient_k)
+
             self.ui.wound_healing_area_wound.setText(self.ui.wound_healing_area_wound.text() +
-                                                     f'<font style="color:rgb{i.color};">{i.type_wound}</font>: {i.area_wound}, <br>')
+                                                     f'<font style="color:rgb{i.color};">{i.type_wound}</font>: {self.history_n_n.area_wound}, <br>')
             # self.ui.wound_healing_area_wound.setText(f'Площадь: {str(i.area_wound)}')
 
     def on_radio_scan_from_catalog(self):
@@ -266,7 +270,6 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_widget.setVisible(True)
         self.ui.widget_2.setVisible(True)
         self.ui.wound_healing_loading_label.setText('Ok')
-
 
     @Slot(QPixmap)
     def setImage_Predict_edit(self, image: QPixmap):

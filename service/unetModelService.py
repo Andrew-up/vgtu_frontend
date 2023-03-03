@@ -138,6 +138,7 @@ class LoadingModelAndPredict(QThread):
                 peri = cv2.arcLength(contour, True)
                 polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
                 area_full += cv2.contourArea(contour)
+                area_full = int(area_full)
                 cv2.fillPoly(image_temp, pts=[contour], color=color)
                 # contour = contour.flatten().tolist()
                 # if len(contour) > 4:
@@ -167,6 +168,8 @@ class LoadingModelAndPredict(QThread):
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             # print(len(res[0, 0, 0, :]))
             list_predict = list()
+
+
             for i in range(len(res[0, 0, 0, :])):
                 list_predict.append(np.sum(res[0, :, :, i]))
             max_value = max(list_predict)
@@ -191,9 +194,10 @@ class LoadingModelAndPredict(QThread):
                 color1.append(literal_eval(i.color))
 
             # color1 = []
-
-            color = color1[max_index]
-            # color2 = (0, 255, 0)
+            if max_index <= len(self.categorical_predict):
+                color = color1[max_index]
+            else:
+                color = (0, 0, 0)
             # color3 = (0, 0, 255)
 
             # Расширение
@@ -213,9 +217,13 @@ class LoadingModelAndPredict(QThread):
             if area_full1 != 0:
                 scan = ResultScan()
                 scan.color = color
-                scan.type_wound = self.categorical_predict[max_index].name_category_ru
+                print(max_index)
+                if max_index <= len(self.categorical_predict):
+                    scan.type_wound = self.categorical_predict[max_index].name_category_ru
+                    scan.result_predict_id = self.categorical_predict[max_index].id_category
+                else:
+                    scan.type_wound = 'Проверьте категории на сервере'
                 scan.area_wound = area_full1
-                scan.result_predict_id = self.categorical_predict[max_index].id_category
                 scan.polygon_wound = str(base64_polygon)
                 scan_list.append(scan)
 

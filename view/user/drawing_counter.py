@@ -20,7 +20,7 @@ from view.py.draw_counter_widget import Ui_Form
 from view.user.catrgorical_item_widget import CategoricalItem
 from itertools import cycle
 from utils.message_box import message_error_show
-
+from utils.read_xml_file import ReadXmlProject
 
 class TypeHistory(enum.Enum):
     null = 0
@@ -45,7 +45,7 @@ class ListHistoryCanvasTwo(object):
 
 
 class Canvas(QtWidgets.QGraphicsView):
-    area_signal = Signal(float)
+    area_signal = Signal(int)
 
     cancel_button_signal = Signal(bool)
     save_button_signal = Signal(bool)
@@ -72,6 +72,7 @@ class Canvas(QtWidgets.QGraphicsView):
         self.item_history: list[HistoryCanvasTwo] = []
         self.list_item_history: list[ListHistoryCanvasTwo] = []
         self.default_pen = True
+
 
     def get_image_from_scene(self):
         image = QImage(int(self.scene_canvas.width()), int(self.scene_canvas.height()), QImage.Format_ARGB32_Premultiplied)
@@ -109,17 +110,17 @@ class Canvas(QtWidgets.QGraphicsView):
         return polygon
 
     def getAreaFromPolygon(self):
+        coefficient_k = ReadXmlProject().get_coefficient_k
         p = self.getPolygon()
-        summ_area = 0
+        summ_area: float = 0
         for i in p:
             xy = np.array(i)
-            # print(xy)
             sssssssss = int(len(xy) / 2)
-            # print(sssssssss)
             xy = xy.reshape((sssssssss, 2))
             xy = xy.astype(int)
-            summ_area += cv2.contourArea(xy)
-        return summ_area
+            summ_area += int(cv2.contourArea(xy))
+        summ_area = summ_area * coefficient_k
+        return int(summ_area)
 
     def clearScene(self):
         self.scene_canvas.clear()
@@ -225,6 +226,7 @@ class Canvas(QtWidgets.QGraphicsView):
         self.area_signal.emit(self.getAreaFromPolygon())
         self.contour_close_button_signal.emit(False)
         self.save_button_signal.emit(True)
+        # print(self.getPolygon())
 
 
     def set_pen(self, width, color):
@@ -265,7 +267,8 @@ class Canvas(QtWidgets.QGraphicsView):
             if self.get_count_points() >= 2:
                 self.contour_close_button_signal.emit(True)
             canvas = self.scene_canvas
-            localPos = self.mapToScene(event.position().toPoint())
+            localPos = self.mapToScene(event.position().toPoint()).toPoint()
+            # print(localPos)
             pen = self.get_pen()
             rad = 1
             scale = pen.width() * 2
@@ -299,6 +302,7 @@ class Canvas(QtWidgets.QGraphicsView):
                     self.clear_contour_button_signal.emit(True)
                     # print(point.rect().getRect())
 
+
         if event.button() == Qt.MouseButton.RightButton:
             self.cancel_stage()
 
@@ -326,28 +330,29 @@ class DrawingCounter(QDialog):
         self.ui.setupUi(self)
 
         if image_original is not None:
-            self.c = Canvas(image_original=image_original)
+            self.canvas = Canvas(image_original=image_original)
         else:
-            self.c = Canvas()
+            self.canvas = Canvas()
 
-        self.c.area_signal.connect(self.on_edit_area)
+        self.canvas.area_signal.connect(self.on_edit_area)
+        self.canvas.clear_contour_button_signal.connect(self.clear_contour_button_isEnabled)
+        self.canvas.cancel_button_signal.connect(self.cancel_button_button_isEnabled)
+        self.canvas.save_button_signal.connect(self.save_button_isEnabled)
+        self.canvas.contour_close_button_signal.connect(self.contour_close_button_isEnabled)
 
-        self.ui.verticalLayout.addWidget(self.c)
-        # self.c.set_pen(3, QtGui.QColor(0, 0, 0))
-        # self.c.set_brush(QColor(0, 0, 127, 100))
+        self.ui.verticalLayout.addWidget(self.canvas)
 
-        self.ui.cancel_button.clicked.connect(self.c.cancel_stage)
-        self.ui.clear_countor_button.clicked.connect(self.c.clear_canvas)
-        self.ui.countor_close_button.clicked.connect(self.c.close_countor)
-        self.ui.zoom_plus.clicked.connect(self.c.zoom_plus)
-        self.ui.zoom_minus.clicked.connect(self.c.zoom_minus)
+        self.ui.cancel_button.clicked.connect(self.canvas.cancel_stage)
+        self.ui.clear_countor_button.clicked.connect(self.canvas.clear_canvas)
+        self.ui.countor_close_button.clicked.connect(self.canvas.close_countor)
+        self.ui.zoom_plus.clicked.connect(self.canvas.zoom_plus)
+        self.ui.zoom_minus.clicked.connect(self.canvas.zoom_minus)
         self.ui.cancel_button.setEnabled(True)
         self.ui.clear_countor_button.setEnabled(True)
-        self.ui.save_button.clicked.connect(self.c.getPolygon)
-        self.ui.save_button.clicked.connect(self.c.getAreaFromPolygon)
-        self.path = QPainterPath()
-        self.polygon_QPoint = []
+        self.ui.save_button.clicked.connect(self.canvas.getPolygon)
+        self.ui.save_button.clicked.connect(self.canvas.getAreaFromPolygon)
         self.ui.save_button.clicked.connect(self.on_click_save_image_button)
+
         self.history = HistoryNeuralNetwork()
         self.categorical = self.get_predict_categorical()
         self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
@@ -358,10 +363,7 @@ class DrawingCounter(QDialog):
         self.ui.countor_close_button.setEnabled(False)
         self.ui.clear_countor_button.setEnabled(False)
 
-        self.c.clear_contour_button_signal.connect(self.clear_contour_button_isEnabled)
-        self.c.cancel_button_signal.connect(self.cancel_button_button_isEnabled)
-        self.c.save_button_signal.connect(self.save_button_isEnabled)
-        self.c.contour_close_button_signal.connect(self.contour_close_button_isEnabled)
+
 
     @Slot(bool)
     def save_button_isEnabled(self, b):
@@ -393,12 +395,13 @@ class DrawingCounter(QDialog):
 
     @Slot(int)
     def on_edit_area(self, area):
+        print(area)
         self.ui.area_countor_label.setText(f'Площадь: {str(area)}')
 
     def select_disease(self):
         # print(self.c.get_len_item_history())
         # print(self.c.get_len_list_item_history())
-        if self.c.get_len_item_history() + self.c.get_len_list_item_history() != 0:
+        if self.canvas.get_len_item_history() + self.canvas.get_len_list_item_history() != 0:
             message_error_show(self, message='Можно указать только 1 болезнь\n Очистите рисинок от других', title='Ошибка')
             return 0
         dlg = QDialog()
@@ -421,24 +424,25 @@ class DrawingCounter(QDialog):
         self.ui.type_disease_label.setText(category.name_category_ru)
         r, g, b = literal_eval(category.color)
         self.color.setRgb(r, g, b)
-        self.c.set_pen(3, self.color)
-        self.c.set_brush(QColor(r, g, b, 127))
+        self.canvas.set_pen(3, self.color)
+        self.canvas.set_brush(QColor(r, g, b, 127))
 
     def get_predict_categorical(self) -> list[ResultPredict]:
         return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
-        image = self.c.get_image_from_scene()
+        image = self.canvas.get_image_from_scene()
         print(type(image))
         # print('save')
         # print(self.history.result_predict)
-        # if self.history is not None:
-        #     self.history.polygon_mask = self.c.getPolygon()
-        #     qiamge = self.c.original_image_copy
-        #     self.history.photo_predict_edit_doctor = image_to_base64(qiamge)
-        #     self.history_n_n.emit(self.history)
+        if self.history is not None:
+            self.history.polygon_mask = self.canvas.getPolygon()
+            qiamge = self.canvas.original_image_copy
+            self.history.photo_predict_edit_doctor = image_to_base64(qiamge.toImage())
+            self.history.area_wound = self.canvas.getAreaFromPolygon()
+            self.history_n_n.emit(self.history)
         self.image_result_edit_doctor.emit(QPixmap.fromImage(image))
-        # self.close()
+        self.close()
 
 
 if __name__ == '__main__':

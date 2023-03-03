@@ -142,6 +142,16 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.label_date)
 
+        self.label_8 = QLabel(Form)
+        self.label_8.setObjectName(u"label_8")
+
+        self.verticalLayout_2.addWidget(self.label_8)
+
+        self.area_label = QLabel(Form)
+        self.area_label.setObjectName(u"area_label")
+
+        self.verticalLayout_2.addWidget(self.area_label)
+
 
         self.verticalLayout.addLayout(self.verticalLayout_2)
 
@@ -176,6 +186,8 @@ class Ui_Form(object):
         self.label_polygon.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"\u0414\u0430\u0442\u0430:", None))
         self.label_date.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_8.setText(QCoreApplication.translate("Form", u"\u041f\u043b\u043e\u0449\u0430\u0434\u044c:", None))
+        self.area_label.setText(QCoreApplication.translate("Form", u"area_label", None))
         self.button_close.setText(QCoreApplication.translate("Form", u"\u0417\u0430\u043a\u0440\u044b\u0442\u044c", None))
     # retranslateUi
 
