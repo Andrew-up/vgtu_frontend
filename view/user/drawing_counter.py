@@ -10,7 +10,7 @@ from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QPixmap, QBrush, QColor, QPainterPath, QPen, QPainter, QImage
 from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, \
     QPushButton, QGraphicsScene, QGraphicsItem, QGraphicsView, QGraphicsEllipseItem, QGraphicsLineItem, \
-    QGraphicsPolygonItem, QGraphicsPathItem
+    QGraphicsPolygonItem, QGraphicsPathItem, QGraphicsRectItem
 
 from model.history_neural_network import HistoryNeuralNetwork
 from model.result_predict import ResultPredict
@@ -118,6 +118,10 @@ class Canvas(QtWidgets.QGraphicsView):
             sssssssss = int(len(xy) / 2)
             xy = xy.reshape((sssssssss, 2))
             xy = xy.astype(int)
+            x, y, w, h = cv2.boundingRect(xy)
+            rect = QGraphicsRectItem(x, y, w, h)
+            self.scene_canvas.addItem(rect)
+
             summ_area += int(cv2.contourArea(xy))
         summ_area = summ_area * coefficient_k
         return int(summ_area)
@@ -131,7 +135,6 @@ class Canvas(QtWidgets.QGraphicsView):
         self.item_history = []
         self.list_item_history = []
         self.area_signal.emit(self.getAreaFromPolygon())
-
         self.save_button_signal.emit(False)
         self.cancel_button_signal.emit(False)
         self.clear_contour_button_signal.emit(False)

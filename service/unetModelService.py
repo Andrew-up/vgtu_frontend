@@ -128,16 +128,22 @@ class LoadingModelAndPredict(QThread):
         area_full = 0
 
         polygon_result = []
+        bbox_list = []
         if polygon is not None:
             # print(dir(polygon))
             polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
             image_temp = np.zeros_like(image, np.uint8)
             image_original_copy = image.copy()
+            print(f'count polygon: {len(polygon)}')
+
             for contour in polygon:
                 # print(contour)
                 peri = cv2.arcLength(contour, True)
                 polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
                 area_full += cv2.contourArea(contour)
+                box = cv2.boundingRect(contour)
+                bbox_list.append(box)
+
                 area_full = int(area_full)
                 cv2.fillPoly(image_temp, pts=[contour], color=color)
                 # contour = contour.flatten().tolist()
@@ -148,6 +154,13 @@ class LoadingModelAndPredict(QThread):
             alpha = 0.5
             mask = image_temp.astype(bool)
             image_original_copy[mask] = cv2.addWeighted(image_original_copy, alpha, image_temp, 1 - alpha, 0)[mask]
+
+            for i in bbox_list:
+                x, y, w, h = i
+                cv2.rectangle(image_original_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+
+
         return image_original_copy, polygon_result, area_full
 
     def unpackArray(self, array):
@@ -168,7 +181,6 @@ class LoadingModelAndPredict(QThread):
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             # print(len(res[0, 0, 0, :]))
             list_predict = list()
-
 
             for i in range(len(res[0, 0, 0, :])):
                 list_predict.append(np.sum(res[0, :, :, i]))
