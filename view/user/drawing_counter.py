@@ -51,6 +51,7 @@ class Canvas(QtWidgets.QGraphicsView):
     save_button_signal = Signal(bool)
     contour_close_button_signal = Signal(bool)
     clear_contour_button_signal = Signal(bool)
+    open_select_diagnosis = Signal()
 
     def __init__(self, image_original: QPixmap = None):
         super().__init__()
@@ -260,7 +261,7 @@ class Canvas(QtWidgets.QGraphicsView):
         self.save_button_signal.emit(False)
         if event.button() == Qt.MouseButton.LeftButton:
             if self.default_pen:
-                message_error_show(self, message='Укажите категорию болезни', title='Ошибка')
+                self.open_select_diagnosis.emit()
                 return 0
             brush = self.get_brush()
             super(Canvas, self).mousePressEvent(event)
@@ -356,12 +357,14 @@ class DrawingCounter(QDialog):
         self.history = HistoryNeuralNetwork()
         self.categorical = self.get_predict_categorical()
         self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
+        self.canvas.open_select_diagnosis.connect(self.select_disease)
         self.color = QColor()
 
         self.ui.cancel_button.setEnabled(False)
         self.ui.save_button.setEnabled(False)
         self.ui.countor_close_button.setEnabled(False)
         self.ui.clear_countor_button.setEnabled(False)
+
 
 
 
@@ -431,18 +434,19 @@ class DrawingCounter(QDialog):
         return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
-        image = self.canvas.get_image_from_scene()
-        print(type(image))
-        # print('save')
-        # print(self.history.result_predict)
-        if self.history is not None:
-            self.history.polygon_mask = self.canvas.getPolygon()
-            qiamge = self.canvas.original_image_copy
-            self.history.photo_predict_edit_doctor = image_to_base64(qiamge.toImage())
-            self.history.area_wound = self.canvas.getAreaFromPolygon()
-            self.history_n_n.emit(self.history)
-        self.image_result_edit_doctor.emit(QPixmap.fromImage(image))
-        self.close()
+        pass
+
+        #Не удалять
+        # image = self.canvas.get_image_from_scene()
+        # print(type(image))
+        # if self.history is not None:
+        #     self.history.polygon_mask = self.canvas.getPolygon()
+        #     qiamge = self.canvas.original_image_copy
+        #     self.history.photo_predict_edit_doctor = image_to_base64(qiamge.toImage())
+        #     self.history.area_wound = self.canvas.getAreaFromPolygon()
+        #     self.history_n_n.emit(self.history)
+        # self.image_result_edit_doctor.emit(QPixmap.fromImage(image))
+        # self.close()
 
 
 if __name__ == '__main__':

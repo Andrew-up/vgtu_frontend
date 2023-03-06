@@ -6,6 +6,8 @@ from dto.patientDTO import PatientDTO, getPatient, getPatientDTO
 from model.patient_model import Patient
 from model.history_patient import HistoryPatient
 from model.result_predict import ResultPredict
+from model.history_neural_network import HistoryNeuralNetwork
+from model.Annotations import Annotations
 from utils.read_xml_file import ReadXmlProject
 
 SECRET_KEY = {"key": 'hFGHFEFyr67ggghhPJhdfh123dd'}
@@ -39,8 +41,10 @@ def get_history_patient(id_patient) -> list[HistoryPatient]:
     h = r.json()
     list_history_patient: list[HistoryPatient] = []
     for i in h:
-        one_obj = HistoryPatient(**i)
-        list_history_patient.append(one_obj)
+        one_obj = HistoryPatient(**i).set_dict()
+        print(one_obj)
+        # list_history_patient.append(one_obj)
+
     return list_history_patient
 
 
@@ -65,10 +69,16 @@ def delete_patient(id_patient):
 def add_history_patient(history: HistoryPatient):
     str_api = f'{api}/history/add/{history.patient_id}/'
     json = history.__dict__
+    print(json)
     r = requests.post(str_api, json=json, headers={"Content-Type": "application/json"})
     return r.status_code, r.text
 
 
+def get_history_Json(history: HistoryPatient()):
+    if history:
+        hs = HistoryPatient(**history.__dict__).get_dict()
+        print(hs)
+    return 0
 
 def get_categorical_predict() -> list[ResultPredict]:
     str_api = f'{api}/categorical/all/'
@@ -80,17 +90,38 @@ def get_categorical_predict() -> list[ResultPredict]:
 
 
 if __name__ == '__main__':
+    # h = HistoryPatient()
+    # h.comment = 'test'
+    # h_nn = HistoryNeuralNetwork()
+    # h_nn.id_history_neural_network = 1
+    # res = ResultPredict()
+    # res.name_category_ru = '1234'
+    # h.history_neutral_network = h_nn
+    #
+    # a = Annotations()
+    # a.segmentation = "123,123,123,123123"
+    # a.bbox = "[123,123,22,33]"
+    # h.history_neutral_network.annotations.append(a)
+    # h.history_neutral_network.annotations.append(a)
+    # h.history_neutral_network.annotations.append(a)
+    # # h.history_neutral_network.annotations = h.history_neutral_network.annotations
+    # h.history_neutral_network.result_predict = res
+    # h.history_neutral_network = h.history_neutral_network
+    # print(get_history_Json(h))
+
+    get_history_patient(1)
+
     # delete_patient(10)
-    # get_patient_by_id(30)
-    # l = get_all_patients(1)
-    # print(l[0].id_patient)
-    # p = Patient()
-    # p.firstname = "123"
-    # add_patient(p)
-    # get_patient_by_id(1)
-    # get_history_patient(5)
-    # p = Patient()
-    # p.address = "123"
-    # add_patient(p)
-    print(get_categorical_predict())
-    pass
+#     # get_patient_by_id(30)
+#     # l = get_all_patients(1)
+#     # print(l[0].id_patient)
+#     # p = Patient()
+#     # p.firstname = "123"
+#     # add_patient(p)
+#     # get_patient_by_id(1)
+#     # get_history_patient(5)
+#     # p = Patient()
+#     # p.address = "123"
+#     # add_patient(p)
+#     # print(get_categorical_predict())
+#     pass
