@@ -15,13 +15,14 @@ from matplotlib import pyplot as plt
 from definitions import DATASET_PATH, MODEL_H5_PATH
 from model.result_predict import ResultPredict
 from model.result_scan import ResultScan
+from model.Annotations import Annotations
 
 
 class LoadingModelAndPredict(QThread):
     loading_model_end = Signal(str)
     predict_image_result = Signal(QPixmap)
     image_original = Signal(QImage)
-    result_scan = Signal(ResultScan)
+    result_scan = Signal(Annotations)
     video_stream_image = Signal(QImage)
     # Запомнить номер камеры
     number_cam = -1
@@ -32,14 +33,13 @@ class LoadingModelAndPredict(QThread):
         start = time.time()
         self.model = None
         self.path_model = path_model
-        # self.model: Model
         self.segmentation_polygon = None
         self.area = None
         self.image_batch = None
         self.scan_from_cam = False
         self.image_path = None
-        self.categorical_predict = None
-        self.categorical_predict: list[ResultPredict]
+        self.categorical_predict: list[ResultPredict] = []
+        self.list_annotations: list[Annotations] = []
 
     def set_categorical_predict(self, categorical):
         self.categorical_predict = categorical
@@ -118,17 +118,14 @@ class LoadingModelAndPredict(QThread):
             image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
             return image
 
-    def drawingMaskForImagePredict(self, image: Image, predict: Image, color):
+    def drawingMaskForImagePredict(self, image: Image, predict: Image, color, result_category: ResultPredict):
+        self.list_annotations.clear()
         p = cv2.resize(predict, (512, 512), interpolation=cv2.INTER_AREA)
         dilation = cv2.dilate(p, (3, 3), iterations=1)
         edged = cv2.Canny(dilation, 1, 200)
         polygon, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        # print(polygon)
         image_original_copy = image.copy()
-        area_full = 0
-
         polygon_result = []
-        bbox_list = []
         if polygon is not None:
             # print(dir(polygon))
             polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
@@ -140,28 +137,33 @@ class LoadingModelAndPredict(QThread):
                 # print(contour)
                 peri = cv2.arcLength(contour, True)
                 polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
-                area_full += cv2.contourArea(contour)
+                polygon_annotation = cv2.approxPolyDP(contour, 0.01 * peri, True)
                 box = cv2.boundingRect(contour)
-                bbox_list.append(box)
-
-                area_full = int(area_full)
                 cv2.fillPoly(image_temp, pts=[contour], color=color)
-                # contour = contour.flatten().tolist()
-                # if len(contour) > 4:
-                #     segmentation.append(contour)
+                a = Annotations()
+                a.id_annotations = None
+                a.history_nn_id = None
+                a.segmentation = self.unpackArray(polygon_annotation)
+                x, y, w, h = box
+                a.bbox = [x, y, w, h]
+                a.category_id = result_category.id_category
+                a.category = result_category
+                a.area = cv2.contourArea(polygon_annotation)
+                self.list_annotations.append(a)
+
+            print(self.list_annotations)
+            for i in self.list_annotations:
+                print(i.__dict__)
 
             cv2.drawContours(image_original_copy, polygon_result, -1, color, thickness=2)
             alpha = 0.5
             mask = image_temp.astype(bool)
             image_original_copy[mask] = cv2.addWeighted(image_original_copy, alpha, image_temp, 1 - alpha, 0)[mask]
 
-            for i in bbox_list:
-                x, y, w, h = i
+            for i in self.list_annotations:
+                x, y, w, h = i.bbox
                 cv2.rectangle(image_original_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-
-
-        return image_original_copy, polygon_result, area_full
+        return image_original_copy, polygon_result
 
     def unpackArray(self, array):
         print('=============')
@@ -169,8 +171,8 @@ class LoadingModelAndPredict(QThread):
         for i in array:
             for j in i:
                 a, b = j
-                res.append(a)
-                res.append(b)
+                res.append(float(a))
+                res.append(float(b))
         return res
 
     def predict(self, batch, original_image):
@@ -179,7 +181,6 @@ class LoadingModelAndPredict(QThread):
         if self.model is not None:
             res = self.model.predict(batch)
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
-            # print(len(res[0, 0, 0, :]))
             list_predict = list()
 
             for i in range(len(res[0, 0, 0, :])):
@@ -200,9 +201,9 @@ class LoadingModelAndPredict(QThread):
             # predict3 = res[0, :, :, 2]
             # predict3 = (predict3 > 0.4).astype(np.uint8)
             # predict3 = np.array(predict3) * 255
+
             color1 = []
             for i in self.categorical_predict:
-                # print(i.color)
                 color1.append(literal_eval(i.color))
 
             # color1 = []
@@ -210,34 +211,40 @@ class LoadingModelAndPredict(QThread):
                 color = color1[max_index]
             else:
                 color = (0, 0, 0)
-            # color3 = (0, 0, 255)
 
-            # Расширение
-            img1, polygon1, area_full1 = self.drawingMaskForImagePredict(image=img_original_resize, predict=predict1,
-                                                                         color=color[::-1])
+            result_category = self.categorical_predict[max_index]
+            print(result_category)
+            print(result_category.name_category_ru)
 
-            result_mask = []
-            for i in polygon1:
-                result_mask.append(self.unpackArray(i))
-            base64_polygon = base64.b64encode(str(result_mask).encode())
+            img1, polygon1 = self.drawingMaskForImagePredict(image=img_original_resize,
+                                                             predict=predict1,
+                                                             color=color[::-1],
+                                                             result_category=result_category)
+
+            self.result_scan.emit(self.list_annotations)
+
+            # result_mask = []
+            # for i in polygon1:
+            #     result_mask.append(self.unpackArray(i))
+            # base64_polygon = base64.b64encode(str(result_mask).encode())
 
             # img2, polygon2, area_full2 = self.drawingMaskForImagePredict(image=img1, predict=predict2, color=color2[::-1])
             # img3, polygon3, area_full3 = self.drawingMaskForImagePredict(image=img2, predict=predict3, color=color3[::-1])
 
-            scan_list = []
-            scan_list: list[ResultScan]
-            if area_full1 != 0:
-                scan = ResultScan()
-                scan.color = color
-                print(max_index)
-                if max_index <= len(self.categorical_predict):
-                    scan.type_wound = self.categorical_predict[max_index].name_category_ru
-                    scan.result_predict_id = self.categorical_predict[max_index].id_category
-                else:
-                    scan.type_wound = 'Проверьте категории на сервере'
-                scan.area_wound = area_full1
-                scan.polygon_wound = str(base64_polygon)
-                scan_list.append(scan)
+            # scan_list = []
+            # scan_list: list[ResultScan]
+            # if area_full1 != 0:
+            #     scan = ResultScan()
+            #     scan.color = color
+            #     print(max_index)
+            #     if max_index <= len(self.categorical_predict):
+            #         scan.type_wound = self.categorical_predict[max_index].name_category_ru
+            #         scan.result_predict_id = self.categorical_predict[max_index].id_category
+            #     else:
+            #         scan.type_wound = 'Проверьте категории на сервере'
+            #     scan.area_wound = area_full1
+            #     scan.polygon_wound = str(base64_polygon)
+            #     scan_list.append(scan)
 
             # if area_full2 != 0:
             #     scan = ResultScan()
@@ -261,15 +268,11 @@ class LoadingModelAndPredict(QThread):
             # scan.image_wound = img_original_resize
             # scan.type_wound = DATASET_LABELS[max_index]
 
-            self.result_scan.emit(scan_list)
+
 
             # scan.area_wound
 
             return img1
-
-    def get_random_image(self):
-        image_path = os.path.join(DATASET_PATH, random.choice(os.listdir(DATASET_PATH)))
-        return image_path
 
     def image_preprocessing(self, Image_original):
 
@@ -279,14 +282,12 @@ class LoadingModelAndPredict(QThread):
         train_img = train_img.astype(np.float32) / 255.
 
         if (len(train_img.shape) == 3 and train_img.shape[2] == 3):
-            print('1')
             pil_image = Image.fromarray((train_img * 255).astype(np.uint8))
             plt.imshow(pil_image)
             plt.show()
             return train_img
         else:
             stacked_img = np.stack((train_img,) * 3, axis=-1)
-            print('2')
             return stacked_img
 
     def create_batch(self, image11):

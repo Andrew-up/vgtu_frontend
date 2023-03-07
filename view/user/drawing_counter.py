@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, \
 
 from model.history_neural_network import HistoryNeuralNetwork
 from model.result_predict import ResultPredict
+from model.Annotations import Annotations
 from service.PatientService import PatientServiceFront
 from service.imageService import image_to_base64
 from view.py.draw_counter_widget import Ui_Form
@@ -22,11 +23,15 @@ from itertools import cycle
 from utils.message_box import message_error_show
 from utils.read_xml_file import ReadXmlProject
 
+from itertools import groupby
+
+
 class TypeHistory(enum.Enum):
     null = 0
     line = 1
     point = 2
     polygon = 3
+    rect = 4
 
 
 class HistoryCanvasTwo(object):
@@ -45,8 +50,7 @@ class ListHistoryCanvasTwo(object):
 
 
 class Canvas(QtWidgets.QGraphicsView):
-    area_signal = Signal(int)
-
+    area_signal = Signal(str)
     cancel_button_signal = Signal(bool)
     save_button_signal = Signal(bool)
     contour_close_button_signal = Signal(bool)
@@ -73,10 +77,20 @@ class Canvas(QtWidgets.QGraphicsView):
         self.item_history: list[HistoryCanvasTwo] = []
         self.list_item_history: list[ListHistoryCanvasTwo] = []
         self.default_pen = True
+        self.annotation_list: list[Annotations] = []
+        self._category: ResultPredict = ResultPredict()
 
+    @property
+    def category(self) -> ResultPredict:
+        return self._category
+
+    @category.setter
+    def category(self, value):
+        self._category = value
 
     def get_image_from_scene(self):
-        image = QImage(int(self.scene_canvas.width()), int(self.scene_canvas.height()), QImage.Format_ARGB32_Premultiplied)
+        image = QImage(int(self.scene_canvas.width()), int(self.scene_canvas.height()),
+                       QImage.Format_ARGB32_Premultiplied)
         painter = QPainter(image)
         self.scene_canvas.render(painter)
         painter.end()
@@ -110,22 +124,19 @@ class Canvas(QtWidgets.QGraphicsView):
                     polygon.append(sssss)
         return polygon
 
-    def getAreaFromPolygon(self):
-        coefficient_k = ReadXmlProject().get_coefficient_k
-        p = self.getPolygon()
-        summ_area: float = 0
-        for i in p:
-            xy = np.array(i)
+    def polygonToNumpyArray(self, polygon):
+        if polygon:
+            xy = np.array(polygon)
             sssssssss = int(len(xy) / 2)
             xy = xy.reshape((sssssssss, 2))
             xy = xy.astype(int)
-            x, y, w, h = cv2.boundingRect(xy)
-            rect = QGraphicsRectItem(x, y, w, h)
-            self.scene_canvas.addItem(rect)
-
-            summ_area += int(cv2.contourArea(xy))
-        summ_area = summ_area * coefficient_k
-        return int(summ_area)
+            return xy
+    def getAreaFromPolygon(self, polygon):
+        summ_area = 0.0
+        if polygon:
+            xy = self.polygonToNumpyArray(polygon)
+            summ_area = float(cv2.contourArea(xy))
+        return float(summ_area)
 
     def clearScene(self):
         self.scene_canvas.clear()
@@ -135,22 +146,36 @@ class Canvas(QtWidgets.QGraphicsView):
         self.clearScene()
         self.item_history = []
         self.list_item_history = []
-        self.area_signal.emit(self.getAreaFromPolygon())
         self.save_button_signal.emit(False)
         self.cancel_button_signal.emit(False)
         self.clear_contour_button_signal.emit(False)
         self.contour_close_button_signal.emit(False)
+        self.annotation_list = []
+        # print(self.getAreaFromPolygon([]))
+        self.area_signal.emit(str(self.getAreaFromPolygon([])))
 
     def cancel_stage(self):
         if not self.item_history and self.list_item_history:
             if self.list_item_history[-1].list_history:
                 self.item_history = self.list_item_history[-1].list_history
                 del self.list_item_history[-1]
+                if self.annotation_list:
+                    print(len(self.annotation_list))
+                    del self.annotation_list[-1]
+                    self.sum_annotation_list()
+
+
 
         if self.item_history:
             if self.item_history[-1].type == TypeHistory.polygon:
                 self.scene_canvas.removeItem(self.item_history[-1].item_history)
                 del self.item_history[-1]
+
+        if self.item_history:
+            if self.item_history[-1].type == TypeHistory.rect:
+                self.scene_canvas.removeItem(self.item_history[-1].item_history)
+                del self.item_history[-1]
+
         if self.item_history:
             if self.item_history[-1].type == TypeHistory.point:
                 self.scene_canvas.removeItem(self.item_history[-1].item_history)
@@ -159,10 +184,9 @@ class Canvas(QtWidgets.QGraphicsView):
             if self.item_history[-1].type == TypeHistory.line:
                 self.scene_canvas.removeItem(self.item_history[-1].item_history)
                 del self.item_history[-1]
-        self.area_signal.emit(self.getAreaFromPolygon())
+        # self.area_signal.emit(self.getAreaFromPolygon())
 
         if not self.item_history and not self.list_item_history:
-            # print('zzzzzzzzzzzzzzzz')
             self.save_button_signal.emit(False)
             self.cancel_button_signal.emit(False)
             self.clear_contour_button_signal.emit(False)
@@ -175,15 +199,26 @@ class Canvas(QtWidgets.QGraphicsView):
         if self.list_item_history and not self.item_history:
             self.save_button_signal.emit(True)
 
+    def sum_annotation_list(self):
+        string_res = str()
+        if self.annotation_list:
+            sort_list = sorted(self.annotation_list, key=lambda x: x.category_id)
+            for key, groups_item in groupby(sort_list, key=lambda x: x.category_id):
+                sum = 0.0
+                category_ru: str = str()
+                for item in groups_item:
+                    sum += item.area
+                    category_ru = item.category.name_category_ru
+                string_res += category_ru + ' ' + str(sum) + ', '
+            self.area_signal.emit(string_res)
 
     def close_countor(self):
-
         sum_points = 0
         pen = self.get_pen()
         rad = 1
         scale = pen.width() * 2
         canvas = self.scene_canvas
-
+        a = Annotations()
         for i in self.item_history:
             if i.type == TypeHistory.point:
                 sum_points += 1
@@ -218,7 +253,21 @@ class Canvas(QtWidgets.QGraphicsView):
                 polygon.setPolygon(polygon_points)
                 polygon.setBrush(self.get_brush())
                 canvas.addItem(polygon)
+
+                polygon_xy = []
+                for i in polygon.polygon():
+                    polygon_xy.append(i.x())
+                    polygon_xy.append(i.y())
+                a.segmentation = polygon_xy
+                a.area = self.getAreaFromPolygon(polygon_xy)
+                array_np = self.polygonToNumpyArray(polygon_xy)
+                bbox = cv2.boundingRect(array_np)
+                x, y, w, h = bbox
+                rect = QGraphicsRectItem(x, y, w, h)
+                self.scene_canvas.addItem(rect)
+                self.add_history(rect, TypeHistory.rect)
                 self.add_history(polygon, TypeHistory.polygon)
+                a.bbox = [x, y, w, h]
                 if self.list_item_history:
                     listzzzzzzzzz = ListHistoryCanvasTwo(self.list_item_history[-1].id_list_history + 1,
                                                          self.item_history, polygon)
@@ -227,11 +276,17 @@ class Canvas(QtWidgets.QGraphicsView):
                 self.list_item_history.append(listzzzzzzzzz)
                 self.item_history = []
 
-        self.area_signal.emit(self.getAreaFromPolygon())
         self.contour_close_button_signal.emit(False)
         self.save_button_signal.emit(True)
-        # print(self.getPolygon())
 
+        if self.annotation_list:
+            a.id_annotations = self.annotation_list[-1].id_annotations + 1
+            print(a.id_annotations)
+        a.category_id = self.category.id_category
+        a.history_nn_id = None
+        a.category = self.category
+        self.annotation_list.append(a)
+        self.sum_annotation_list()
 
     def set_pen(self, width, color):
         pen = QtGui.QPen()
@@ -306,7 +361,6 @@ class Canvas(QtWidgets.QGraphicsView):
                     self.clear_contour_button_signal.emit(True)
                     # print(point.rect().getRect())
 
-
         if event.button() == Qt.MouseButton.RightButton:
             self.cancel_stage()
 
@@ -326,7 +380,7 @@ class Canvas(QtWidgets.QGraphicsView):
 
 class DrawingCounter(QDialog):
     image_result_edit_doctor = Signal(QPixmap)
-    history_n_n = Signal(HistoryNeuralNetwork)
+    annotation_signal = Signal(Annotations)
 
     def __init__(self, image_original=None, parent=None):
         super(DrawingCounter, self).__init__(parent)
@@ -343,9 +397,9 @@ class DrawingCounter(QDialog):
         self.canvas.cancel_button_signal.connect(self.cancel_button_button_isEnabled)
         self.canvas.save_button_signal.connect(self.save_button_isEnabled)
         self.canvas.contour_close_button_signal.connect(self.contour_close_button_isEnabled)
+        self.canvas.open_select_diagnosis.connect(self.select_disease)
 
         self.ui.verticalLayout.addWidget(self.canvas)
-
         self.ui.cancel_button.clicked.connect(self.canvas.cancel_stage)
         self.ui.clear_countor_button.clicked.connect(self.canvas.clear_canvas)
         self.ui.countor_close_button.clicked.connect(self.canvas.close_countor)
@@ -353,23 +407,18 @@ class DrawingCounter(QDialog):
         self.ui.zoom_minus.clicked.connect(self.canvas.zoom_minus)
         self.ui.cancel_button.setEnabled(True)
         self.ui.clear_countor_button.setEnabled(True)
-        self.ui.save_button.clicked.connect(self.canvas.getPolygon)
+
         self.ui.save_button.clicked.connect(self.canvas.getAreaFromPolygon)
         self.ui.save_button.clicked.connect(self.on_click_save_image_button)
-
-        self.history = HistoryNeuralNetwork()
+        self.history_n_n = HistoryNeuralNetwork()
         self.categorical = self.get_predict_categorical()
-        self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
-        self.canvas.open_select_diagnosis.connect(self.select_disease)
-        self.color = QColor()
 
+        self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
+        self.color = QColor()
         self.ui.cancel_button.setEnabled(False)
         self.ui.save_button.setEnabled(False)
         self.ui.countor_close_button.setEnabled(False)
         self.ui.clear_countor_button.setEnabled(False)
-
-
-
 
     @Slot(bool)
     def save_button_isEnabled(self, b):
@@ -399,16 +448,14 @@ class DrawingCounter(QDialog):
         else:
             self.ui.cancel_button.setEnabled(False)
 
-    @Slot(int)
-    def on_edit_area(self, area):
-        print(area)
-        self.ui.area_countor_label.setText(f'Площадь: {str(area)}')
+    @Slot(str)
+    def on_edit_area(self, string):
+        self.ui.area_countor_label.setText(f'Площадь: {string}')
 
     def select_disease(self):
-        # print(self.c.get_len_item_history())
-        # print(self.c.get_len_list_item_history())
-        if self.canvas.get_len_item_history() + self.canvas.get_len_list_item_history() != 0:
-            message_error_show(self, message='Можно указать только 1 болезнь\n Очистите рисинок от других', title='Ошибка')
+
+        if self.canvas.get_len_item_history() != 0:
+            message_error_show(self, message='Вначале замкните контур текущей болезни', title='Ошибка')
             return 0
         dlg = QDialog()
         layout = QVBoxLayout()
@@ -425,21 +472,38 @@ class DrawingCounter(QDialog):
 
     @Slot(ResultPredict)
     def ooooooooooooooooo(self, category: ResultPredict):
-        self.history.result_predict_id = category.id_category
-        self.history.result_predict = category
-        self.ui.type_disease_label.setText(category.name_category_ru)
+        self.ui.type_disease_label.setText('Сейчас выбрано: ' + category.name_category_ru)
         r, g, b = literal_eval(category.color)
         self.color.setRgb(r, g, b)
         self.canvas.set_pen(3, self.color)
         self.canvas.set_brush(QColor(r, g, b, 127))
+        self.canvas.category = category
 
     def get_predict_categorical(self) -> list[ResultPredict]:
         return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
-        pass
+        self.history_n_n.annotations.clear()
+        for i in self.canvas.annotation_list:
+            a = Annotations(**i.__dict__)
+            a.category = ResultPredict(**i.category.__dict__)
+            self.history_n_n.annotations.append(a)
+        qiamge = self.canvas.get_image_from_scene()
 
-        #Не удалять
+        self.history_n_n.photo_predict_edit_doctor = image_to_base64(qiamge)
+        self.image_result_edit_doctor.emit(QPixmap.fromImage(qiamge))
+        self.annotation_signal.emit(self.history_n_n.annotations)
+
+
+        # self.history_n_n.annotations.clear()
+        # for i in self.canvas.annotation_list:
+        #     print(type(i.category))
+        #     a = Annotations(**i.__dict__)
+        #     a.category = ResultPredict(**i.category.__dict__).__dict__
+        #     self.history_n_n.annotations.append(a.__dict__)
+        # print(self.history_n_n.__dict__)
+
+        # Не удалять
         # image = self.canvas.get_image_from_scene()
         # print(type(image))
         # if self.history is not None:
