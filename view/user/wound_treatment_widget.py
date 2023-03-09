@@ -24,6 +24,8 @@ from service.imageService import ImageConverter, image_to_base64
 from model.patient_model import Patient
 from utils.message_box import message_error_show, message_info_show
 from utils.read_xml_file import ReadXmlProject
+from model.result_predict import ResultPredict
+
 
 
 class WoundHealingPatient(QWidget):
@@ -71,13 +73,7 @@ class WoundHealingPatient(QWidget):
         history.date = str(datetime.datetime.now())
         history.comment = 'тест'
         history.patient_id = self.patient_id
-        # history_nn = HistoryNeuralNetwork()
-        # history_nn.result_predict_id = 1
-        # history_nn.photo_original = '12312312'
-        # history_nn.photo_predict = 'ssssss'
-        # history.comment = 'comment-test'
-        # history.date = 'date-test'
-        history.history_neutral_network = self.history_n_n.__dict__
+        history.history_neutral_network = self.history_n_n
 
         # history.patient_id = 1
         s = PatientServiceFront(1)
@@ -139,8 +135,11 @@ class WoundHealingPatient(QWidget):
         self.ui.label_9.setText(f'<font style="color:rgb(255, 0, 0);"> КОНТУР РАНЫ НЕ ОПРЕДЕЛЕН </font>')
         coefficient_k = ReadXmlProject().get_coefficient_k
         string_res = str()
+
         if annotation_list:
+            self.history_n_n.annotations = annotation_list
             self.ui.label_9.setText(f'<font style="color:rgb(0, 255, 0);"> Определен {len(annotation_list)} контур(а) </font>')
+
             sort_list = sorted(annotation_list, key=lambda x: x.category_id)
             for key, groups_item in groupby(sort_list, key=lambda x: x.category_id):
                 sum = 0.0
@@ -148,17 +147,16 @@ class WoundHealingPatient(QWidget):
                 for item in groups_item:
                     sum += item.area
                     category_ru = item.category.name_category_ru
-                string_res += category_ru + ' ' + str(sum) + ', '
-            self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res)
-
-
+                string_res += category_ru + ' ' + str(float(sum * coefficient_k)) + ', '
+            self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res +'<br>')
+            self.ui.wound_healing_area_wound.setWordWrap(True)
 
     def on_radio_scan_from_catalog(self):
         self.load_model_and_predict.play_video = False
         self.load_model_and_predict.scan_from_cam = False
         if self.ui.radio_scan_to_photo_catalog.isChecked():
             self.ui.button_select_ptoho_from_catalog.setVisible(True)
-            # self.load_model_and_predict.scan_from_cam = False
+            self.load_model_and_predict.scan_from_cam = False
             self.ui.wound_healing_start_scan.setEnabled(False)
 
     def check_cam_in_group(self, radio_group: QButtonGroup(), array_index_cam):
@@ -185,7 +183,7 @@ class WoundHealingPatient(QWidget):
             button_ok = QPushButton()
             button_cancel = QPushButton()
             button_ok.setText("OK")
-            button_ok.clicked.connect(lambda: self.check_cam_in_group(group, index_cam_arr))
+            res = button_ok.clicked.connect(lambda: self.check_cam_in_group(group, index_cam_arr))
             button_ok.clicked.connect(msg.close)
             button_cancel.clicked.connect(msg.close)
             button_cancel.setText("Отмена")
@@ -193,11 +191,11 @@ class WoundHealingPatient(QWidget):
             layout.addWidget(button_cancel)
             msg.setLayout(layout)
             msg.exec()
-            # self.load_model_and_predict.start()
-        # else:
-        #     print('else')
-        #     self.load_model_and_predict.play_video = True
-        #     self.load_model_and_predict.start()
+            print(self.load_model_and_predict.number_cam)
+            if self.load_model_and_predict.number_cam >=0:
+                self.load_model_and_predict.play_video = True
+                self.load_model_and_predict.start()
+
 
         if self.ui.radio_scan_to_cam.isChecked():
             self.load_model_and_predict.image_path = None

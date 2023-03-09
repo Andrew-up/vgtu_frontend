@@ -43,8 +43,7 @@ def get_history_patient(id_patient) -> list[HistoryPatient]:
     for i in h:
         one_obj = HistoryPatient(**i).set_dict()
         print(one_obj)
-        # list_history_patient.append(one_obj)
-
+        list_history_patient.append(one_obj)
     return list_history_patient
 
 
@@ -72,13 +71,6 @@ def add_history_patient(history: HistoryPatient):
     print(json)
     r = requests.post(str_api, json=json, headers={"Content-Type": "application/json"})
     return r.status_code, r.text
-
-
-def get_history_Json(history: HistoryPatient()):
-    if history:
-        hs = HistoryPatient(**history.__dict__).get_dict()
-        print(hs)
-    return 0
 
 def get_categorical_predict() -> list[ResultPredict]:
     str_api = f'{api}/categorical/all/'

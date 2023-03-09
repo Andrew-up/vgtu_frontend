@@ -201,6 +201,7 @@ class Canvas(QtWidgets.QGraphicsView):
 
     def sum_annotation_list(self):
         string_res = str()
+        coefficient_k = ReadXmlProject().get_coefficient_k
         if self.annotation_list:
             sort_list = sorted(self.annotation_list, key=lambda x: x.category_id)
             for key, groups_item in groupby(sort_list, key=lambda x: x.category_id):
@@ -209,7 +210,7 @@ class Canvas(QtWidgets.QGraphicsView):
                 for item in groups_item:
                     sum += item.area
                     category_ru = item.category.name_category_ru
-                string_res += category_ru + ' ' + str(sum) + ', '
+                string_res += category_ru + ' ' + str(float(round(sum*coefficient_k, 2))) + 'кв мм, '
             self.area_signal.emit(string_res)
 
     def close_countor(self):
@@ -412,7 +413,6 @@ class DrawingCounter(QDialog):
         self.ui.save_button.clicked.connect(self.on_click_save_image_button)
         self.history_n_n = HistoryNeuralNetwork()
         self.categorical = self.get_predict_categorical()
-
         self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
         self.color = QColor()
         self.ui.cancel_button.setEnabled(False)
@@ -451,6 +451,7 @@ class DrawingCounter(QDialog):
     @Slot(str)
     def on_edit_area(self, string):
         self.ui.area_countor_label.setText(f'Площадь: {string}')
+        self.ui.area_countor_label.setWordWrap(True)
 
     def select_disease(self):
 
@@ -484,6 +485,7 @@ class DrawingCounter(QDialog):
 
     def on_click_save_image_button(self):
         self.history_n_n.annotations.clear()
+
         for i in self.canvas.annotation_list:
             a = Annotations(**i.__dict__)
             a.category = ResultPredict(**i.category.__dict__)
@@ -513,7 +515,7 @@ class DrawingCounter(QDialog):
         #     self.history.area_wound = self.canvas.getAreaFromPolygon()
         #     self.history_n_n.emit(self.history)
         # self.image_result_edit_doctor.emit(QPixmap.fromImage(image))
-        # self.close()
+        self.close()
 
 
 if __name__ == '__main__':

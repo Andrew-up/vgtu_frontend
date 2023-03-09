@@ -5,37 +5,62 @@ from model.result_predict import  ResultPredict
 class HistoryPatient:
     def __init__(self, **entries):
         self.id_healing_history: int
-        self.patient_id: int
+        self.patient_id: int = int()
         self.history_neural_network_id: int
-        self.history_neutral_network: HistoryNeuralNetwork() = None
+        self.history_neutral_network: HistoryNeuralNetwork = HistoryNeuralNetwork()
         self.patient = None
         self.doctor = None
-        self.comment: str
-        self.date: str
+        self.comment: str = str()
+        self.date: str = str()
         self.__dict__.update(entries)
 
     def get_dict(self):
         h = HistoryPatient()
+        h.history_neutral_network = HistoryNeuralNetwork()
         if self.history_neutral_network:
+
+            h.patient_id = self.patient_id
+
+            h.history_neutral_network.photo_original = self.history_neutral_network.photo_original
+            h.history_neutral_network.photo_predict = self.history_neutral_network.photo_predict
+            h.history_neutral_network.photo_predict_edit_doctor = self.history_neutral_network.photo_predict_edit_doctor
+            h.date = self.date
+            h.comment = self.comment
+
             if self.history_neutral_network.annotations:
+                print(len(self.history_neutral_network.annotations))
+                h.history_neutral_network.annotations = []
                 for i in self.history_neutral_network.annotations:
-                    h.history_neutral_network.annotations.append(Annotations(**i.__dict__).__dict__)
-            if self.history_neutral_network.result_predict:
-                h.history_neutral_network.result_predict = self.history_neutral_network.result_predict.__dict__
+                    print('=====================')
+                    if i.id_annotations is None:
+                        i.id_annotations = 0
+                    else:
+                        i.id_annotations += 1
+                    if i.category:
+                        i.category = i.category.__dict__
+                    print(i.area)
+
+                    h.history_neutral_network.annotations.append(i.__dict__)
             h.history_neutral_network = h.history_neutral_network.__dict__
-        return h.__dict__
+        return h
 
     def set_dict(self):
         h = HistoryPatient()
-        # print(self.history_neutral_network)
-        h_nn = HistoryNeuralNetwork(**self.history_neutral_network)
-        print(h_nn.annotations)
-        # r = ResultPredict(**self.history_neutral_network.result_predict)
-        # a = Annotations(**self.history_neutral_network.annotations)
-        # h_nn = HistoryNeuralNetwork(**self.history_neutral_network)
-        # h_nn.result_predict = r
-        # h_nn.annotations = a
-        # h.history_neutral_network = h_nn
+        if self:
+            if self.history_neutral_network:
+                h_nn = HistoryNeuralNetwork(**self.history_neutral_network)
+                list_a = []
+                for i in h_nn.annotations:
+                    a = Annotations(**i)
+                    if a.category:
+                        print(a.category)
+                        a.category = ResultPredict(**a.category)
+                    list_a.append(a)
+                h_nn.annotations = list_a
+                h.history_neutral_network = h_nn
+                h.date = self.date
+                h.comment = self.comment
+
         return h
 
 

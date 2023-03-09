@@ -114,9 +114,10 @@ class LoadingModelAndPredict(QThread):
             # Возращаем кадр из видеопотока
             return frame
         else:
-            # Получаем картинку если картинка из каталога
-            image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
-            return image
+            if self.scan_from_cam == False:
+                # Получаем картинку если картинка из каталога
+                image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
+                return image
 
     def drawingMaskForImagePredict(self, image: Image, predict: Image, color, result_category: ResultPredict):
         self.list_annotations.clear()

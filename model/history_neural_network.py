@@ -8,6 +8,6 @@ class HistoryNeuralNetwork:
         self.photo_predict = None
         self.photo_predict_edit_doctor = None
         self.healing_history_id: int = 0
-        self.annotations: list[Annotations()] = []
+        self.annotations: list[Annotations] = []
         self.__dict__.update(entries)
 
