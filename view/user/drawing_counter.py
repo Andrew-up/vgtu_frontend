@@ -61,10 +61,14 @@ class Canvas(QtWidgets.QGraphicsView):
         super().__init__()
 
         if image_original is None:
-            pixmap = QtGui.QPixmap(512, 512)
+            pixmap = QtGui.QPixmap(128, 512)
             pixmap.fill(Qt.gray)
+
         else:
             pixmap = image_original
+            # print(image_original.rect())
+
+
 
         self.scene_canvas = QtWidgets.QGraphicsScene()
         self.scene_canvas.setSceneRect(pixmap.rect())
@@ -333,8 +337,12 @@ class Canvas(QtWidgets.QGraphicsView):
             rad = 1
             scale = pen.width() * 2
             # print(localPos)
-            if self.scene_canvas.sceneRect().height() > localPos.x() > 0 and \
-                    self.scene_canvas.sceneRect().width() > localPos.y() > 0:
+            # print(f'height: {self.scene_canvas.sceneRect().height()}')
+            # print(f'width: {self.scene_canvas.sceneRect().width()}')
+            # print(f'x: {localPos.x()}')
+            # print(f'y: {localPos.y()}')
+            if self.scene_canvas.sceneRect().width() > localPos.x() > 0 and \
+                    self.scene_canvas.sceneRect().height() > localPos.y() > 0:
                 point_pos_x, point_pos_y = localPos.x() - scale - rad, localPos.y() - scale - rad
                 point = QGraphicsEllipseItem()
                 point.setBrush(brush)

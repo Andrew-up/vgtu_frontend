@@ -66,7 +66,6 @@ class LoadingModelAndPredict(QThread):
                 cap.release()
                 cv2.destroyAllWindows()
                 print('поток закончен')
-                self.video_stream_image.emit(QImage())
                 break
 
     def run(self):
@@ -86,7 +85,10 @@ class LoadingModelAndPredict(QThread):
             predict = self.predict(batch_image, image)
             image_qt = self.opencvFormatToQImage(predict)
             self.predict_image_result.emit(QPixmap.fromImage(image_qt))
+        else:
+            self.video_stream_image.emit(QImage())
         print('Поток закончил свою работу')
+
 
     def load_model_func(self):
         from keras.models import load_model

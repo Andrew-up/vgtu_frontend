@@ -75,7 +75,7 @@ class SelectedCamera(QDialog):
                 a = (bright_count/all_pixels * 100)
                 p = f'Камер не обнаружно, или слишком темно. \n Процент пикселей значение которых выше 127: {round(a, 2)} % '
                 self.label.setText(p)
-                if a > 50:
+                if a > 10:
                     arr.append(index)
             cap.release()
             cv2.destroyAllWindows()
