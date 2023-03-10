@@ -25,6 +25,7 @@ from model.patient_model import Patient
 from utils.message_box import message_error_show, message_info_show
 from utils.read_xml_file import ReadXmlProject
 from model.result_predict import ResultPredict
+from view.user.selected_index_cam_widget import SelectedCamera
 
 
 
@@ -64,6 +65,8 @@ class WoundHealingPatient(QWidget):
             self.patient_id = patient.id_patient
             self.ui.wound_healing_fullname_client.setText(patient.full_name)
             self.ui.wound_healing_diagnosis_client.setText(patient.dianosis)
+
+        self.index_cam = -1
 
     def get_predict_categorical(self):
         return PatientServiceFront(1).get_all_categorical()
@@ -105,28 +108,6 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_button_result_yes.setEnabled(True)
         self.ui.wound_healing_button_result_no.setEnabled(True)
 
-    def returnCameraIndexes(self):
-        # checks the first 3 indexes.
-        index = 0
-        arr = []
-        i = 3
-        while i > 0:
-            cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
-            for jjjj in range(10):
-                cap.read()
-            success, img = cap.read()
-            print(success)
-            if cap.read()[0]:
-                arr.append(index)
-                print(index)
-            # print(cap.read()[0])
-            cap.release()
-            cv2.destroyAllWindows()
-            index += 1
-            # print(i)
-            i -= 1
-        return arr
-
     @Slot(Annotations)
     def result_scan_init(self, annotation_list: list[Annotations]):
         print('result_scan_init')
@@ -151,57 +132,39 @@ class WoundHealingPatient(QWidget):
             self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res +'<br>')
             self.ui.wound_healing_area_wound.setWordWrap(True)
 
+
+    @Slot(int)
+    def set_cam_index(self, index: int):
+        self.index_cam = index
+
     def on_radio_scan_from_catalog(self):
-        self.load_model_and_predict.play_video = False
-        self.load_model_and_predict.scan_from_cam = False
         if self.ui.radio_scan_to_photo_catalog.isChecked():
             self.ui.button_select_ptoho_from_catalog.setVisible(True)
+            self.load_model_and_predict.play_video = False
             self.load_model_and_predict.scan_from_cam = False
             self.ui.wound_healing_start_scan.setEnabled(False)
-
-    def check_cam_in_group(self, radio_group: QButtonGroup(), array_index_cam):
-        a = 0
-        for i in radio_group.buttons():
-            if i.isChecked():
-                self.ui.file_name_select_folder.setText('Выбрана камера: ' + str(array_index_cam[a]))
-                self.load_model_and_predict.number_cam = array_index_cam[a]
-                self.load_model_and_predict.number_cam = a
-                return 0
-            a += 1
+            self.set_cam_index(-1)
+            self.load_model_and_predict.quit()
+            self.ui.file_name_select_folder.setText("Выберите фото из каталога")
 
     def on_radio_scan_to_cam(self):
-        if self.load_model_and_predict.number_cam == -1:
-            index_cam_arr = self.returnCameraIndexes()
-            msg = QDialog()
-            layout = QVBoxLayout()
-            group = QButtonGroup()
-            for i in range(len(index_cam_arr)):
-                radio = QRadioButton()
-                radio.setText('Камера: ' + str(i))
-                layout.addWidget(radio)
-                group.addButton(radio)
-            button_ok = QPushButton()
-            button_cancel = QPushButton()
-            button_ok.setText("OK")
-            res = button_ok.clicked.connect(lambda: self.check_cam_in_group(group, index_cam_arr))
-            button_ok.clicked.connect(msg.close)
-            button_cancel.clicked.connect(msg.close)
-            button_cancel.setText("Отмена")
-            layout.addWidget(button_ok)
-            layout.addWidget(button_cancel)
-            msg.setLayout(layout)
-            msg.exec()
-            print(self.load_model_and_predict.number_cam)
-            if self.load_model_and_predict.number_cam >=0:
-                self.load_model_and_predict.play_video = True
-                self.load_model_and_predict.start()
-
+        if self.index_cam == -1:
+            selected = SelectedCamera()
+            selected.clickButtonItem.connect(self.set_cam_index)
+            selected.exec()
 
         if self.ui.radio_scan_to_cam.isChecked():
             self.load_model_and_predict.image_path = None
             self.ui.button_select_ptoho_from_catalog.setVisible(False)
             self.load_model_and_predict.scan_from_cam = True
-            self.ui.wound_healing_start_scan.setEnabled(True)
+            self.load_model_and_predict.play_video = True
+            self.ui.file_name_select_folder.setText("Выберите камеру из списка")
+
+            if self.index_cam >= 0:
+                self.load_model_and_predict.number_cam = self.index_cam
+                self.load_model_and_predict.start()
+                self.ui.wound_healing_start_scan.setEnabled(True)
+                self.ui.file_name_select_folder.setText(f"Выбрана камера: {self.index_cam}")
 
     def hide_widget(self):
         # self.ui.wound_healing_widget.setVisible(False)
@@ -271,19 +234,6 @@ class WoundHealingPatient(QWidget):
         self.load_model_and_predict.play_video = False
         self.ui.wound_healing_loading_label.setVisible(True)
         self.load_model_and_predict.start()
-        # self.load_model_and_predict.start()
-        # self.ui.wound_healing_loading_label.setVisible(True)
-        # self.l.get_random_image()
-        # img2 = self.l.image_preprocessing()
-        # self.l.create_batch(img2)
-        # pred = self.l.predict()
-        # convertToQtFormat = QImage(pred.data, pred.shape[1], pred.shape[0],
-        #                            QImage.Format.Format_BGR888)
-        # image_detect_qt_format = convertToQtFormat.scaled(256, 256, Qt.KeepAspectRatio)
-        # self.ui.wound_healing_image.setPixmap(QPixmap.fromImage(image_detect_qt_format))
-        # self.ui.wound_healing_image.setScaledContents(True)
-        # self.result_scan()
-
 
 if __name__ == '__main__':
     app = QApplication()

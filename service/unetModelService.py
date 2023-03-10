@@ -66,23 +66,28 @@ class LoadingModelAndPredict(QThread):
                 cap.release()
                 cv2.destroyAllWindows()
                 print('поток закончен')
+                # print(self.number_cam)
+                # print(self.play_video)
+                # print(self.image_path)
                 break
 
     def run(self):
         self.video_stream()
         print('==========___==========')
         image = self.get_image()
-        self.image_original.emit(self.opencvFormatToQImage(image))
-        print('Началась загрузка модели в отдельном потоке')
-        secundomer = time.time()
-        self.load_model_func()
-        res = round(time.time() - secundomer, 2)
-        self.loading_model_end.emit(str(res))  # посылаем сигнал с временем загрузки модели
-        image_preprocessing = self.image_preprocessing(image)
-        batch_image = self.create_batch(image_preprocessing)
-        predict = self.predict(batch_image, image)
-        image_qt = self.opencvFormatToQImage(predict)
-        self.predict_image_result.emit(QPixmap.fromImage(image_qt))
+        if image is not None:
+            # print(image)
+            self.image_original.emit(self.opencvFormatToQImage(image))
+            print('Началась загрузка модели в отдельном потоке')
+            secundomer = time.time()
+            self.load_model_func()
+            res = round(time.time() - secundomer, 2)
+            self.loading_model_end.emit(str(res))  # посылаем сигнал с временем загрузки модели
+            image_preprocessing = self.image_preprocessing(image)
+            batch_image = self.create_batch(image_preprocessing)
+            predict = self.predict(batch_image, image)
+            image_qt = self.opencvFormatToQImage(predict)
+            self.predict_image_result.emit(QPixmap.fromImage(image_qt))
         print('Поток закончил свою работу')
 
     def load_model_func(self):
@@ -99,7 +104,10 @@ class LoadingModelAndPredict(QThread):
 
     def get_image(self):
         # Получение картинки с камеры
-        if self.scan_from_cam and self.image_path is None:
+        print(self.image_path)
+        print(self.scan_from_cam)
+        if self.image_path is None and self.scan_from_cam:
+            print('2222222222')
             timer = time.time()
             cap = cv2.VideoCapture(self.number_cam, cv2.CAP_DSHOW)  # 0 - номер камеры
             # "Прогреваем" камеру, чтобы снимок не был тёмным
@@ -114,7 +122,7 @@ class LoadingModelAndPredict(QThread):
             # Возращаем кадр из видеопотока
             return frame
         else:
-            if self.scan_from_cam == False:
+            if self.scan_from_cam == False and self.image_path is not None:
                 # Получаем картинку если картинка из каталога
                 image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
                 return image

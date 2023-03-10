@@ -412,7 +412,6 @@ class DrawingCounter(QDialog):
         self.ui.save_button.clicked.connect(self.canvas.getAreaFromPolygon)
         self.ui.save_button.clicked.connect(self.on_click_save_image_button)
         self.history_n_n = HistoryNeuralNetwork()
-        self.categorical = self.get_predict_categorical()
         self.ui.select_categorical_disease_button.clicked.connect(self.select_disease)
         self.color = QColor()
         self.ui.cancel_button.setEnabled(False)
@@ -458,17 +457,8 @@ class DrawingCounter(QDialog):
         if self.canvas.get_len_item_history() != 0:
             message_error_show(self, message='Вначале замкните контур текущей болезни', title='Ошибка')
             return 0
-        dlg = QDialog()
-        layout = QVBoxLayout()
-        for i in self.categorical:
-            item = CategoricalItem(layout, category=i)
-            item.clickButtonItem.connect(self.ooooooooooooooooo)
-            layout.addWidget(item)
-        save_button = QPushButton()
-        save_button.setText("Сохранить")
-        save_button.clicked.connect(dlg.close)
-        layout.addWidget(save_button)
-        dlg.setLayout(layout)
+        dlg = CategoricalItem()
+        dlg.clickButtonItem.connect(self.ooooooooooooooooo)
         dlg.exec()
 
     @Slot(ResultPredict)
@@ -479,9 +469,6 @@ class DrawingCounter(QDialog):
         self.canvas.set_pen(3, self.color)
         self.canvas.set_brush(QColor(r, g, b, 127))
         self.canvas.category = category
-
-    def get_predict_categorical(self) -> list[ResultPredict]:
-        return PatientServiceFront(1).get_all_categorical()
 
     def on_click_save_image_button(self):
         self.history_n_n.annotations.clear()

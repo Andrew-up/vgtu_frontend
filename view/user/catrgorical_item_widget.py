@@ -1,56 +1,52 @@
 import sys
 
-from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtWidgets import QWidget, QApplication, QLabel, QListWidget, QListWidgetItem, QHBoxLayout, QRadioButton, \
-    QButtonGroup, QPushButton, QVBoxLayout
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QApplication, QRadioButton, \
+    QPushButton, QVBoxLayout, QDialog
 
 from model.result_predict import ResultPredict
+from service.PatientService import get_categorical_predict
 
 
-class JJJJJ(QRadioButton):
-
-    clickButtonItem = Signal(str)
-
-    def __init__(self, name=None):
-        super().__init__()
-        self.setText(str(name))
-        self.id = name
-        self.button_description = 'this_button id : ' + str(self.id)
-        self.clicked.connect(lambda: self.clickButtonItem.emit(self.button_description))
-
-
-class CategoricalItem(QWidget):
+class CustomRadioButtonClass(QRadioButton):
     clickButtonItem = Signal(ResultPredict)
 
-    def __init__(self, layout: QVBoxLayout = None, category: ResultPredict = None):
+    def __init__(self, category: ResultPredict):
+        super().__init__()
+        self.cat = category
+        self.setText(category.name_category_ru)
+        self.clicked.connect(lambda: self.clickButtonItem.emit(self.cat))
+
+
+class CategoricalItem(QDialog):
+    clickButtonItem = Signal(ResultPredict)
+
+    def __init__(self):
         super(CategoricalItem, self).__init__()
-        q_radio = QRadioButton()
-        self.cat_pred = None
-        self.color = None
-        self.index = []
-        if category is not None:
-            self.color = category.color
-            self.cat_pred = category
-            q_radio.setText(category.name_category_ru)
-        q_radio.clicked.connect(self.clickghdhgfs)
+        self.category = get_categorical_predict()
+        layout = QVBoxLayout()
+        for i in self.category:
+            radio = CustomRadioButtonClass(category=i)
+            radio.clickButtonItem.connect(self.on_selected_category)
+            layout.addWidget(radio)
+        self.save_button = QPushButton()
+        self.save_button.setText("Сохранить")
+        self.save_button.clicked.connect(self.on_save_button_click)
+        layout.addWidget(self.save_button)
+        self.setWindowTitle('Выберите категорию')
+        self.setLayout(layout)
+        self.selected_category = ResultPredict()
 
-        if layout is None:
-            layout = QVBoxLayout()
-            for i in range(5):
-                pass
-                q_radiosss = JJJJJ(i)
-                q_radiosss.clickButtonItem.connect(self.prohfdhgf)
-                layout.addWidget(q_radiosss)
-            self.setLayout(layout)
-        else:
-            layout.addWidget(q_radio)
+    def on_selected_category(self, item: ResultPredict):
+        self.selected_category = item
 
-    def prohfdhgf(self, item):
-        print(item)
+    def on_save_button_click(self):
+        self.clickButtonItem.emit(self.selected_category)
+        print(self.selected_category.name_category_ru)
+        self.close()
 
-    def clickghdhgfs(self):
-        if self.cat_pred is not None:
-            self.clickButtonItem.emit(self.cat_pred)
+    def get_all_category(self) -> list[ResultPredict]:
+        return get_categorical_predict()
 
 
 if __name__ == '__main__':
