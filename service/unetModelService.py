@@ -66,9 +66,7 @@ class LoadingModelAndPredict(QThread):
                 cap.release()
                 cv2.destroyAllWindows()
                 print('поток закончен')
-                # print(self.number_cam)
-                # print(self.play_video)
-                # print(self.image_path)
+                self.video_stream_image.emit(QImage())
                 break
 
     def run(self):
@@ -122,6 +120,9 @@ class LoadingModelAndPredict(QThread):
             # Возращаем кадр из видеопотока
             return frame
         else:
+            print('222222222222')
+            print(self.scan_from_cam)
+            print(self.image_path)
             if self.scan_from_cam == False and self.image_path is not None:
                 # Получаем картинку если картинка из каталога
                 image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
@@ -276,8 +277,6 @@ class LoadingModelAndPredict(QThread):
             # scan.polygon_wound = segmentation
             # scan.image_wound = img_original_resize
             # scan.type_wound = DATASET_LABELS[max_index]
-
-
 
             # scan.area_wound
 

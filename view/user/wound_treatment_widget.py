@@ -5,6 +5,7 @@ import time
 from itertools import groupby
 
 import cv2
+from PIL.Image import Image
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtWidgets import QWidget, QApplication, QFileDialog, QPushButton, QDialog, QVBoxLayout, QButtonGroup, \
@@ -128,10 +129,9 @@ class WoundHealingPatient(QWidget):
                 for item in groups_item:
                     sum += item.area
                     category_ru = item.category.name_category_ru
-                string_res += category_ru + ' ' + str(float(sum * coefficient_k)) + ', '
+                string_res += category_ru + ' ' + str(round(float(sum * coefficient_k), 2)) + ', '
             self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res +'<br>')
             self.ui.wound_healing_area_wound.setWordWrap(True)
-
 
     @Slot(int)
     def set_cam_index(self, index: int):
@@ -147,6 +147,8 @@ class WoundHealingPatient(QWidget):
             self.load_model_and_predict.quit()
             self.ui.file_name_select_folder.setText("Выберите фото из каталога")
 
+
+
     def on_radio_scan_to_cam(self):
         if self.index_cam == -1:
             selected = SelectedCamera()
@@ -159,7 +161,6 @@ class WoundHealingPatient(QWidget):
             self.load_model_and_predict.scan_from_cam = True
             self.load_model_and_predict.play_video = True
             self.ui.file_name_select_folder.setText("Выберите камеру из списка")
-
             if self.index_cam >= 0:
                 self.load_model_and_predict.number_cam = self.index_cam
                 self.load_model_and_predict.start()
@@ -184,6 +185,8 @@ class WoundHealingPatient(QWidget):
         if fileName[0] != '':
             self.load_model_and_predict.image_path = fileName[0]
             self.ui.wound_healing_start_scan.setEnabled(True)
+            image = self.load_model_and_predict.get_image()
+            self.setImage_Original(self.load_model_and_predict.opencvFormatToQImage(image))
         print(time.time() - timing)
 
     @Slot(str)
