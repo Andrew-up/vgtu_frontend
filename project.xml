@@ -7,10 +7,10 @@
         <coefficient_k>0.05</coefficient_k>
     </app>
     <server>
-        <addr>188.235.18.191</addr>
-<!--        <addr>localhost</addr>-->
-        <port>8095</port>
-<!--        <port>5000</port>-->
+<!--        <addr>188.235.18.191</addr>-->
+        <addr>localhost</addr>
+<!--        <port>8095</port>-->
+        <port>5000</port>
         <update_api>api/app/update/download/</update_api>
         <check_version_api>api/app/version/</check_version_api>
     </server>
