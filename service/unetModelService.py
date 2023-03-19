@@ -148,20 +148,21 @@ class LoadingModelAndPredict(QThread):
             for contour in polygon:
                 # print(contour)
                 peri = cv2.arcLength(contour, True)
-                polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
-                polygon_annotation = cv2.approxPolyDP(contour, 0.01 * peri, True)
-                box = cv2.boundingRect(contour)
-                cv2.fillPoly(image_temp, pts=[contour], color=color)
-                a = Annotations()
-                a.id_annotations = None
-                a.history_nn_id = None
-                a.segmentation = self.unpackArray(polygon_annotation)
-                x, y, w, h = box
-                a.bbox = [x, y, w, h]
-                a.category_id = result_category.id_category
-                a.category = result_category
-                a.area = cv2.contourArea(polygon_annotation)
-                self.list_annotations.append(a)
+                if peri > 1:
+                    polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
+                    polygon_annotation = cv2.approxPolyDP(contour, 0.01 * peri, True)
+                    box = cv2.boundingRect(contour)
+                    cv2.fillPoly(image_temp, pts=[contour], color=color)
+                    a = Annotations()
+                    a.id_annotations = None
+                    a.history_nn_id = None
+                    a.segmentation = self.unpackArray(polygon_annotation)
+                    x, y, w, h = box
+                    a.bbox = [x, y, w, h]
+                    a.category_id = result_category.id_category
+                    a.category = result_category
+                    a.area = cv2.contourArea(polygon_annotation)
+                    self.list_annotations.append(a)
 
             print(self.list_annotations)
             for i in self.list_annotations:
@@ -178,7 +179,7 @@ class LoadingModelAndPredict(QThread):
         return image_original_copy, polygon_result
 
     def unpackArray(self, array):
-        print('=============')
+        # print('=============')
         res = []
         for i in array:
             for j in i:
@@ -203,7 +204,7 @@ class LoadingModelAndPredict(QThread):
             # print(max_index)
             # print(self.categorical_predict[max_index].name_category_ru)
             predict1 = res[0, :, :, max_index]
-            predict1 = (predict1 > 0.4).astype(np.uint8)
+            predict1 = (predict1 > 0.6).astype(np.uint8)
             predict1 = np.array(predict1) * 255
 
             # predict2 = res[0, :, :, 1]
@@ -223,7 +224,8 @@ class LoadingModelAndPredict(QThread):
                 color = color1[max_index]
             else:
                 color = (0, 0, 0)
-
+            print('_________________________')
+            print(max_index)
             result_category = self.categorical_predict[max_index]
             print(result_category)
             print(result_category.name_category_ru)

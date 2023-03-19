@@ -236,7 +236,7 @@ class WoundHealingPatient(QWidget):
         self.history_n_n = HistoryNeuralNetwork()
         self.load_model_and_predict.play_video = False
         self.ui.wound_healing_loading_label.setVisible(True)
-        # self.load_model_and_predict.start()
+        self.load_model_and_predict.start()
 
 if __name__ == '__main__':
     app = QApplication()
