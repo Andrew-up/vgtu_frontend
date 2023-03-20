@@ -148,7 +148,6 @@ class WoundHealingPatient(QWidget):
             self.ui.file_name_select_folder.setText("Выберите фото из каталога")
 
 
-
     def on_radio_scan_to_cam(self):
         if self.index_cam == -1:
             selected = SelectedCamera()
@@ -186,7 +185,10 @@ class WoundHealingPatient(QWidget):
             self.load_model_and_predict.image_path = fileName[0]
             self.ui.wound_healing_start_scan.setEnabled(True)
             image = self.load_model_and_predict.get_image()
-            self.setImage_Original(self.load_model_and_predict.opencvFormatToQImage(image))
+            height, width, channel = image.shape
+            bytesPerLine = 3 * width
+            image = QImage(image, width, height, bytesPerLine, QImage.Format_BGR888)
+            self.setImage_Original(QPixmap(image))
         print(time.time() - timing)
 
     @Slot(str)
@@ -204,10 +206,12 @@ class WoundHealingPatient(QWidget):
         self.ui.wound_healing_widget.setVisible(True)
 
     @Slot(QImage)
-    def setImage_Original(self, image):
-        self.history_n_n.photo_original = image_to_base64(image)
-        self.image_original = QPixmap.fromImage(image)
-        self.ui.wound_healing_image.setPixmap(QPixmap.fromImage(image))
+    def setImage_Original(self, image: QPixmap):
+        print(type(image))
+        self.history_n_n.photo_original = image_to_base64(image.toImage())
+        self.image_original = image
+        print('111111111')
+        self.ui.wound_healing_image.setPixmap(image)
         self.ui.wound_healing_image.setScaledContents(True)
         self.ui.wound_healing_widget.setVisible(True)
 

@@ -21,7 +21,7 @@ from model.Annotations import Annotations
 class LoadingModelAndPredict(QThread):
     loading_model_end = Signal(str)
     predict_image_result = Signal(QPixmap)
-    image_original = Signal(QImage)
+    image_original = Signal(QPixmap)
     result_scan = Signal(Annotations)
     video_stream_image = Signal(QImage)
     # Запомнить номер камеры
@@ -48,9 +48,8 @@ class LoadingModelAndPredict(QThread):
         self.image_path = path_image
 
     def opencvFormatToQImage(self, image: QImage):
-        # print(image)
-        convertToQtFormats = QImage(image.data, image.shape[1], image.shape[0],
-                                    QImage.Format.Format_BGR888)
+        print(image.shape)
+        convertToQtFormats = QImage(image.data, image.shape[1], image.shape[0], QImage.Format.Format_BGR888)
         qimage = convertToQtFormats.scaled(512, 512, Qt.KeepAspectRatio)
         return qimage
 
@@ -74,7 +73,14 @@ class LoadingModelAndPredict(QThread):
         image = self.get_image()
         if image is not None:
             # print(image)
-            self.image_original.emit(self.opencvFormatToQImage(image))
+            height, width, channel = image.shape
+            bytesPerLine = 3 * width
+            image_2 = QImage(image, width, height, bytesPerLine, QImage.Format_BGR888)
+
+            pixmap = QPixmap(image_2)
+            print(type)
+            self.image_original.emit(pixmap)
+
             print('Началась загрузка модели в отдельном потоке')
             secundomer = time.time()
             self.load_model_func()
@@ -92,12 +98,13 @@ class LoadingModelAndPredict(QThread):
 
     def load_model_func(self):
         from keras.models import load_model
-        from utils.unet_model.model_losses import dice_coef, bce_dice_loss
+        from utils.unet_model.model_losses import dice_coef, bce_dice_loss, binary_weighted_cross_entropy, MyMeanIOU
+        iou1111 = MyMeanIOU(num_classes=12)
         if self.model is None:
             print('------ Загружаю модель ------')
             self.model = load_model(self.path_model,
-                                    custom_objects={'dice_coef': dice_coef,
-                                                    'bce_dice_loss': bce_dice_loss})
+                                    custom_objects={'loss': binary_weighted_cross_entropy(beta=1.0, is_logits=True),
+                                                    'MyMeanIOU': iou1111})
             return self.model
         else:
             return self.model
@@ -127,6 +134,7 @@ class LoadingModelAndPredict(QThread):
             print(self.image_path)
             if self.scan_from_cam == False and self.image_path is not None:
                 # Получаем картинку если картинка из каталога
+                # image = cv2.imread(self.image_path, cv2.COLOR_RGB2BGR)
                 image = cv2.imread(self.image_path, cv2.COLOR_BGR2RGB)
                 return image
 
