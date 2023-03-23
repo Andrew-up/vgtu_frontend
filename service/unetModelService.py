@@ -95,15 +95,15 @@ class LoadingModelAndPredict(QThread):
             self.video_stream_image.emit(QImage())
         print('Поток закончил свою работу')
 
-
     def load_model_func(self):
         from keras.models import load_model
-        from utils.unet_model.model_losses import dice_coef, bce_dice_loss, binary_weighted_cross_entropy, MyMeanIOU
+        from utils.unet_model.model_losses import dice_coef, bce_dice_loss, binary_weighted_cross_entropy, MyMeanIOU, \
+            dice_loss
         iou1111 = MyMeanIOU(num_classes=12)
         if self.model is None:
             print('------ Загружаю модель ------')
             self.model = load_model(self.path_model,
-                                    custom_objects={'loss': binary_weighted_cross_entropy(beta=1.0, is_logits=True),
+                                    custom_objects={'dice_loss': dice_loss,
                                                     'MyMeanIOU': iou1111})
             return self.model
         else:
@@ -139,14 +139,14 @@ class LoadingModelAndPredict(QThread):
                 return image
 
     def drawingMaskForImagePredict(self, image: Image, predict: Image, color, result_category: ResultPredict):
-        self.list_annotations.clear()
         p = cv2.resize(predict, (512, 512), interpolation=cv2.INTER_AREA)
-        dilation = cv2.dilate(p, (3, 3), iterations=1)
-        edged = cv2.Canny(dilation, 1, 200)
-        polygon, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        p = p.astype('uint8')
+
+        polygon, hierarchy = cv2.findContours(p, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         image_original_copy = image.copy()
         polygon_result = []
         if polygon is not None:
+            # print(polygon)
             # print(dir(polygon))
             polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
             image_temp = np.zeros_like(image, np.uint8)
@@ -198,52 +198,39 @@ class LoadingModelAndPredict(QThread):
 
     def predict(self, batch, original_image):
         print(f" ==========  {self.objectName()} ========== ")
-
+        self.list_annotations.clear()
         if self.model is not None:
+
             res = self.model.predict(batch)
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             list_predict = list()
-
+            dd = ['1', '2', '3', '4', '5']
             for i in range(len(res[0, 0, 0, :])):
-                list_predict.append(np.sum(res[0, :, :, i]))
-            max_value = max(list_predict)
-            max_index = list_predict.index(max_value)
-
-            # print(max_index)
-            # print(self.categorical_predict[max_index].name_category_ru)
-            predict1 = res[0, :, :, max_index]
-            predict1 = (predict1 > 0.6).astype(np.uint8)
-            predict1 = np.array(predict1) * 255
-
-            # predict2 = res[0, :, :, 1]
-            # predict2 = (predict2 > 0.4).astype(np.uint8)
-            # predict2 = np.array(predict2) * 255
-
-            # predict3 = res[0, :, :, 2]
-            # predict3 = (predict3 > 0.4).astype(np.uint8)
-            # predict3 = np.array(predict3) * 255
-
+                r_one = (res[0, :, :, i] > 0.7).astype(np.float32)
+                r_one = np.array(r_one)
+                list_predict.append(r_one)
             color1 = []
             for i in self.categorical_predict:
                 color1.append(literal_eval(i.color))
 
-            # color1 = []
-            if max_index <= len(self.categorical_predict):
-                color = color1[max_index]
-            else:
-                color = (0, 0, 0)
-            print('_________________________')
-            print(max_index)
-            result_category = self.categorical_predict[max_index]
-            print(result_category)
-            print(result_category.name_category_ru)
+            for index, j in enumerate(list_predict):
+                color = color1[index]
+                print(color)
+                if np.sum(j) > 5:
+                    category = self.categorical_predict[index]
+                    print(f'category: {category.name_category_ru} np.sum: {np.sum(j)}')
 
-            img1, polygon1 = self.drawingMaskForImagePredict(image=img_original_resize,
-                                                             predict=predict1,
-                                                             color=color[::-1],
-                                                             result_category=result_category)
+                    img1, polygon1 = self.drawingMaskForImagePredict(image=img_original_resize,
+                                                                     predict=j,
+                                                                     color=color[::-1],
+                                                                     result_category=category)
+
+                    plt.imshow(img1)
+                    plt.show()
+                    img_original_resize = img1
 
             self.result_scan.emit(self.list_annotations)
+            #
 
             # result_mask = []
             # for i in polygon1:
@@ -292,7 +279,7 @@ class LoadingModelAndPredict(QThread):
 
             # scan.area_wound
 
-            return img1
+            return img_original_resize
 
     def image_preprocessing(self, Image_original):
 
@@ -303,8 +290,8 @@ class LoadingModelAndPredict(QThread):
 
         if (len(train_img.shape) == 3 and train_img.shape[2] == 3):
             pil_image = Image.fromarray((train_img * 255).astype(np.uint8))
-            plt.imshow(pil_image)
-            plt.show()
+            # plt.imshow(pil_image)
+            # plt.show()
             return train_img
         else:
             stacked_img = np.stack((train_img,) * 3, axis=-1)

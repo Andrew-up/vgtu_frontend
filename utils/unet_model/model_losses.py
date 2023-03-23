@@ -7,12 +7,14 @@ bce_loss_fun = sm.losses.BinaryCELoss()
 import tensorflow as tf
 from typing import Union, Callable
 
+
 def bce_dice_loss(y_true, y_pred):
     dice_loss = dice_loss_fun(y_true, y_pred)
     bce_loss = bce_loss_fun(y_true, y_pred)
     return 0.5 * dice_loss + 0.5 * bce_loss
 
-#metrics
+
+# metrics
 def dice_coef(y_true, y_pred, smooth=1):
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
@@ -33,9 +35,11 @@ def convert_to_logits(y_pred: tf.Tensor) -> tf.Tensor:
 
     return K.log(y_pred / (1 - y_pred))
 
+
 class MyMeanIOU(tf.keras.metrics.MeanIoU):
     def update_state(self, y_true, y_pred, sample_weight=None):
         return super().update_state(tf.argmax(y_true, axis=-1), tf.argmax(y_pred, axis=-1), sample_weight)
+
 
 def binary_weighted_cross_entropy(beta: float, is_logits: bool = False) -> Callable[[tf.Tensor, tf.Tensor], tf.Tensor]:
     """
@@ -50,6 +54,7 @@ def binary_weighted_cross_entropy(beta: float, is_logits: bool = False) -> Calla
     :param is_logits: If y_pred are logits (bool, default=False)
     :return: Weighted cross entropy loss function (Callable[[tf.Tensor, tf.Tensor], tf.Tensor])
     """
+
     def loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         """
         Computes the weighted cross entropy.
@@ -69,3 +74,9 @@ def binary_weighted_cross_entropy(beta: float, is_logits: bool = False) -> Calla
         return wce_loss
 
     return loss
+
+
+def dice_loss(y_true, y_pred):
+    numerator = tf.reduce_sum(y_true * y_pred)
+    denominator = tf.reduce_sum(y_true * y_true) + tf.reduce_sum(y_pred * y_pred) - tf.reduce_sum(y_true * y_pred)
+    return 1 - numerator / denominator
