@@ -99,7 +99,7 @@ class LoadingModelAndPredict(QThread):
         from keras.models import load_model
         from utils.unet_model.model_losses import dice_coef, bce_dice_loss, binary_weighted_cross_entropy, MyMeanIOU, \
             dice_loss
-        iou1111 = MyMeanIOU(num_classes=12)
+        iou1111 = MyMeanIOU(num_classes=3)
         if self.model is None:
             print('------ Загружаю модель ------')
             self.model = load_model(self.path_model,
