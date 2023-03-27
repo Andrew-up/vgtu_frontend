@@ -105,6 +105,11 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addWidget(self.pushButton)
 
+        self.update_cnn_button = QPushButton(self.centralwidget)
+        self.update_cnn_button.setObjectName(u"update_cnn_button")
+
+        self.verticalLayout_2.addWidget(self.update_cnn_button)
+
 
         self.verticalLayout_4.addLayout(self.verticalLayout_2)
 
@@ -134,6 +139,7 @@ class Ui_MainWindow(object):
         self.icon_profile_main.setText(QCoreApplication.translate("MainWindow", u"\u0418\u043a\u043e\u043d\u043a\u0430", None))
         self.authorized_user.setText(QCoreApplication.translate("MainWindow", u"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d \u0418\u0432\u0430\u043d\u043e\u0432\u0438\u0447", None))
         self.login_exit.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0445\u043e\u0434", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f", None))
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f", None))
+        self.update_cnn_button.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435 \u043d\u0435\u0439\u0440\u043e\u043d\u043d\u043e\u0439 \u0441\u0435\u0442\u0438", None))
     # retranslateUi
 

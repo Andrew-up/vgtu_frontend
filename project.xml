@@ -1,17 +1,20 @@
 <root>
     <app>
-        <version>1.1.0</version>
+        <version>1.0.1</version>
         <exe_file_main>main.exe</exe_file_main>
         <temp_update>temp_update</temp_update>
         <file_name_archive>update.zip</file_name_archive>
         <coefficient_k>0.05</coefficient_k>
+        <model_cnn_path>unet_model/</model_cnn_path>
+        <model_cnn_name>model_h.5</model_cnn_name>
+        <model_cnn_version>1.0.0</model_cnn_version>
+        <update_installer_exe_path>install_update.exe</update_installer_exe_path>
     </app>
     <server>
-<!--        <addr>188.235.18.191</addr>-->
         <addr>localhost</addr>
-<!--        <port>8095</port>-->
         <port>5000</port>
         <update_api>api/app/update/download/</update_api>
+        <update_cnn_model_api>api/model_cnn/last_model/download/</update_cnn_model_api>
         <check_version_api>api/app/version/</check_version_api>
     </server>
 </root>

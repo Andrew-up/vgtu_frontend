@@ -148,7 +148,14 @@
       <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>Проверить обновления</string>
+         <string>Проверить обновления приложения</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="update_cnn_button">
+        <property name="text">
+         <string>Обновление нейронной сети</string>
         </property>
        </widget>
       </item>

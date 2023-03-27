@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QWidget
 from service.slotsService import SlotsMainMenu
 from view.py.mainwindow import Ui_MainWindow
 from view.user.list_patient_widget import ListPatient
-
+from view.user.info_model_cnn_widget import InfoModelCNNWidget
 from view.user.Update_app_widget import UpdateAppWidget
 
 
@@ -23,6 +23,12 @@ class MainWindow(QMainWindow):
         self.ui.pushButton.clicked.connect(self.update_app)
         self.ui.logo_company_main.setStyleSheet('background-color: white')
         self.ui.logo_company_main.setText('ROBOT HELPER')
+        self.ui.update_cnn_button.clicked.connect(self.open_cnn_dialog)
+
+
+    def open_cnn_dialog(self):
+        dlg = InfoModelCNNWidget()
+        dlg.exec()
 
     def view_patient(self):
         list_patient = ListPatient(self)

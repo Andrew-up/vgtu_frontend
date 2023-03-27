@@ -1,13 +1,9 @@
-import json
-
 import requests
 
 from dto.patientDTO import PatientDTO, getPatient, getPatientDTO
-from model.patient_model import Patient
 from model.history_patient import HistoryPatient
+from model.patient_model import Patient
 from model.result_predict import ResultPredict
-from model.history_neural_network import HistoryNeuralNetwork
-from model.Annotations import Annotations
 from utils.read_xml_file import ReadXmlProject
 
 SECRET_KEY = {"key": 'hFGHFEFyr67ggghhPJhdfh123dd'}
@@ -71,6 +67,7 @@ def add_history_patient(history: HistoryPatient):
     print(json)
     r = requests.post(str_api, json=json, headers={"Content-Type": "application/json"})
     return r.status_code, r.text
+
 
 def get_categorical_predict() -> list[ResultPredict]:
     str_api = f'{api}/categorical/all/'

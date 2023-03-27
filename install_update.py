@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from threading import Thread
 from tkinter import BOTH, ttk, END, RIGHT, Y, WORD
-
+from ast import literal_eval
 
 class Worker(Thread):
     OK = 0
@@ -20,14 +20,25 @@ class Worker(Thread):
                  txt=tk.Text,
                  root: tk.Tk = None,
                  name_archive=None,
+                 start_main_exe=False,
                  parent=None):
         super(Worker, self).__init__(parent)
         self._file_name_archive = name_archive
         self.txt = txt
         self.root = root
+        self._start_main_exe = start_main_exe
         self._path_temp = os.path.join(path_temp)
         self._path_target = os.path.join(path_target)
+        self.create_path_target()
         self.zip_file_temp_full_path = f'{self._path_temp}/{self._file_name_archive}'
+
+
+    def create_path_target(self):
+        if os.path.exists(self._path_target):
+            self.add_text(f"папка {self._path_target} есть")
+        else:
+            os.mkdir(self._path_target)
+            self.add_text(f"создал папку{self._path_target}")
 
     def add_text(self, str):
         txt.pack(expand=1, fill=BOTH)
@@ -77,17 +88,19 @@ class Worker(Thread):
 
             except OSError as e:
                 print(e)
-
-            main_path = os.path.join(self._path_target, 'main.exe')
-            if os.path.exists(main_path):
-                try:
-                    self.add_text('Запускаю новую версию')
-                    subprocess.run(main_path)
-                    # os.remove(self.zip_file_temp_full_path)
-                except subprocess.CalledProcessError as e:
-                    self.add_text(str(e.output))
+            if self._start_main_exe:
+                main_path = os.path.join(self._path_target, 'main.exe')
+                if os.path.exists(main_path):
+                    try:
+                        self.add_text('Запускаю новую версию')
+                        subprocess.run(main_path)
+                        # os.remove(self.zip_file_temp_full_path)
+                    except subprocess.CalledProcessError as e:
+                        self.add_text(str(e.output))
+                else:
+                    self.add_text(f'Файл: {main_path} не найден')
             else:
-                self.add_text(f'Файл: {main_path} не найден')
+                self.add_text(f'Запуск main.exe == : {self._start_main_exe}')
         else:
             self.add_text(f'Не удалось распаковать архив, проверьте каталог\n'
                           f'{self.zip_file_temp_full_path}')
@@ -115,7 +128,10 @@ def add_text(str):
 
 
 if __name__ == '__main__':
+    print('11111111')
     update_dir, ROOT_DIR, file_name_archive = get_update_dir_from_xml()
+    print('2222222222')
+
     root = tk.Tk()
     root.geometry("500x400")
     root.title("Обновление")
@@ -128,16 +144,17 @@ if __name__ == '__main__':
     scrollbar.pack(side=RIGHT, fill=Y)
     txt.config(yscrollcommand=scrollbar.set)
 
-    path_temp, path_target = None, None
+    path_temp, path_target, start_main_exe = None, None, None
     if len(sys.argv) > 2:
         path_temp = sys.argv[1]
         path_target = sys.argv[2]
+        start_main_exe = literal_eval(sys.argv[3])
 
     if path_temp is not None and path_target is not None:
         add_text('Получил аргументы при запуске программы: ')
         add_text(path_temp)
         add_text(path_target)
-        w = Worker(path_temp=path_temp, path_target=path_target, name_archive=file_name_archive, root=root)
+        w = Worker(path_temp=path_temp, path_target=path_target, name_archive=file_name_archive, root=root, start_main_exe=start_main_exe)
         w.daemon = True
         w.start()
     else:
