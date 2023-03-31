@@ -80,7 +80,6 @@ class LoadingModelAndPredict(QThread):
             pixmap = QPixmap(image_2)
             print(type)
             self.image_original.emit(pixmap)
-
             print('Началась загрузка модели в отдельном потоке')
             secundomer = time.time()
             self.load_model_func()
@@ -99,7 +98,7 @@ class LoadingModelAndPredict(QThread):
         from keras.models import load_model
         from utils.unet_model.model_losses import dice_coef, bce_dice_loss, binary_weighted_cross_entropy, MyMeanIOU, \
             dice_loss
-        iou1111 = MyMeanIOU(num_classes=3)
+        iou1111 = MyMeanIOU(num_classes=12)
         if self.model is None:
             print('------ Загружаю модель ------')
             self.model = load_model(self.path_model,
@@ -139,9 +138,10 @@ class LoadingModelAndPredict(QThread):
                 return image
 
     def drawingMaskForImagePredict(self, image: Image, predict: Image, color, result_category: ResultPredict):
+        print(color)
+        print(result_category.name_category_ru)
         p = cv2.resize(predict, (512, 512), interpolation=cv2.INTER_AREA)
         p = p.astype('uint8')
-
         polygon, hierarchy = cv2.findContours(p, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         image_original_copy = image.copy()
         polygon_result = []
@@ -156,7 +156,7 @@ class LoadingModelAndPredict(QThread):
             for contour in polygon:
                 # print(contour)
                 peri = cv2.arcLength(contour, True)
-                if peri > 1:
+                if peri > 100:
                     polygon_result.append(cv2.approxPolyDP(contour, 0.01 * peri, True))
                     polygon_annotation = cv2.approxPolyDP(contour, 0.01 * peri, True)
                     box = cv2.boundingRect(contour)
@@ -172,9 +172,9 @@ class LoadingModelAndPredict(QThread):
                     a.area = cv2.contourArea(polygon_annotation)
                     self.list_annotations.append(a)
 
-            print(self.list_annotations)
-            for i in self.list_annotations:
-                print(i.__dict__)
+            # print(self.list_annotations)
+            # for i in self.list_annotations:
+            #     print(i.__dict__)
 
             cv2.drawContours(image_original_copy, polygon_result, -1, color, thickness=2)
             alpha = 0.5
@@ -183,7 +183,7 @@ class LoadingModelAndPredict(QThread):
 
             for i in self.list_annotations:
                 x, y, w, h = i.bbox
-                cv2.rectangle(image_original_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                # cv2.rectangle(image_original_copy, (x, y), (x + w, y + h), color, 2)
         return image_original_copy, polygon_result
 
     def unpackArray(self, array):
@@ -202,6 +202,7 @@ class LoadingModelAndPredict(QThread):
         if self.model is not None:
 
             res = self.model.predict(batch)
+
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             list_predict = list()
             dd = ['1', '2', '3', '4', '5']
@@ -215,7 +216,7 @@ class LoadingModelAndPredict(QThread):
 
             for index, j in enumerate(list_predict):
                 color = color1[index]
-                print(color)
+                # print(color)
                 if np.sum(j) > 5:
                     category = self.categorical_predict[index]
                     print(f'category: {category.name_category_ru} np.sum: {np.sum(j)}')
@@ -225,8 +226,8 @@ class LoadingModelAndPredict(QThread):
                                                                      color=color[::-1],
                                                                      result_category=category)
 
-                    plt.imshow(img1)
-                    plt.show()
+                    # plt.imshow(img1)
+                    # plt.show()
                     img_original_resize = img1
 
             self.result_scan.emit(self.list_annotations)
@@ -308,5 +309,7 @@ class LoadingModelAndPredict(QThread):
 
 
 if __name__ == '__main__':
-    l = LoadingModelAndPredict(MODEL_H5_PATH)
+    pass
+
+    # l = LoadingModelAndPredict(MODEL_H5_PATH)
     # pred = l.predict()

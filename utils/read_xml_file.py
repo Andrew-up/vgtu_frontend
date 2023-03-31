@@ -32,6 +32,12 @@ class ReadXmlProject(object):
         text = app.find('model_cnn_name')
         text.text = new_file_name
         root_node.write(self.file_path)
+    def update_file_version_cnn_model(self, new_file_name: str):
+        root_node = ET.parse(self.file_path)
+        app = root_node.getroot().find('app')
+        text = app.find('model_cnn_version')
+        text.text = new_file_name
+        root_node.write(self.file_path)
 
     def _init_variable(self):
         if os.path.exists(self.file_path):
@@ -55,6 +61,12 @@ class ReadXmlProject(object):
         else:
             print(f'не найден {self.file_path}')
 
+    @property
+    def model_cnn_name(self):
+        return self._model_cnn_name
+    @property
+    def model_cnn_path(self):
+        return self._model_cnn_path
     @property
     def update_cnn_model_api(self):
         return self._update_cnn_model_api
@@ -82,7 +94,7 @@ class ReadXmlProject(object):
         # print(ROOT_DIR__A)
         # p = os.path.join(ROOT_DIR__A, '/test123')
 
-        return os.path.normcase(os.path.join(ROOT_DIR, 'test123'))
+        return os.path.normcase(os.path.join(ROOT_DIR))
 
     @property
     def app_version(self):

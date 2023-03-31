@@ -1,5 +1,6 @@
 import base64
 import datetime
+import os
 import sys
 import time
 from itertools import groupby
@@ -11,7 +12,7 @@ from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtWidgets import QWidget, QApplication, QFileDialog, QPushButton, QDialog, QVBoxLayout, QButtonGroup, \
     QRadioButton
 
-from definitions import DATASET_PATH, MODEL_H5_PATH
+from definitions import DATASET_PATH
 from model.Annotations import Annotations
 
 from model.result_scan import ResultScan
@@ -30,6 +31,7 @@ from view.user.selected_index_cam_widget import SelectedCamera
 
 
 
+
 class WoundHealingPatient(QWidget):
 
     def __init__(self, patient: Patient = None, parent=None):
@@ -44,7 +46,11 @@ class WoundHealingPatient(QWidget):
         self.ui.button_select_ptoho_from_catalog.setVisible(False)
 
         # ------- Отдельный поток и связка сигналов
-        self.load_model_and_predict = LoadingModelAndPredict(MODEL_H5_PATH)
+        xml2 = ReadXmlProject()
+        path_model = os.path.join(xml2.get_root_dir, xml2.model_cnn_path)
+        path_model_and_name = os.path.join(path_model, xml2.model_cnn_name)
+        print(path_model_and_name)
+        self.load_model_and_predict = LoadingModelAndPredict(path_model_and_name)
         self.load_model_and_predict.setObjectName('LOAD_MODEL_THREAD')
         self.load_model_and_predict.loading_model_end.connect(self.on_load_model_end_signal)
         self.load_model_and_predict.image_original.connect(self.setImage_Original)
@@ -54,6 +60,7 @@ class WoundHealingPatient(QWidget):
         self.load_model_and_predict.set_categorical_predict(self.get_predict_categorical())
         # print(self.load_model_and_predict.categorical_predict)
         # -------
+        self.ui.label.setText(f'Используется {xml2.model_cnn_version} версия нейронной сети')
 
         # Связка кнопок Результат корректен ?
         self.ui.wound_healing_button_result_yes.clicked.connect(self.on_result_is_ok)
@@ -121,15 +128,17 @@ class WoundHealingPatient(QWidget):
         if annotation_list:
             self.history_n_n.annotations = annotation_list
             self.ui.label_9.setText(f'<font style="color:rgb(0, 255, 0);"> Определен {len(annotation_list)} контур(а) </font>')
-
             sort_list = sorted(annotation_list, key=lambda x: x.category_id)
             for key, groups_item in groupby(sort_list, key=lambda x: x.category_id):
                 sum = 0.0
                 category_ru: str = str()
+                color = (255,255,255)
                 for item in groups_item:
                     sum += item.area
                     category_ru = item.category.name_category_ru
-                string_res += category_ru + ' ' + str(round(float(sum * coefficient_k), 2)) + ', '
+                    color = item.category.color
+                    print(item.category.color)
+                string_res += f'<font style="color:rgb{color};">  {category_ru} {str(round(float(sum * coefficient_k), 2))}</font>, '
             self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res +'<br>')
             self.ui.wound_healing_area_wound.setWordWrap(True)
 

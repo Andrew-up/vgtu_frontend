@@ -83,7 +83,15 @@ class UpdateApp(QThread):
 class UpdateAppWidget(QDialog):
     close_app = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, api_check,
+                 api_download,
+                 path_folder_update,
+                 path_folder_end,
+                 exe_file_installer_path,
+                 version_app=None,
+                 start_main_exe=False,
+                 filename=None,
+                 parent=None):
         super(UpdateAppWidget, self).__init__(parent)
         self.root = parent
         self.ui = Ui_Form()
@@ -103,22 +111,6 @@ class UpdateAppWidget(QDialog):
         # self.ui.pushButton_2.setEnabled(False)
         self.ui.pushButton_2.clicked.connect(self.install_update_start_exe)
 
-        self._api_check = None
-        self._api_download = None
-        self._path_folder_update = None
-        self._path_folder_end = None
-        self._exe_file_installer_path = None
-        self._version = None
-        self._start_main_exe = False
-
-
-    def set_param(self, api_check,
-                  api_download,
-                  path_folder_update,
-                  path_folder_end,
-                  exe_file_installer_path,
-                  version_app,
-                  start_main_exe=False):
         self._api_check = api_check
         self._api_download = api_download
         self._path_folder_update = path_folder_update
@@ -126,6 +118,11 @@ class UpdateAppWidget(QDialog):
         self._exe_file_installer_path = exe_file_installer_path
         self._version = version_app
         self._start_main_exe = start_main_exe
+        self._filename = filename
+        self.ui.pushButton_2.setEnabled(False)
+        if not self.start_main_exe:
+            self.ui.pushButton.setVisible(False)
+            self.download_new_version('')
 
     @property
     def start_main_exe(self):
@@ -188,6 +185,8 @@ class UpdateAppWidget(QDialog):
 
         msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
         res = msg.exec()
+        update_dir_end = self.path_folder_update
+        print(update_dir_end)
         if res == QMessageBox.StandardButton.Yes:
             if not os.path.exists(self.exe_file_installer_path):
                 self.message_error_show(
@@ -195,14 +194,20 @@ class UpdateAppWidget(QDialog):
                     f"Проверьте project.xml")
                 return 0
             exe_installer = self.exe_file_installer_path
-            update_dir = self.path_folder_update
+
             send_download_files_to_dir = self.path_folder_end
-            str = f'{exe_installer} "{update_dir}" "{send_download_files_to_dir}" "{self.start_main_exe}"'
-            subprocess.Popen(str)
+            str_f_path = f'{exe_installer} "{update_dir_end}" "{send_download_files_to_dir}" "{self.start_main_exe}"'
+            if not self.start_main_exe:
+                xml2 = ReadXmlProject()
+                xml2.update_file_version_cnn_model(self.version)
+                print(self._filename)
+                if self._filename is not None:
+                    xml2.update_file_name_model_cnn(self._filename)
+            subprocess.Popen(str_f_path)
             if self.start_main_exe:
                 if self.root is None:
                     print(self.root)
-                    app.quit()
+                    self.close()
                 self.close_app.emit()
         else:
             print('Отмена обновлений')
@@ -214,18 +219,37 @@ class UpdateAppWidget(QDialog):
         except:
             return False
 
+    def version_comparison(self, version_local: str, version_remote: str):
+
+        a1 = version_local.rstrip('0') + '0'
+        b1 = version_remote.rstrip('0') + '0'
+        lst1 = [int(i) for i in a1.split('.')]
+        lst2 = [int(i) for i in b1.split('.')]
+
+        return lst1 == lst2
+
+    def download_new_version(self, version):
+        if not self.url_validator(self.api_download):
+            self.message_error_show(f"Адрес для загрузки: \" {self.api_download} \" не валидный")
+            return 0
+        self.update_class.set_dir(os.path.join(ROOT_DIR, self.path_folder_update))
+        self.update_class.set_api_download(self.api_download)
+        self.update_class.start()
+        self.ui.label.setText(f"Идет загрузка новой версии: {version}")
+        print('Скачиваю новую версию')
+
     def check_version(self):
         adr = self.api_check
         if not self.url_validator(adr):
             self.message_error_show(f"Адрес {adr} не валидный")
             return 0
         r = requests.get(adr)
-        print(adr)
+
         if r.status_code != 200:
             self.message_error_show('Сервер вернул код отличный от 200\n'
                                     f'{r.text}')
 
-        if r.text > self.version and r.status_code == 200:
+        if not self.version_comparison(version_local=self.version, version_remote=r.text) and r.status_code == 200:
             msg = QMessageBox()
             msg.setWindowTitle('Проверка обновлений')
             msg.setText(f'Ваша версия: {self.version}\n'
@@ -234,14 +258,7 @@ class UpdateAppWidget(QDialog):
             msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
             res = msg.exec()
             if res == QMessageBox.StandardButton.Yes:
-                if not self.url_validator(self.api_download):
-                    self.message_error_show(f"Адрес для загрузки: \" {self.api_download} \" не валидный")
-                    return 0
-                self.update_class.set_dir(os.path.join(ROOT_DIR, self.path_folder_update))
-                self.update_class.set_api_download(self.api_download)
-                self.update_class.start()
-                self.ui.label.setText(f"Идет загрузка новой версии приложения {r.text}")
-                print('Скачиваю новую версию')
+                self.download_new_version(r.text)
             if res == QMessageBox.StandardButton.Cancel:
                 print('Отмена скачивания')
         else:
@@ -253,27 +270,23 @@ class UpdateAppWidget(QDialog):
 
 
 if __name__ == '__main__':
-    # upd = Worker()
-    # upd.daemon = True
-    # upd.start()
-    # sys.exit(app.exec())
     xml = ReadXmlProject()
     url_check = xml.get_API() + xml.server_api_check_version
     version_download = '?version=1.0.9'
-    url_download = xml.get_API() + xml.update_cnn_model_api+version_download
+    url_download = xml.get_API() + xml.update_cnn_model_api + version_download
 
     url_installer_exe_path = xml.update_installer_exe_path
     update_dir = ROOT_DIR + '/333'
     path_end_update = ROOT_DIR + '/4444'
     version = xml.model_cnn_version
+    print(version)
     app = QApplication()
-    window = UpdateAppWidget()
-    window.set_param(api_check=url_check,
-                     api_download=url_download,
-                     path_folder_update=update_dir,
-                     path_folder_end=path_end_update,
-                     exe_file_installer_path=url_installer_exe_path,
-                     version_app=version,
-                     start_main_exe=False)
+    window = UpdateAppWidget(api_check=url_check,
+                             api_download=url_download,
+                             path_folder_update=update_dir,
+                             path_folder_end=path_end_update,
+                             exe_file_installer_path=url_installer_exe_path,
+                             version_app=version,
+                             start_main_exe=True)
     window.show()
     sys.exit(app.exec())

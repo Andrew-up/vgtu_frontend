@@ -1,13 +1,15 @@
+import os
 import sys
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget
 
+from definitions import ROOT_DIR
 from service.slotsService import SlotsMainMenu
 from view.py.mainwindow import Ui_MainWindow
 from view.user.list_patient_widget import ListPatient
 from view.user.info_model_cnn_widget import InfoModelCNNWidget
 from view.user.Update_app_widget import UpdateAppWidget
-
+from utils.read_xml_file import ReadXmlProject
 
 
 class MainWindow(QMainWindow):
@@ -25,7 +27,6 @@ class MainWindow(QMainWindow):
         self.ui.logo_company_main.setText('ROBOT HELPER')
         self.ui.update_cnn_button.clicked.connect(self.open_cnn_dialog)
 
-
     def open_cnn_dialog(self):
         dlg = InfoModelCNNWidget()
         dlg.exec()
@@ -39,15 +40,27 @@ class MainWindow(QMainWindow):
     def close_app(self):
         app.quit()
         sys.exit(app.exec())
+
     @Slot()
     def update_app(self):
-        dlg = UpdateAppWidget(self)
+        xml = ReadXmlProject()
+        url_check = xml.get_API() + xml.server_api_check_version
+        url_download = xml.get_API() + xml.server_api_update
+        url_installer_exe_path = xml.update_installer_exe_path
+        update_dir = xml.app_update_folder
+        path_end_update = os.path.join(ROOT_DIR)
+        version = xml.app_version
+        print(f'end_path: {path_end_update}')
+
+        dlg = UpdateAppWidget(api_check=url_check,
+                              api_download=url_download,
+                              path_folder_update=update_dir,
+                              path_folder_end=path_end_update,
+                              exe_file_installer_path=url_installer_exe_path,
+                              version_app=version,
+                              start_main_exe=True)
         dlg.close_app.connect(self.close_app)
         dlg.exec()
-        # upd = Worker()
-        # upd.daemon = True
-        # upd.start()
-        # sleep(3)
 
     @Slot()
     def open_start_view(self):

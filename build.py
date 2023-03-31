@@ -5,12 +5,12 @@ PyInstaller.__main__.run([
 ])
 
 print('======================')
-#
-# PyInstaller.__main__.run([
-#     'main.py',
-#     '--noconfirm',
-#     '--add-data=project.xml;.',
-#     '--add-data=Image_test/;Image_test',
-#     '--add-data=unet_model/;unet_model',
-#     '--add-data=dist/install_update.exe;.',
-# ])
+
+PyInstaller.__main__.run([
+    'main.py',
+    '--noconfirm',
+    '--add-data=project.xml;.',
+    '--add-data=Image_test/;Image_test',
+    '--add-data=unet_model/;unet_model',
+    '--add-data=dist/install_update.exe;.',
+])
