@@ -1,6 +1,3 @@
-import base64
-import os
-import random
 import time
 from ast import literal_eval
 
@@ -12,10 +9,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
 from matplotlib import pyplot as plt
 
-from definitions import DATASET_PATH, MODEL_H5_PATH
-from model.result_predict import ResultPredict
-from model.result_scan import ResultScan
 from model.Annotations import Annotations
+from model.result_predict import ResultPredict
+
+import tensorflow as tf
 
 
 class LoadingModelAndPredict(QThread):
@@ -96,14 +93,16 @@ class LoadingModelAndPredict(QThread):
 
     def load_model_func(self):
         from keras.models import load_model
-        from utils.unet_model.model_losses import dice_coef, bce_dice_loss, binary_weighted_cross_entropy, MyMeanIOU, \
-            dice_loss
-        iou1111 = MyMeanIOU(num_classes=12)
+        from utils.unet_model.model_losses import dice_loss
+        # iou1111 = MyMeanIOU(num_classes=12)
         if self.model is None:
+            print(self.path_model)
+            interpreter = tf.lite.Interpreter(model_path=self.path_model)
+            interpreter.allocate_tensors()
             print('------ Загружаю модель ------')
-            self.model = load_model(self.path_model,
-                                    custom_objects={'dice_loss': dice_loss,
-                                                    'MyMeanIOU': iou1111})
+            self.model = interpreter
+
+
             return self.model
         else:
             return self.model
@@ -138,15 +137,16 @@ class LoadingModelAndPredict(QThread):
                 return image
 
     def drawingMaskForImagePredict(self, image: Image, predict: Image, color, result_category: ResultPredict):
-        print(color)
+        # print(color)
         print(result_category.name_category_ru)
         p = cv2.resize(predict, (512, 512), interpolation=cv2.INTER_AREA)
         p = p.astype('uint8')
         polygon, hierarchy = cv2.findContours(p, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        print(polygon)
         image_original_copy = image.copy()
         polygon_result = []
         if polygon is not None:
-            # print(polygon)
+
             # print(dir(polygon))
             polygon = sorted(polygon, key=cv2.contourArea, reverse=True)
             image_temp = np.zeros_like(image, np.uint8)
@@ -198,16 +198,29 @@ class LoadingModelAndPredict(QThread):
 
     def predict(self, batch, original_image):
         print(f" ==========  {self.objectName()} ========== ")
+        print(f" ==========  {batch.shape} ========== ")
         self.list_annotations.clear()
         if self.model is not None:
 
-            res = self.model.predict(batch)
+
+
+            # Получение входного и выходного тензоров
+            input_details = self.model.get_input_details()
+            output_details = self.model.get_output_details()
+            # Подача изображения на вход модели
+            self.model.set_tensor(input_details[0]['index'], batch)
+
+            # Выполнение предсказания
+            self.model.invoke()
+            # Получение результата предсказания
+            res = self.model.get_tensor(output_details[0]['index'])
+            res = np.squeeze(res)
 
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             list_predict = list()
-            dd = ['1', '2', '3', '4', '5']
-            for i in range(len(res[0, 0, 0, :])):
-                r_one = (res[0, :, :, i] > 0.7).astype(np.float32)
+
+            for i in range(len(res[0, 0, :])):
+                r_one = res[:, :, i]
                 r_one = np.array(r_one)
                 list_predict.append(r_one)
             color1 = []
@@ -222,7 +235,7 @@ class LoadingModelAndPredict(QThread):
                     print(f'category: {category.name_category_ru} np.sum: {np.sum(j)}')
 
                     img1, polygon1 = self.drawingMaskForImagePredict(image=img_original_resize,
-                                                                     predict=j,
+                                                                     predict=(j*255).astype(np.uint8),
                                                                      color=color[::-1],
                                                                      result_category=category)
 
@@ -285,8 +298,8 @@ class LoadingModelAndPredict(QThread):
     def image_preprocessing(self, Image_original):
 
         # train_img = cv2.cvtColor(Image, cv2.IMREAD_ANYDEPTH)
-        train_img = cv2.cvtColor(Image_original, cv2.IMREAD_COLOR)
-        train_img = cv2.resize(train_img, (128, 128))
+        train_img = cv2.cvtColor(Image_original, cv2.COLOR_BGR2RGB)
+        train_img = cv2.resize(train_img, (256, 256))
         train_img = train_img.astype(np.float32) / 255.
 
         if (len(train_img.shape) == 3 and train_img.shape[2] == 3):
@@ -303,7 +316,7 @@ class LoadingModelAndPredict(QThread):
         # print(image11.shape)
         from keras.utils import img_to_array
         from tensorflow import expand_dims
-        img_array = img_to_array(image11)
+        img_array = img_to_array(image11 * 255)
         img_array_batch = expand_dims(img_array, 0)  # Create a batch
         return img_array_batch
 
