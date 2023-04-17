@@ -29,11 +29,18 @@ class Ui_Form(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
+
         self.horizontalLayout.addWidget(self.label)
+
         self.pushButton = QPushButton(Form)
         self.pushButton.setObjectName(u"pushButton")
+
         self.horizontalLayout.addWidget(self.pushButton)
+
+
         self.verticalLayout.addLayout(self.horizontalLayout)
+
+
         self.retranslateUi(Form)
 
         QMetaObject.connectSlotsByName(Form)

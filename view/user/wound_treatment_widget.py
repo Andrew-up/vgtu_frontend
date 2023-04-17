@@ -132,7 +132,7 @@ class WoundHealingPatient(QWidget):
             for key, groups_item in groupby(sort_list, key=lambda x: x.category_id):
                 sum = 0.0
                 category_ru: str = str()
-                color = (255,255,255)
+                color = (255, 255, 255)
                 for item in groups_item:
                     sum += item.area
                     category_ru = item.category.name_category_ru

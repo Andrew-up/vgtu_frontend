@@ -142,7 +142,7 @@ class LoadingModelAndPredict(QThread):
         p = cv2.resize(predict, (512, 512), interpolation=cv2.INTER_AREA)
         p = p.astype('uint8')
         polygon, hierarchy = cv2.findContours(p, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        print(polygon)
+        # print(polygon)
         image_original_copy = image.copy()
         polygon_result = []
         if polygon is not None:
@@ -215,12 +215,14 @@ class LoadingModelAndPredict(QThread):
             # Получение результата предсказания
             res = self.model.get_tensor(output_details[0]['index'])
             res = np.squeeze(res)
+            res = tf.nn.softmax(res, axis=-1)
 
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             list_predict = list()
+            res = res[:, :, 1:]
 
             for i in range(len(res[0, 0, :])):
-                r_one = res[:, :, i]
+                r_one = res[:, :, i] > 0.5
                 r_one = np.array(r_one)
                 list_predict.append(r_one)
             color1 = []
