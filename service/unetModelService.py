@@ -202,27 +202,34 @@ class LoadingModelAndPredict(QThread):
         self.list_annotations.clear()
         if self.model is not None:
 
-
+            start = time.time()  ## точка отсчета времени
 
             # Получение входного и выходного тензоров
             input_details = self.model.get_input_details()
             output_details = self.model.get_output_details()
             # Подача изображения на вход модели
+            list_predict = list()
+            print(batch.shape)
             self.model.set_tensor(input_details[0]['index'], batch)
-
+            img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             # Выполнение предсказания
             self.model.invoke()
             # Получение результата предсказания
-            res = self.model.get_tensor(output_details[0]['index'])
-            res = np.squeeze(res)
-            res = tf.nn.softmax(res, axis=-1)
 
-            img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
-            list_predict = list()
-            res = res[:, :, 1:]
 
-            for i in range(len(res[0, 0, :])):
-                r_one = res[:, :, i] > 0.5
+            end = time.time() - start  ## собственно время работы программы
+            print(f'время распознавания: {end}')  ## вывод времени
+
+            result_predict = self.model.get_tensor(output_details[0]['index']) # Получаю тензор 1 256 256 4
+            result_predict = np.squeeze(result_predict) #Убираю 1, получается тензор 256, 256,3
+            result_predict = tf.nn.softmax(result_predict, axis=-1) #Сглаживаю значения что бы вероятности были в диапазоне от 0 до 1
+
+            argmax_predict = np.argmax(np.array(result_predict), axis=-1) #получаю максимальное значение по последней оси
+            result_predict = tf.keras.utils.to_categorical(argmax_predict) # Разворачиваю массив в размерность, сколько нашлось категорий+1
+            result_predict = result_predict[:, :, 1:] #Убираю фон на распознанном изображении
+
+            for i in range(len(result_predict[0, 0, :])):
+                r_one = result_predict[:, :, i]
                 r_one = np.array(r_one)
                 list_predict.append(r_one)
             color1 = []
@@ -232,7 +239,7 @@ class LoadingModelAndPredict(QThread):
             for index, j in enumerate(list_predict):
                 color = color1[index]
                 # print(color)
-                if np.sum(j) > 5:
+                if np.sum(j) > 100:
                     category = self.categorical_predict[index]
                     print(f'category: {category.name_category_ru} np.sum: {np.sum(j)}')
 
