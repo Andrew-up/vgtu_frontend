@@ -13,6 +13,8 @@ def get_history_training_model():
         list_history.append(HistoryTrainingModel(**i))
     print(f'ответ от сервера за : {r.elapsed.total_seconds()} секунд')
     return list_history
+
+
 def get_last_history_training():
     r = requests.get(f'{api}model_cnn/last_model/')
     last_model_history = r.json()
@@ -31,4 +33,4 @@ def get_annotation_json():
 
 
 if __name__ == '__main__':
-    get_annotation_json()
+    get_history_training_model()

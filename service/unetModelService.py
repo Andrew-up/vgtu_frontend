@@ -82,9 +82,7 @@ class LoadingModelAndPredict(QThread):
             self.load_model_func()
             res = round(time.time() - secundomer, 2)
             self.loading_model_end.emit(str(res))  # посылаем сигнал с временем загрузки модели
-            image_preprocessing = self.image_preprocessing(image)
-            batch_image = self.create_batch(image_preprocessing)
-            predict = self.predict(batch_image, image)
+            predict = self.predict(image)
             image_qt = self.opencvFormatToQImage(predict)
             self.predict_image_result.emit(QPixmap.fromImage(image_qt))
         else:
@@ -172,6 +170,8 @@ class LoadingModelAndPredict(QThread):
                     a.area = cv2.contourArea(polygon_annotation)
                     self.list_annotations.append(a)
 
+
+
             # print(self.list_annotations)
             # for i in self.list_annotations:
             #     print(i.__dict__)
@@ -196,9 +196,9 @@ class LoadingModelAndPredict(QThread):
                 res.append(float(b))
         return res
 
-    def predict(self, batch, original_image):
+    def predict(self, original_image):
         print(f" ==========  {self.objectName()} ========== ")
-        print(f" ==========  {batch.shape} ========== ")
+        print(f" ==========  {np.array(original_image).shape} ========== ")
         self.list_annotations.clear()
         if self.model is not None:
 
@@ -207,10 +207,15 @@ class LoadingModelAndPredict(QThread):
             # Получение входного и выходного тензоров
             input_details = self.model.get_input_details()
             output_details = self.model.get_output_details()
+
+
             # Подача изображения на вход модели
             list_predict = list()
-            print(batch.shape)
-            self.model.set_tensor(input_details[0]['index'], batch)
+            # print(batch.shape)
+            image_preprocessing = self.image_preprocessing(original_image, target_shape=input_details[0]['shape'])
+            batch_image = self.create_batch(image_preprocessing)
+            # return 0
+            self.model.set_tensor(input_details[0]['index'], batch_image)
             img_original_resize = cv2.resize(original_image, (512, 512), interpolation=cv2.INTER_AREA)
             # Выполнение предсказания
             self.model.invoke()
@@ -304,11 +309,12 @@ class LoadingModelAndPredict(QThread):
 
             return img_original_resize
 
-    def image_preprocessing(self, Image_original):
+    def image_preprocessing(self, Image_original, target_shape=(1, 256, 256, 3)):
 
         # train_img = cv2.cvtColor(Image, cv2.IMREAD_ANYDEPTH)
+        print(f'target_shape: {target_shape}')
         train_img = cv2.cvtColor(Image_original, cv2.COLOR_BGR2RGB)
-        train_img = cv2.resize(train_img, (256, 256))
+        train_img = cv2.resize(train_img, (target_shape[1], target_shape[2]))
         train_img = train_img.astype(np.float32) / 255.
 
         if (len(train_img.shape) == 3 and train_img.shape[2] == 3):
