@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'list_patient_widget.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -35,10 +35,15 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.label_2)
 
+        self.widget_2 = QWidget(Form)
+        self.widget_2.setObjectName(u"widget_2")
+        self.widget_2.setMinimumSize(QSize(0, 50))
+        self.verticalLayout_6 = QVBoxLayout(self.widget_2)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(-1, 10, -1, 10)
-        self.pushButton_6 = QPushButton(Form)
+        self.pushButton_6 = QPushButton(self.widget_2)
         self.pushButton_6.setObjectName(u"pushButton_6")
 
         self.horizontalLayout_3.addWidget(self.pushButton_6)
@@ -47,18 +52,28 @@ class Ui_Form(object):
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_4)
 
-        self.pushButton_7 = QPushButton(Form)
+        self.pushButton_7 = QPushButton(self.widget_2)
         self.pushButton_7.setObjectName(u"pushButton_7")
 
         self.horizontalLayout_3.addWidget(self.pushButton_7)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_3)
 
+
+        self.verticalLayout_2.addWidget(self.widget_2)
+
+        self.widget = QWidget(Form)
+        self.widget.setObjectName(u"widget")
+        self.widget.setEnabled(True)
+        self.widget.setMinimumSize(QSize(0, 0))
+        self.verticalLayout_5 = QVBoxLayout(self.widget)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(1, 1, 1, 1)
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(-1, 10, -1, 10)
-        self.label_3 = QLabel(Form)
+        self.label_3 = QLabel(self.widget)
         self.label_3.setObjectName(u"label_3")
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
@@ -68,13 +83,16 @@ class Ui_Form(object):
 
         self.horizontalLayout_5.addWidget(self.label_3)
 
-        self.lineEdit = QLineEdit(Form)
+        self.lineEdit = QLineEdit(self.widget)
         self.lineEdit.setObjectName(u"lineEdit")
 
         self.horizontalLayout_5.addWidget(self.lineEdit)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_5)
+
+
+        self.verticalLayout_2.addWidget(self.widget)
 
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
@@ -128,7 +146,7 @@ class Ui_Form(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 286, 216))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 286, 196))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_4 = QVBoxLayout()
@@ -164,7 +182,7 @@ class Ui_Form(object):
         self.label_2.setText(QCoreApplication.translate("Form", u"\u0421\u043f\u0438\u0441\u043e\u043a \u043f\u0430\u0446\u0438\u0435\u043d\u0442\u043e\u0432", None))
         self.pushButton_6.setText(QCoreApplication.translate("Form", u"\u0421\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u043a\u0430", None))
         self.pushButton_7.setText(QCoreApplication.translate("Form", u"\u0424\u0438\u043b\u044c\u0442\u0440\u0430\u0446\u0438\u044f", None))
-        self.label_3.setText(QCoreApplication.translate("Form", u"\u041b\u0443\u043f\u0430", None))
+        self.label_3.setText(QCoreApplication.translate("Form", u"\u041b\u0443\u043f\u04301", None))
         self.pushButton_8.setText(QCoreApplication.translate("Form", u"\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u0430\u0446\u0438\u0435\u043d\u0442\u0430", None))
         self.update_patients.setText(QCoreApplication.translate("Form", u"\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u0441\u043f\u0438\u0441\u043e\u043a", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"\u0424\u0418\u041e", None))

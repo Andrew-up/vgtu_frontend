@@ -6,14 +6,14 @@
         <file_name_archive>update.zip</file_name_archive>
         <coefficient_k>1</coefficient_k>
         <model_cnn_path>unet_model/</model_cnn_path>
-        <model_cnn_name>model_1_0_19.tflite</model_cnn_name>
-        <model_cnn_version>1.0.19</model_cnn_version>
+        <model_cnn_name>model_1_0_1.tflite</model_cnn_name>
+        <model_cnn_version>1.0.1</model_cnn_version>
         <update_installer_exe_path>install_update.exe</update_installer_exe_path>
     </app>
     <server>
 
-        <addr>localhost</addr>
-        <port>5000</port>
+        <addr>127.0.0.1</addr>
+        <port>8080</port>
 
         <update_api>api/app/update/download/</update_api>
         <update_cnn_model_api>api/model_cnn/last_model/download/</update_cnn_model_api>

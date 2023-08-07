@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'history_patient_item_widget.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,6 +23,11 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(218, 308)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
+        Form.setSizePolicy(sizePolicy)
         Form.setStyleSheet(u"QWidget#Form{\n"
 "	color: rgb(255, 255, 255);\n"
 "}\n"
@@ -53,22 +58,22 @@ class Ui_Form(object):
 
         self.patient_history_item_date = QLabel(self.widget)
         self.patient_history_item_date.setObjectName(u"patient_history_item_date")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.patient_history_item_date.sizePolicy().hasHeightForWidth())
-        self.patient_history_item_date.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.patient_history_item_date.sizePolicy().hasHeightForWidth())
+        self.patient_history_item_date.setSizePolicy(sizePolicy1)
         self.patient_history_item_date.setStyleSheet(u"background-color: rgb(255, 255, 255);")
 
         self.verticalLayout.addWidget(self.patient_history_item_date)
 
         self.patient_history_item_comment = QLabel(self.widget)
         self.patient_history_item_comment.setObjectName(u"patient_history_item_comment")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.patient_history_item_comment.sizePolicy().hasHeightForWidth())
-        self.patient_history_item_comment.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.patient_history_item_comment.sizePolicy().hasHeightForWidth())
+        self.patient_history_item_comment.setSizePolicy(sizePolicy2)
         self.patient_history_item_comment.setStyleSheet(u"background-color: rgb(170, 153, 255);")
 
         self.verticalLayout.addWidget(self.patient_history_item_comment)

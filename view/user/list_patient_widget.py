@@ -22,6 +22,11 @@ class ListPatient(QWidget):
         self.ui.update_patients.clicked.connect(self.on_update_list)
         self.main_menu_slots = None
         self.main_menu_slots: SlotsMainMenu
+        self.ui.widget.setVisible(False)
+        self.ui.widget_2.setVisible(False)
+        # self.ui.label_3.setText('111111111')
+        # self.ui.
+        # self.ui.horizontalLayout_5.setParent(None)
 
     def set_main_menu_slots(self, value: SlotsMainMenu):
         self.main_menu_slots = value
