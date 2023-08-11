@@ -23,9 +23,9 @@ class CategoricalItem(QDialog):
 
     def __init__(self):
         super(CategoricalItem, self).__init__()
-        self.category = get_categorical_predict()
+        self.result_predict = get_categorical_predict()
         layout = QVBoxLayout()
-        for i in self.category:
+        for i in self.result_predict:
             radio = CustomRadioButtonClass(category=i)
             radio.clickButtonItem.connect(self.on_selected_category)
             layout.addWidget(radio)

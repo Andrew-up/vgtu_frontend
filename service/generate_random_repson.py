@@ -58,13 +58,13 @@ def generate_person():
     if women > 5:
         patient.gender = 'female'
         patient.firstname = random.choice(name_female)
-        patient.middle_name = random.choice(female_middle_name)
-        patient.last_name = random.choice(female_last_name)
+        patient.middlename = random.choice(female_middle_name)
+        patient.surname = random.choice(female_last_name)
     else:
         patient.gender = 'male'
         patient.firstname = random.choice(name_male)
-        patient.middle_name = random.choice(male_middle_name)
-        patient.last_name = random.choice(male_last_name)
+        patient.middlename = random.choice(male_middle_name)
+        patient.surname = random.choice(male_last_name)
 
     date_str = f'{random.randint(1, 28)}.{random.randint(1, 12)}.{random.randint(1960, 2000)}'
     date_obj = datetime.strptime(date_str, '%d.%m.%Y').date()

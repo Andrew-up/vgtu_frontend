@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.4.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,18 +17,18 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLayout,
     QMainWindow, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QStackedWidget, QStatusBar, QVBoxLayout,
-    QWidget)
+    QSpacerItem, QStackedWidget, QStatusBar, QTextEdit,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(747, 613)
+        MainWindow.resize(649, 584)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.verticalLayout_4 = QVBoxLayout(self.centralwidget)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setSizeConstraint(QLayout.SetMinimumSize)
@@ -95,11 +95,47 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
 
 
-        self.verticalLayout_4.addLayout(self.verticalLayout)
+        self.verticalLayout_2.addLayout(self.verticalLayout)
 
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(-1, 5, -1, -1)
+        self.widget_server_connect = QWidget(self.centralwidget)
+        self.widget_server_connect.setObjectName(u"widget_server_connect")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.widget_server_connect.sizePolicy().hasHeightForWidth())
+        self.widget_server_connect.setSizePolicy(sizePolicy2)
+        self.widget_server_connect.setMinimumSize(QSize(0, 50))
+        self.widget_server_connect.setStyleSheet(u"")
+        self.horizontalLayout_4 = QHBoxLayout(self.widget_server_connect)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.textEdit = QTextEdit(self.widget_server_connect)
+        self.textEdit.setObjectName(u"textEdit")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
+        self.textEdit.setSizePolicy(sizePolicy3)
+
+        self.horizontalLayout_3.addWidget(self.textEdit)
+
+        self.reload_connect_server = QPushButton(self.widget_server_connect)
+        self.reload_connect_server.setObjectName(u"reload_connect_server")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.reload_connect_server.sizePolicy().hasHeightForWidth())
+        self.reload_connect_server.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_3.addWidget(self.reload_connect_server)
+
+
+        self.horizontalLayout_4.addLayout(self.horizontalLayout_3)
+
+
+        self.verticalLayout_2.addWidget(self.widget_server_connect)
+
         self.pushButton = QPushButton(self.centralwidget)
         self.pushButton.setObjectName(u"pushButton")
 
@@ -110,18 +146,20 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_2.addWidget(self.update_cnn_button)
 
-
-        self.verticalLayout_4.addLayout(self.verticalLayout_2)
-
         self.stacked_widget_main = QStackedWidget(self.centralwidget)
         self.stacked_widget_main.setObjectName(u"stacked_widget_main")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.stacked_widget_main.sizePolicy().hasHeightForWidth())
+        self.stacked_widget_main.setSizePolicy(sizePolicy5)
 
-        self.verticalLayout_4.addWidget(self.stacked_widget_main)
+        self.verticalLayout_2.addWidget(self.stacked_widget_main)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 747, 22))
+        self.menubar.setGeometry(QRect(0, 0, 649, 22))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -139,6 +177,7 @@ class Ui_MainWindow(object):
         self.icon_profile_main.setText(QCoreApplication.translate("MainWindow", u"\u0418\u043a\u043e\u043d\u043a\u0430", None))
         self.authorized_user.setText(QCoreApplication.translate("MainWindow", u"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d \u0418\u0432\u0430\u043d\u043e\u0432\u0438\u0447", None))
         self.login_exit.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0445\u043e\u0434", None))
+        self.reload_connect_server.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0435\u0440\u0435\u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u044c\u0441\u044f", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f", None))
         self.update_cnn_button.setText(QCoreApplication.translate("MainWindow", u"\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435 \u043d\u0435\u0439\u0440\u043e\u043d\u043d\u043e\u0439 \u0441\u0435\u0442\u0438", None))
     # retranslateUi

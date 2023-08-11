@@ -1,6 +1,7 @@
+import json
+
 import requests
 
-from dto.patientDTO import PatientDTO, getPatient, getPatientDTO
 from model.history_patient import HistoryPatient
 from model.patient_model import Patient
 from model.result_predict import ResultPredict
@@ -12,8 +13,8 @@ api = ReadXmlProject().get_API() + 'api/'
 
 def get_patient_by_id(id: int) -> Patient:
     r = requests.get(f'{api}patient/{id}/')
-    dto: PatientDTO = PatientDTO(**r.json())
-    p: Patient() = getPatient(dto)
+    # dto: PatientDTO = PatientDTO(**r.json())
+    p: Patient() = Patient(**r.json())
     print(f'ответ от сервера за : {r.elapsed.total_seconds()} секунд')
     return p
 
@@ -26,8 +27,7 @@ def get_all_patients(id_doctor: int) -> list[Patient]:
         patients: list[Patient] = []
         for dto_dict in r.json():
             p = Patient()
-            dto = PatientDTO(**dto_dict)
-            patient: Patient = getPatient(dto)
+            patient = Patient(**dto_dict)
             patients.append(patient)
         return patients
 
@@ -44,14 +44,13 @@ def get_history_patient(id_patient) -> list[HistoryPatient]:
 
 
 def add_patient(patient: Patient):
-    dto: PatientDTO = getPatientDTO(patient)
     api_full = f'{api}add/'
-    print(api_full)
-    r = requests.post(api_full, json=dto.__dict__, headers={"Content-Type": "application/json"})
+    print(patient.to_dict())
+    r = requests.post(api_full, json=patient.to_dict(), headers={"Content-Type": "application/json"})
     print(f'ответ от сервера за : {r.elapsed.total_seconds()} секунд')
-    dto_new = PatientDTO(**r.json())
-    new_patient = getPatient(dto_new)
-    return new_patient
+    print(r.json())
+    dto_new = Patient(**r.json())
+    return dto_new
 
 
 def delete_patient(id_patient):
@@ -62,16 +61,18 @@ def delete_patient(id_patient):
 
 
 def add_history_patient(history: HistoryPatient):
-    str_api = f'{api}/history/add/{history.patient_id}/'
+    str_api = f'{api}history/add/{history.patient_id}/'
     json = history.__dict__
-    print(json)
+    # print(history.history_neutral_network.annotations)
+    print(json['history_neutral_network'])
     r = requests.post(str_api, json=json, headers={"Content-Type": "application/json"})
     return r.status_code, r.text
 
 
 def get_categorical_predict() -> list[ResultPredict]:
-    str_api = f'{api}/categorical/all/'
+    str_api = f'{api}categorical/all/'
     r = requests.get(str_api)
+    print(r.text)
     result_predict_list: list[ResultPredict] = []
     for i in r.json():
         result_predict_list.append(ResultPredict(**i))
@@ -98,7 +99,7 @@ if __name__ == '__main__':
     # h.history_neutral_network = h.history_neutral_network
     # print(get_history_Json(h))
 
-    get_history_patient(1)
+    get_history_patient(5)
 
     # delete_patient(10)
 #     # get_patient_by_id(30)

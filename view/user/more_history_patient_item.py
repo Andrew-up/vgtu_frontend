@@ -1,13 +1,12 @@
-import base64
 import sys
 from ast import literal_eval
 
-from PySide6.QtWidgets import QWidget, QApplication, QDialog
+from PySide6.QtWidgets import QApplication, QDialog
 
 from model.history_patient import HistoryPatient
+from service.imageService import is_valid_base64_image, byteArrayToPixmap
 from utils.read_xml_file import ReadXmlProject
 from view.py.more_history_patient_item import Ui_Form
-from service.imageService import image_to_base64, base64_to_image, is_valid_base64_image, byteArrayToPixmap, stringIsBase64
 
 
 class MoreHistoryPatientItem(QDialog):
@@ -23,7 +22,6 @@ class MoreHistoryPatientItem(QDialog):
 
     def close_this(self):
         self.close()
-
 
     def initImage(self):
         coefficient_k = ReadXmlProject().get_coefficient_k
@@ -47,9 +45,9 @@ class MoreHistoryPatientItem(QDialog):
             if self.history_patient.history_neutral_network.annotations:
                 string_dianosis = str()
                 for i in self.history_patient.history_neutral_network.annotations:
-                    r, g, b = literal_eval(i.category.color)
+                    r, g, b = literal_eval(i.result_predict.color)
                     string_dianosis += f' <font style="color:rgb({r}, {g}, {b});"> ' \
-                                       f'Категория: {i.category.name_category_ru}' f' ' \
+                                       f'Категория: {i.result_predict.name_category_ru}' f' ' \
                                        f'Площадь: {str(float(round(i.area * coefficient_k, 2)))} кв мм' \
                                        f' Полигон: {i.segmentation} <br> ____________________ <br></font>'
                 self.ui.label_dianosis.setWordWrap(True)

@@ -1,15 +1,17 @@
 import os
 import sys
+import urllib.parse
+
+import requests
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget
 
 from definitions import ROOT_DIR
 from service.slotsService import SlotsMainMenu
-from view.py.mainwindow import Ui_MainWindow
-from view.user.list_patient_widget import ListPatient
-from view.user.info_model_cnn_widget import InfoModelCNNWidget
-from view.user.Update_app_widget import UpdateAppWidget
 from utils.read_xml_file import ReadXmlProject
+from view.py.mainwindow import Ui_MainWindow
+from view.user.info_model_cnn_widget import InfoModelCNNWidget
+from view.user.list_patient_widget import ListPatient
 
 
 class MainWindow(QMainWindow):
@@ -19,13 +21,37 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        print('1111111111111111')
+        self.r = ReadXmlProject()
+        self.ui.widget_server_connect.setVisible(False)
+        self.ui.textEdit.setReadOnly(True)
         self.this_class_slot.open_start_view.connect(self.open_start_view)
         self.this_class_slot.set_widget_main_menu.connect(self.set_widget_root_stacket_widget)
-        self.view_patient()
         self.ui.pushButton.clicked.connect(self.update_app)
         self.ui.logo_company_main.setStyleSheet('background-color: white')
         self.ui.logo_company_main.setText('ROBOT HELPER')
         self.ui.update_cnn_button.clicked.connect(self.open_cnn_dialog)
+        self.ui.reload_connect_server.clicked.connect(self.check_status_server)
+        self.check_status_server()
+
+    def check_status_server(self) -> bool:
+        print('обновить')
+        url_check = urllib.parse.urljoin(self.r.get_API(), 'api/app/status/')
+        try:
+            r = requests.get(url_check)
+            if r.json()['status'] == "ok":
+                print(r.json())
+                self.ui.widget_server_connect.setVisible(False)
+                self.view_patient()
+                return True
+            else:
+                self.ui.widget_server_connect.setVisible(True)
+                self.ui.textEdit.setText(r.text)
+                return False
+        except requests.exceptions.RequestException as e:  # This is the correct syntax
+            self.ui.widget_server_connect.setVisible(True)
+            self.ui.textEdit.setText(str(e))
+            return False
 
     def open_cnn_dialog(self):
         dlg = InfoModelCNNWidget()
@@ -43,13 +69,14 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_app(self):
-        xml = ReadXmlProject()
-        url_check = xml.get_API() + xml.server_api_check_version
-        url_download = xml.get_API() + xml.server_api_update
-        url_installer_exe_path = xml.update_installer_exe_path
-        update_dir = xml.app_update_folder
+        from view.user.Update_app_widget import UpdateAppWidget
+
+        url_check = self.r.get_API() + self.r.server_api_check_version
+        url_download = self.r.get_API() + self.r.server_api_update
+        url_installer_exe_path = self.r.update_installer_exe_path
+        update_dir = self.r.app_update_folder
         path_end_update = os.path.join(ROOT_DIR)
-        version = xml.app_version
+        version = self.r.app_version
         print(f'end_path: {path_end_update}')
 
         dlg = UpdateAppWidget(api_check=url_check,

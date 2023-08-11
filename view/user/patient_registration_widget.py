@@ -1,11 +1,11 @@
-from PySide6.QtCore import Slot, QSize
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame, QDialog
 import sys
-from view.py.patient_registration import Ui_Form
-from service.generate_random_repson import generate_person
+
+from PySide6.QtWidgets import QApplication, QMessageBox, QDialog
+
 from model.patient_model import Patient
 from service.PatientService import PatientServiceFront
+from service.generate_random_repson import generate_person
+from view.py.patient_registration import Ui_Form
 
 
 class PatientRegistration(QDialog):
@@ -14,13 +14,10 @@ class PatientRegistration(QDialog):
         super(PatientRegistration, self).__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        self.patient = None
+        self.patient: Patient = Patient()
         self.ui.get_random_patient_button.clicked.connect(self.get_random_person)
         self.ui.registration_button.clicked.connect(self.on_registration_button)
         self.ui.clear_all_button.clicked.connect(self.clear_all)
-
-
-
 
     def registration_ok(self, id_new_user: Patient):
         dlg = QMessageBox(self)
@@ -34,8 +31,8 @@ class PatientRegistration(QDialog):
 
     def fill_registration_card(self):
         self.ui.firstname_patient.setText(self.patient.firstname)
-        self.ui.lastname_patient.setText(self.patient.last_name)
-        self.ui.middle_name_patient.setText(self.patient.middle_name)
+        self.ui.lastname_patient.setText(self.patient.surname)
+        self.ui.middle_name_patient.setText(self.patient.middlename)
         self.ui.date_of_birth_patient.setDate(self.patient.date_of_birth)
         self.ui.address_patient.setText(self.patient.address)
         self.ui.phone_patient.setText(self.patient.phone)
@@ -46,18 +43,12 @@ class PatientRegistration(QDialog):
     def on_registration_button(self):
         p = PatientServiceFront(1)
         res: Patient = p.add(self.patient)
-        print(res.id_patient)
-        self.close()
-        # if res.id_patient > 0:
-        #     self.registration_ok(res)
-
+        # self.close()
 
     def get_random_person(self):
         patient_random: Patient = generate_person()
         self.patient = patient_random
         self.fill_registration_card()
-
-
 
 
 if __name__ == '__main__':

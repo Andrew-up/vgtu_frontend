@@ -1,17 +1,18 @@
 import base64
-import io
-from ast import literal_eval
-
-from PySide6.QtCore import Slot, QSize, QByteArray, QBuffer
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame,QDialog
 import sys
-from view.py.history_patient_item_widget import Ui_Form
-from model.history_patient import HistoryPatient
-from service.imageService import image_to_base64, base64_to_image, is_valid_base64_image
-from PIL import Image
+from ast import literal_eval
+from io import BytesIO
 
+from PIL import Image
+from PySide6.QtCore import QByteArray
+from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtWidgets import QWidget, QApplication
+
+from model.history_patient import HistoryPatient
+from service.imageService import is_valid_base64_image
+from view.py.history_patient_item_widget import Ui_Form
 from view.user.more_history_patient_item import MoreHistoryPatientItem
+
 
 class HistoryPatientWidgetItem(QWidget):
 
@@ -37,8 +38,8 @@ class HistoryPatientWidgetItem(QWidget):
             img = is_valid_base64_image(photo)
             img_pred = is_valid_base64_image(photo_pred)
             if img_pred:
-                basad = QByteArray.fromBase64(literal_eval(photo_pred))
-                img = QImage.fromData(basad, 'PNG')
+                image_bytes = base64.b64decode(photo_pred)
+                img = QImage.fromData(image_bytes)
                 image = QPixmap.fromImage(img)
                 self.ui.patient_history_item_image.setPixmap(image)
                 self.ui.patient_history_item_image.setScaledContents(True)
@@ -46,13 +47,12 @@ class HistoryPatientWidgetItem(QWidget):
                 return 0
 
             if img:
-                basad = QByteArray.fromBase64(literal_eval(photo))
-                img = QImage.fromData(basad, 'PNG')
+                image_bytes = base64.b64decode(photo)
+                img = QImage.fromData(image_bytes)
                 image = QPixmap.fromImage(img)
                 self.ui.patient_history_item_image.setPixmap(image)
                 self.ui.patient_history_item_image.setScaledContents(True)
                 print('img')
-
 
 
 if __name__ == '__main__':

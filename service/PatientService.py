@@ -1,7 +1,3 @@
-from model.patient_model import Patient
-from model.history_patient import HistoryPatient
-from controller.PatientController import get_patient_by_id, \
-    get_all_patients, add_patient, delete_patient, get_history_patient, add_history_patient, get_categorical_predict
 from controller.PatientController import get_patient_by_id, \
     get_all_patients, add_patient, delete_patient, get_history_patient, add_history_patient, get_categorical_predict
 from model.history_patient import HistoryPatient

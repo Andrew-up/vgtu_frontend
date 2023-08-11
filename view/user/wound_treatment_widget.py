@@ -1,35 +1,27 @@
-import base64
+import datetime
 import datetime
 import os
 import sys
 import time
 from itertools import groupby
 
-import cv2
-from PIL.Image import Image
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QFileDialog, QPushButton, QDialog, QVBoxLayout, QButtonGroup, \
-    QRadioButton
+from PySide6.QtWidgets import QWidget, QApplication, QFileDialog
 
 from definitions import DATASET_PATH
 from model.Annotations import Annotations
-
-from model.result_scan import ResultScan
-from model.history_patient import HistoryPatient
 from model.history_neural_network import HistoryNeuralNetwork
-from service.unetModelService import LoadingModelAndPredict
-from service.PatientService import PatientServiceFront
-from view.py.wound_healing_widget import Ui_Form
-from view.user.drawing_counter import DrawingCounter
-from service.imageService import ImageConverter, image_to_base64
+from model.history_patient import HistoryPatient
 from model.patient_model import Patient
+from service.PatientService import PatientServiceFront
+from service.imageService import image_to_base64
+from service.unetModelService import LoadingModelAndPredict
 from utils.message_box import message_error_show, message_info_show
 from utils.read_xml_file import ReadXmlProject
-from model.result_predict import ResultPredict
+from view.py.wound_healing_widget import Ui_Form
+from view.user.drawing_counter import DrawingCounter
 from view.user.selected_index_cam_widget import SelectedCamera
-
-
 
 
 class WoundHealingPatient(QWidget):
@@ -127,7 +119,8 @@ class WoundHealingPatient(QWidget):
 
         if annotation_list:
             self.history_n_n.annotations = annotation_list
-            self.ui.label_9.setText(f'<font style="color:rgb(0, 255, 0);"> Определен {len(annotation_list)} контур(а) </font>')
+            self.ui.label_9.setText(
+                f'<font style="color:rgb(0, 255, 0);"> Определен {len(annotation_list)} контур(а) </font>')
             sort_list = sorted(annotation_list, key=lambda x: x.category_id)
             for key, groups_item in groupby(sort_list, key=lambda x: x.category_id):
                 sum = 0.0
@@ -135,11 +128,11 @@ class WoundHealingPatient(QWidget):
                 color = (255, 255, 255)
                 for item in groups_item:
                     sum += item.area
-                    category_ru = item.category.name_category_ru
-                    color = item.category.color
-                    print(item.category.color)
+                    category_ru = item.result_predict.name_category_ru
+                    color = item.result_predict.color
+                    print(item.result_predict.color)
                 string_res += f'<font style="color:rgb{color};">  {category_ru} {str(round(float(sum * coefficient_k), 2))}</font>, '
-            self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res +'<br>')
+            self.ui.wound_healing_area_wound.setText('Площадь: <br>' + string_res + '<br>')
             self.ui.wound_healing_area_wound.setWordWrap(True)
 
     @Slot(int)
@@ -155,7 +148,6 @@ class WoundHealingPatient(QWidget):
             self.set_cam_index(-1)
             self.load_model_and_predict.quit()
             self.ui.file_name_select_folder.setText("Выберите фото из каталога")
-
 
     def on_radio_scan_to_cam(self):
         if self.index_cam == -1:
@@ -250,6 +242,7 @@ class WoundHealingPatient(QWidget):
         self.load_model_and_predict.play_video = False
         self.ui.wound_healing_loading_label.setVisible(True)
         self.load_model_and_predict.start()
+
 
 if __name__ == '__main__':
     app = QApplication()

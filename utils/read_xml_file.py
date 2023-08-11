@@ -106,7 +106,7 @@ class ReadXmlProject(object):
 
     @property
     def server_addr(self):
-        print(self._server_addr)
+        # print(self._server_addr)
         return self._server_addr
 
     @property

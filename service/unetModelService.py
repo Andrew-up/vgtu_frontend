@@ -3,16 +3,14 @@ from ast import literal_eval
 
 import cv2
 import numpy as np
+import tensorflow as tf
 from PIL import Image
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
-from matplotlib import pyplot as plt
 
 from model.Annotations import Annotations
 from model.result_predict import ResultPredict
-
-import tensorflow as tf
 
 
 class LoadingModelAndPredict(QThread):
@@ -90,8 +88,6 @@ class LoadingModelAndPredict(QThread):
         print('Поток закончил свою работу')
 
     def load_model_func(self):
-        from keras.models import load_model
-        from utils.unet_model.model_losses import dice_loss
         # iou1111 = MyMeanIOU(num_classes=12)
         if self.model is None:
             print(self.path_model)
@@ -99,7 +95,6 @@ class LoadingModelAndPredict(QThread):
             interpreter.allocate_tensors()
             print('------ Загружаю модель ------')
             self.model = interpreter
-
 
             return self.model
         else:
@@ -166,11 +161,9 @@ class LoadingModelAndPredict(QThread):
                     x, y, w, h = box
                     a.bbox = [x, y, w, h]
                     a.category_id = result_category.id_category
-                    a.category = result_category
+                    a.result_predict = result_category
                     a.area = cv2.contourArea(polygon_annotation)
                     self.list_annotations.append(a)
-
-
 
             # print(self.list_annotations)
             # for i in self.list_annotations:
@@ -208,7 +201,6 @@ class LoadingModelAndPredict(QThread):
             input_details = self.model.get_input_details()
             output_details = self.model.get_output_details()
 
-
             # Подача изображения на вход модели
             list_predict = list()
             # print(batch.shape)
@@ -220,18 +212,21 @@ class LoadingModelAndPredict(QThread):
             # Выполнение предсказания
             self.model.invoke()
             # Получение результата предсказания
-
+            print('output tensor: ' + str(output_details[0]['index']))
 
             end = time.time() - start  ## собственно время работы программы
             print(f'время распознавания: {end}')  ## вывод времени
 
-            result_predict = self.model.get_tensor(output_details[0]['index']) # Получаю тензор 1 256 256 4
-            result_predict = np.squeeze(result_predict) #Убираю 1, получается тензор 256, 256,3
-            result_predict = tf.nn.softmax(result_predict, axis=-1) #Сглаживаю значения что бы вероятности были в диапазоне от 0 до 1
+            result_predict = self.model.get_tensor(output_details[0]['index'])  # Получаю тензор 1 256 256 4
+            result_predict = np.squeeze(result_predict)  # Убираю 1, получается тензор 256, 256,3
+            result_predict = tf.nn.softmax(result_predict,
+                                           axis=-1)  # Сглаживаю значения что бы вероятности были в диапазоне от 0 до 1
 
-            argmax_predict = np.argmax(np.array(result_predict), axis=-1) #получаю максимальное значение по последней оси
-            result_predict = tf.keras.utils.to_categorical(argmax_predict) # Разворачиваю массив в размерность, сколько нашлось категорий+1
-            result_predict = result_predict[:, :, 1:] #Убираю фон на распознанном изображении
+            argmax_predict = np.argmax(np.array(result_predict),
+                                       axis=-1)  # получаю максимальное значение по последней оси
+            result_predict = tf.keras.utils.to_categorical(
+                argmax_predict)  # Разворачиваю массив в размерность, сколько нашлось категорий+1
+            result_predict = result_predict[:, :, 1:]  # Убираю фон на распознанном изображении
 
             for i in range(len(result_predict[0, 0, :])):
                 r_one = result_predict[:, :, i]
@@ -249,63 +244,13 @@ class LoadingModelAndPredict(QThread):
                     print(f'category: {category.name_category_ru} np.sum: {np.sum(j)}')
 
                     img1, polygon1 = self.drawingMaskForImagePredict(image=img_original_resize,
-                                                                     predict=(j*255).astype(np.uint8),
+                                                                     predict=(j * 255).astype(np.uint8),
                                                                      color=color[::-1],
                                                                      result_category=category)
 
-                    # plt.imshow(img1)
-                    # plt.show()
                     img_original_resize = img1
 
             self.result_scan.emit(self.list_annotations)
-            #
-
-            # result_mask = []
-            # for i in polygon1:
-            #     result_mask.append(self.unpackArray(i))
-            # base64_polygon = base64.b64encode(str(result_mask).encode())
-
-            # img2, polygon2, area_full2 = self.drawingMaskForImagePredict(image=img1, predict=predict2, color=color2[::-1])
-            # img3, polygon3, area_full3 = self.drawingMaskForImagePredict(image=img2, predict=predict3, color=color3[::-1])
-
-            # scan_list = []
-            # scan_list: list[ResultScan]
-            # if area_full1 != 0:
-            #     scan = ResultScan()
-            #     scan.color = color
-            #     print(max_index)
-            #     if max_index <= len(self.categorical_predict):
-            #         scan.type_wound = self.categorical_predict[max_index].name_category_ru
-            #         scan.result_predict_id = self.categorical_predict[max_index].id_category
-            #     else:
-            #         scan.type_wound = 'Проверьте категории на сервере'
-            #     scan.area_wound = area_full1
-            #     scan.polygon_wound = str(base64_polygon)
-            #     scan_list.append(scan)
-
-            # if area_full2 != 0:
-            #     scan = ResultScan()
-            #     scan.color = color2
-            #     scan.type_wound = DATASET_LABELS[1]
-            #     scan.area_wound = area_full2
-            #     scan_list.append(scan)
-            #
-            # if area_full3 != 0:
-            #     scan = ResultScan()
-            #     scan.area_wound = area_full3
-            #     scan.color = color3
-            #     scan.type_wound = DATASET_LABELS[2]
-            #     scan_list.append(scan)
-
-            # Заполняем результаты сканирование и передает сигналом в UI
-
-            # scan = ResultScan()
-
-            # scan.polygon_wound = segmentation
-            # scan.image_wound = img_original_resize
-            # scan.type_wound = DATASET_LABELS[max_index]
-
-            # scan.area_wound
 
             return img_original_resize
 

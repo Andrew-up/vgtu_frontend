@@ -220,7 +220,8 @@ class UpdateAppWidget(QDialog):
             return False
 
     def version_comparison(self, version_local: str, version_remote: str):
-
+        print(version_local)
+        print(version_remote)
         a1 = version_local.rstrip('0') + '0'
         b1 = version_remote.rstrip('0') + '0'
         lst1 = [int(i) for i in a1.split('.')]

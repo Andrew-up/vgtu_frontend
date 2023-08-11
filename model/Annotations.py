@@ -8,6 +8,6 @@ class Annotations:
         self.segmentation: list[float] = []
         self.history_nn_id: int = int()
         self.category_id: int = int()
-        self.category: ResultPredict = ResultPredict()
+        self.result_predict: ResultPredict = ResultPredict()
         self.__dict__.update(entries)
 

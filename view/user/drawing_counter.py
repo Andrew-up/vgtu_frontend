@@ -82,15 +82,15 @@ class Canvas(QtWidgets.QGraphicsView):
         self.list_item_history: list[ListHistoryCanvasTwo] = []
         self.default_pen = True
         self.annotation_list: list[Annotations] = []
-        self._category: ResultPredict = ResultPredict()
+        self._result_predict: ResultPredict = ResultPredict()
 
     @property
-    def category(self) -> ResultPredict:
-        return self._category
+    def result_predict(self) -> ResultPredict:
+        return self._result_predict
 
-    @category.setter
-    def category(self, value):
-        self._category = value
+    @result_predict.setter
+    def result_predict(self, value):
+        self._result_predict = value
 
     def get_image_from_scene(self):
         image = QImage(int(self.scene_canvas.width()), int(self.scene_canvas.height()),
@@ -213,7 +213,7 @@ class Canvas(QtWidgets.QGraphicsView):
                 category_ru: str = str()
                 for item in groups_item:
                     sum += item.area
-                    category_ru = item.category.name_category_ru
+                    category_ru = item.result_predict.name_category_ru
                 string_res += category_ru + ' ' + str(float(round(sum*coefficient_k, 2))) + 'кв мм, '
             self.area_signal.emit(string_res)
 
@@ -287,9 +287,9 @@ class Canvas(QtWidgets.QGraphicsView):
         if self.annotation_list:
             a.id_annotations = self.annotation_list[-1].id_annotations + 1
             print(a.id_annotations)
-        a.category_id = self.category.id_category
+        a.category_id = self.result_predict.id_category
         a.history_nn_id = None
-        a.category = self.category
+        a.result_predict = self.result_predict
         self.annotation_list.append(a)
         self.sum_annotation_list()
 
@@ -470,20 +470,22 @@ class DrawingCounter(QDialog):
         dlg.exec()
 
     @Slot(ResultPredict)
-    def ooooooooooooooooo(self, category: ResultPredict):
-        self.ui.type_disease_label.setText('Сейчас выбрано: ' + category.name_category_ru)
-        r, g, b = literal_eval(category.color)
+    def ooooooooooooooooo(self, result_predict: ResultPredict):
+        self.ui.type_disease_label.setText('Сейчас выбрано: ' + result_predict.name_category_ru)
+        r, g, b = literal_eval(result_predict.color)
         self.color.setRgb(r, g, b)
         self.canvas.set_pen(3, self.color)
         self.canvas.set_brush(QColor(r, g, b, 127))
-        self.canvas.category = category
+        self.canvas.result_predict = result_predict
 
     def on_click_save_image_button(self):
         self.history_n_n.annotations.clear()
 
         for i in self.canvas.annotation_list:
             a = Annotations(**i.__dict__)
-            a.category = ResultPredict(**i.category.__dict__)
+            a.result_predict = ResultPredict(**i.result_predict.__dict__)
+            # print('==========anns==========')
+            # print(a)
             self.history_n_n.annotations.append(a)
         qiamge = self.canvas.get_image_from_scene()
 

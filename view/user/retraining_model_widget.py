@@ -5,6 +5,7 @@ from model.history_training_model import HistoryTrainingModel
 from view.py.Retraining_model import Ui_Form
 from controller.model_cnn_controller import get_annotation_json, get_last_history_training, send_retraining_model
 
+
 class RetrainingModelWidget(QDialog):
 
     def __init__(self, history_training: HistoryTrainingModel = HistoryTrainingModel(), parent=None):
@@ -13,14 +14,16 @@ class RetrainingModelWidget(QDialog):
         self.ui.setupUi(self)
         self.history_training = history_training
         self.last_history_training = get_last_history_training()
-
         self.inizializator()
         self.ui.pushButton.clicked.connect(self.on_retraining_button)
 
     def inizializator(self):
         self.ui.model_training_false.setVisible(False)
         self.ui.widget.setVisible(False)
-        if self.last_history_training['status'] == 'completed':
+        print(self.last_history_training)
+        if self.last_history_training['status'] == 'completed' or (
+                self.last_history_training['version'] is None and self.last_history_training['status'] is None
+        ):
             ann_json = get_annotation_json()
             self.ui.widget.setVisible(True)
             self.ui.total_annotation_label.setText(str(len(ann_json['annotations'])))
@@ -30,7 +33,6 @@ class RetrainingModelWidget(QDialog):
         else:
             self.ui.model_training_false.setVisible(True)
 
-
     def on_retraining_button(self):
         send_retraining_model()
         self.last_history_training = get_last_history_training()
@@ -39,7 +41,6 @@ class RetrainingModelWidget(QDialog):
     def open_more_info_model(self):
         dlg = RetrainingModelWidget(self.history_training)
         dlg.exec()
-
 
 
 if __name__ == '__main__':

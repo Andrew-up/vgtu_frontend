@@ -36,8 +36,9 @@ class HistoryPatient:
                         i.id_annotations = 0
                     else:
                         i.id_annotations += 1
-                    if i.category:
-                        i.category = i.category.__dict__
+                    print(i.result_predict)
+                    if i.result_predict:
+                        i.result_predict = i.result_predict.__dict__
                     print(i.area)
 
                     h.history_neutral_network.annotations.append(i.__dict__)
@@ -52,9 +53,8 @@ class HistoryPatient:
                 list_a = []
                 for i in h_nn.annotations:
                     a = Annotations(**i)
-                    if a.category:
-                        print(a.category)
-                        a.category = ResultPredict(**a.category)
+                    if a.result_predict:
+                        a.result_predict = ResultPredict(**a.result_predict)
                     list_a.append(a)
                 h_nn.annotations = list_a
                 h.history_neutral_network = h_nn
