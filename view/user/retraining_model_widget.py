@@ -1,5 +1,6 @@
 import sys
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QApplication, QDialog
 from model.history_training_model import HistoryTrainingModel
 from view.py.Retraining_model import Ui_Form
@@ -41,6 +42,7 @@ class RetrainingModelWidget(QDialog):
     def open_more_info_model(self):
         dlg = RetrainingModelWidget(self.history_training)
         dlg.exec()
+
 
 
 if __name__ == '__main__':

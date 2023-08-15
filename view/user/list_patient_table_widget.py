@@ -1,12 +1,12 @@
 import sys
-from PySide6.QtWidgets import QWidget, QApplication, QStackedWidget
 
+from PySide6.QtWidgets import QWidget, QApplication
+
+from model.patient_model import Patient
 from service.slotsService import SlotsMainMenu
 from view.py.patient_table_item import Ui_Form
 
-from PySide6.QtCore import QSize
-from model.patient_model import Patient
-from view.user.view_patient_widget import ViewPatient
+
 
 class ListPatientItem(QWidget):
 
@@ -34,7 +34,7 @@ class ListPatientItem(QWidget):
 
     def open_patient(self):
         print('sssssssssssssssss')
-
+        from view.user.view_patient_widget import ViewPatient
         vp = ViewPatient(patient=self.patient)
         if self.get_main_menu_slots() is not None:
             vp.set_main_menu_slots(self.get_main_menu_slots())

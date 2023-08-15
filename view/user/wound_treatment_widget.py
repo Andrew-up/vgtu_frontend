@@ -1,5 +1,4 @@
 import datetime
-import datetime
 import os
 import sys
 import time
@@ -20,8 +19,6 @@ from service.unetModelService import LoadingModelAndPredict
 from utils.message_box import message_error_show, message_info_show
 from utils.read_xml_file import ReadXmlProject
 from view.py.wound_healing_widget import Ui_Form
-from view.user.drawing_counter import DrawingCounter
-from view.user.selected_index_cam_widget import SelectedCamera
 
 
 class WoundHealingPatient(QWidget):
@@ -92,6 +89,7 @@ class WoundHealingPatient(QWidget):
         self.ui.widget.setVisible(True)
 
     def on_result_is_not_ok(self):
+        from view.user.drawing_counter import DrawingCounter
         dlg = DrawingCounter(self.image_original)
         dlg.image_result_edit_doctor.connect(self.setImage_Predict_edit)
         dlg.annotation_signal.connect(self.result_scan_init)
@@ -150,6 +148,7 @@ class WoundHealingPatient(QWidget):
             self.ui.file_name_select_folder.setText("Выберите фото из каталога")
 
     def on_radio_scan_to_cam(self):
+        from view.user.selected_index_cam_widget import SelectedCamera
         if self.index_cam == -1:
             selected = SelectedCamera()
             selected.clickButtonItem.connect(self.set_cam_index)

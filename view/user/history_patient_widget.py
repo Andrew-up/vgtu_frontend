@@ -1,11 +1,13 @@
-from PySide6.QtCore import Slot, QSize
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtWidgets import QWidget, QApplication, QMessageBox, QFrame
 import sys
+
+from PySide6.QtWidgets import QWidget, QApplication
+
+from model.patient_model import Patient
+from service.PatientService import PatientServiceFront
 from view.py.history_patient_widget import Ui_Form
 from view.user.history_patient_wodget_item import HistoryPatientWidgetItem
-from service.PatientService import PatientServiceFront
-from model.patient_model import Patient
+
+
 class HistoryPatient(QWidget):
 
     def __init__(self, patient: Patient = None, parent=None):
@@ -38,10 +40,12 @@ class HistoryPatient(QWidget):
             self.items_layout.addWidget(item)
 
     def scroll_next(self):
-        self.ui.scrollArea.horizontalScrollBar().setValue(self.ui.scrollArea.horizontalScrollBar().value() + self.item_size)
-    def scroll_prev(self):
-        self.ui.scrollArea.horizontalScrollBar().setValue(self.ui.scrollArea.horizontalScrollBar().value() - self.item_size)
+        self.ui.scrollArea.horizontalScrollBar().setValue(
+            self.ui.scrollArea.horizontalScrollBar().value() + self.item_size)
 
+    def scroll_prev(self):
+        self.ui.scrollArea.horizontalScrollBar().setValue(
+            self.ui.scrollArea.horizontalScrollBar().value() - self.item_size)
 
 
 if __name__ == '__main__':

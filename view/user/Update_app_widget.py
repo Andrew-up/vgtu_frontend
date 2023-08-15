@@ -3,17 +3,15 @@ import shutil
 import subprocess
 import sys
 import time
-import xml.etree.ElementTree as ET
-import zipfile
+from urllib.parse import urlparse
 
 import requests
 from PySide6.QtCore import QThread, Signal, Slot
 from PySide6.QtWidgets import QApplication, QMessageBox, QDialog
 
 from definitions import ROOT_DIR
-from view.py.update_app import Ui_Form
-from urllib.parse import urlparse
 from utils.read_xml_file import ReadXmlProject
+from view.py.update_app import Ui_Form
 
 
 class UpdateApp(QThread):
@@ -219,15 +217,17 @@ class UpdateAppWidget(QDialog):
         except:
             return False
 
-    def version_comparison(self, version_local: str, version_remote: str):
-        print(version_local)
-        print(version_remote)
-        a1 = version_local.rstrip('0') + '0'
-        b1 = version_remote.rstrip('0') + '0'
-        lst1 = [int(i) for i in a1.split('.')]
-        lst2 = [int(i) for i in b1.split('.')]
+    def compare_versions(self, version_local: str, version_remote: str):
+        v1 = version_local.split('.')
+        v2 = version_remote.split('.')
 
-        return lst1 == lst2
+        for i in range(len(v1)):
+            if int(v1[i]) < int(v2[i]):
+                return True
+            elif int(v1[i]) > int(v2[i]):
+                return False
+
+        return False
 
     def download_new_version(self, version):
         if not self.url_validator(self.api_download):
@@ -249,8 +249,7 @@ class UpdateAppWidget(QDialog):
         if r.status_code != 200:
             self.message_error_show('Сервер вернул код отличный от 200\n'
                                     f'{r.text}')
-
-        if not self.version_comparison(version_local=self.version, version_remote=r.text) and r.status_code == 200:
+        if self.compare_versions(version_local=self.version, version_remote=r.text) and r.status_code == 200:
             msg = QMessageBox()
             msg.setWindowTitle('Проверка обновлений')
             msg.setText(f'Ваша версия: {self.version}\n'

@@ -117,15 +117,25 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_9)
 
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.pushButton_3 = QPushButton(Form)
+        self.pushButton_3.setObjectName(u"pushButton_3")
+
+        self.verticalLayout_3.addWidget(self.pushButton_3)
+
+        self.pushButton_2 = QPushButton(Form)
+        self.pushButton_2.setObjectName(u"pushButton_2")
+
+        self.verticalLayout_3.addWidget(self.pushButton_2)
+
         self.pushButton = QPushButton(Form)
         self.pushButton.setObjectName(u"pushButton")
 
-        self.horizontalLayout_6.addWidget(self.pushButton)
+        self.verticalLayout_3.addWidget(self.pushButton)
 
 
-        self.verticalLayout.addLayout(self.horizontalLayout_6)
+        self.verticalLayout.addLayout(self.verticalLayout_3)
 
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
@@ -150,6 +160,8 @@ class Ui_Form(object):
         self.total_epoch.setText(QCoreApplication.translate("Form", u"total_epoch", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"\u0422\u0435\u043a\u0443\u0449\u0430\u044f \u044d\u043f\u043e\u0445\u0430 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f", None))
         self.current_epoch.setText(QCoreApplication.translate("Form", u"current_epoch", None))
+        self.pushButton_3.setText(QCoreApplication.translate("Form", u"\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c", None))
+        self.pushButton_2.setText(QCoreApplication.translate("Form", u"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u043c\u043e\u0434\u0435\u043b\u044c", None))
         self.pushButton.setText(QCoreApplication.translate("Form", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043c\u043e\u0434\u0435\u043b\u044c", None))
     # retranslateUi
 

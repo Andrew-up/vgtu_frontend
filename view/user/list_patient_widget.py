@@ -6,8 +6,6 @@ from model.patient_model import Patient
 from service.PatientService import PatientServiceFront
 from service.slotsService import SlotsMainMenu
 from view.py.list_patient_widget import Ui_Form
-from view.user.list_patient_table_widget import ListPatientItem
-from view.user.patient_registration_widget import PatientRegistration
 
 
 class ListPatient(QWidget):
@@ -42,6 +40,8 @@ class ListPatient(QWidget):
         self.get_all_patient()
 
     def get_all_patient(self):
+        from view.user.list_patient_table_widget import ListPatientItem
+
         service = PatientServiceFront(1)
         self.patient_list = service.getAll()
         if self.patient_list is not None:
@@ -51,6 +51,7 @@ class ListPatient(QWidget):
                 self.ui.verticalLayout_4.addWidget(new)
 
     def add_new_patient(self, patient: Patient = 0):
+        from view.user.patient_registration_widget import PatientRegistration
         dlg = PatientRegistration()
         dlg.exec()
         self.on_update_list()

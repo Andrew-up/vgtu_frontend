@@ -22,15 +22,22 @@ class InfoModelCNNWidget(QDialog):
     def open_dialog_retraining_model(self):
         r = RetrainingModelWidget()
         r.exec()
+        self.get_all_history()
+
 
     def get_all_history(self):
         self.history_training_list = get_history_training_model()
+        for i in reversed(range(self.ui.verticalLayout_3.count())):
+            self.ui.verticalLayout_3.itemAt(i).widget().setParent(None)
         self.add_item_from_list_history(self.history_training_list)
 
     def add_item_from_list_history(self, list_history):
+
         for i in list_history:
+
             w = ItemInfoModelCNN(i)
-            self.ui.verticalLayout.addWidget(w)
+            w.signal111.connect(self.get_all_history)
+            self.ui.verticalLayout_3.addWidget(w)
 
 
 

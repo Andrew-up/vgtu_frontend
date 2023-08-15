@@ -1,3 +1,6 @@
+import time
+
+timer = time.time()
 import os
 import sys
 import urllib.parse
@@ -10,8 +13,12 @@ from definitions import ROOT_DIR
 from service.slotsService import SlotsMainMenu
 from utils.read_xml_file import ReadXmlProject
 from view.py.mainwindow import Ui_MainWindow
+import threading
 from view.user.info_model_cnn_widget import InfoModelCNNWidget
-from view.user.list_patient_widget import ListPatient
+
+
+
+print(f"time: {time.time() - timer}")
 
 
 class MainWindow(QMainWindow):
@@ -21,6 +28,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
         print('1111111111111111')
         self.r = ReadXmlProject()
         self.ui.widget_server_connect.setVisible(False)
@@ -33,6 +41,8 @@ class MainWindow(QMainWindow):
         self.ui.update_cnn_button.clicked.connect(self.open_cnn_dialog)
         self.ui.reload_connect_server.clicked.connect(self.check_status_server)
         self.check_status_server()
+        thread = threading.Thread(target=self.load_app)
+        thread.start()
 
     def check_status_server(self) -> bool:
         print('обновить')
@@ -43,7 +53,7 @@ class MainWindow(QMainWindow):
                 print(r.json())
                 self.ui.widget_server_connect.setVisible(False)
                 self.view_patient()
-                return True
+                # return True
             else:
                 self.ui.widget_server_connect.setVisible(True)
                 self.ui.textEdit.setText(r.text)
@@ -57,7 +67,18 @@ class MainWindow(QMainWindow):
         dlg = InfoModelCNNWidget()
         dlg.exec()
 
+    def load_app(self):
+        print('Идет загрузка приложения...')
+        from view.user.card_patient_widget import CardPatient
+        from view.user.history_patient_widget import HistoryPatient
+        from view.user.wound_treatment_widget import WoundHealingPatient
+        print('загрузка завершена')
+        self.ui.label.setText('Загрузка завершена')
+        time.sleep(5)
+        self.ui.widget_2.setVisible(False)
+
     def view_patient(self):
+        from view.user.list_patient_widget import ListPatient
         list_patient = ListPatient(self)
         list_patient.set_main_menu_slots(self.this_class_slot)
         list_patient.get_all_patient()
@@ -107,7 +128,7 @@ class MainWindow(QMainWindow):
         return count
 
     def clear_stacked_widget(self):
-        if self.getCountStacketWidget() > 100:
+        if self.getCountStacketWidget() > 10:
             pages = self.ui.stacked_widget_main.count()
             for i in range(pages):
                 widget = self.ui.stacked_widget_main.widget(0)

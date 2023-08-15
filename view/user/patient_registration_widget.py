@@ -43,7 +43,8 @@ class PatientRegistration(QDialog):
     def on_registration_button(self):
         p = PatientServiceFront(1)
         res: Patient = p.add(self.patient)
-        # self.close()
+        if res:
+            self.close()
 
     def get_random_person(self):
         patient_random: Patient = generate_person()
